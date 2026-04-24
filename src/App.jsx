@@ -855,7 +855,7 @@ function Trend({ record }) {
   const d = delta(record, item);
   return (
     <Card title="กราฟแนวโน้ม ครั้งที่ 1–4" icon={ActivityIcon} right={<div className="flex flex-wrap gap-2"><Pill>Auto zoom scale</Pill><Pill tone={d.tone}>เปลี่ยนแปลง {d.text}</Pill></div>}>
-      <div className="mb-4 max-w-sm"><Select label="เลือกตัวชี้วัด" value={key} onChange={setKey} options={all.map((m) => ({ value: m[0], label: `${m[1]} / ${m[0]}` }))} /></div>
+      <div className="mb-4 max-w-sm"><Select label="เลือกตัวชี้วัด" value={key} onChange={setKey} options={all.map((m) => ({ value: m[0], label: m[1] }))} /></div>
       <div className="h-80">
         <ResponsiveContainer>
           <LineChart data={data} margin={{ top: 12, right: 18, left: 8, bottom: 6 }}>
