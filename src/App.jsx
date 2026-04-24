@@ -1712,6 +1712,1755 @@ function SessionForm({ draft, update, idx }) {
 ต้องการลบจริงหรือไม่?`); if (ok) update(["sessions", idx], session(idx + 1)); }} className="rounded-full border border-rose-200 bg-rose-50 px-3 py-1 text-sm font-semibold text-rose-700 hover:bg-rose-100">ลบครั้งนี้</button><Pill tone="dark">ครั้งที่ {idx + 1}/4</Pill></div>}><div className="grid gap-4 md:grid-cols-2"><Field label="วันที่ประเมิน (พ.ศ. YYYY-MM-DD)" value={s.date} onChange={(v) => update([...base, "date"], v)} /><Field label="หมายเหตุสั้น ๆ" value={s.note} onChange={(v) => update([...base, "note"], v)} /></div></Card><Card title="InBody / Body Composition" icon={HeartIcon}><div className="grid items-stretch gap-4 md:grid-cols-4"><Info label="BMI คำนวณอัตโนมัติ" value={s.inbody.bmi || "กรอกน้ำหนักและส่วนสูง"} />{metrics.inbody.filter(([key]) => key !== "bmi").map(([key, label, unit]) => <Field key={key} label={`${label} (${unit})`} value={s.inbody[key]} onChange={(v) => update([...base, "inbody", key], v)} type="number" tone={metricTone(key)} />)}</div></Card><Card title="Fitness Test 5 ด้าน" icon={ActivityIcon}><div className="grid gap-4 md:grid-cols-5">{metrics.fitness.map(([key, label, unit]) => <Field key={key} label={`${label} (${unit})`} value={s.fitness[key]} onChange={(v) => update([...base, "fitness", key], v)} type="number" />)}</div></Card><Card title="Overhead Deep Squat" icon={ClipboardIcon}><div className="grid gap-3 md:grid-cols-2">{ohsItems.map((x, i) => <Select key={x} label={x} value={s.ohs[i]} onChange={(v) => update([...base, "ohs", i], v)} options={["ปกติ", "ต้องระวัง", "ควรปรับแก้"]} />)}</div></Card></div>;
 }
 
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import {
+  deleteRecord as deleteRecordFromSupabase,
+  loadAllRecords,
+  loadAuditLogs,
+  saveRecord as saveRecordToSupabase,
+  signInAdmin as signInAdminWithSupabase,
+  signOutAdmin as signOutAdminFromSupabase,
+} from "./lib/healthRepository";
+import {
+  LineChart,
+  Line,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts";
+
+// แก้ปัญหา build: ไม่ใช้ lucide-react เพราะบาง sandbox fetch icon จาก CDN ไม่ได้
+// ใช้ไอคอน SVG แบบ local แทน เพื่อให้รันได้โดยไม่ต้องพึ่ง external icon files
+const IconBase = ({ children, className = "h-6 w-6 text-slate-500" }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    {children}
+  </svg>
+);
+
+const ActivityIcon = (props) => <IconBase {...props}><path d="M22 12h-4l-3 8-6-16-3 8H2" /></IconBase>;
+const ClipboardIcon = (props) => <IconBase {...props}><path d="M9 3h6" /><path d="M9 7h6" /><path d="M8 3h8a2 2 0 0 1 2 2v15H6V5a2 2 0 0 1 2-2Z" /><path d="M9 12h6" /><path d="M9 16h6" /></IconBase>;
+const FileIcon = (props) => <IconBase {...props}><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z" /><path d="M14 2v6h6" /><path d="M8 13h8" /><path d="M8 17h6" /></IconBase>;
+const HeartIcon = (props) => <IconBase {...props}><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 1 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8Z" /><path d="M3 12h4l2-4 4 8 2-4h6" /></IconBase>;
+const SearchIcon = (props) => <IconBase {...props}><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /></IconBase>;
+const UserIcon = (props) => <IconBase {...props}><circle cx="12" cy="8" r="4" /><path d="M4 21a8 8 0 0 1 16 0" /></IconBase>;
+
+const ADMIN_PASSWORD = "LMHPC9";
+const ADMIN_USERS = {
+  admin1: { id: "admin1", name: "ชัยวัฒน์", role: "Admin" },
+  admin2: { id: "admin2", name: "ธนาวุฒิ", role: "Admin" },
+};
+const PAGE_SIZE = 50;
+const RECORDS_STORAGE_KEY = "hpc9_lm_health_records_v1";
+const AUDIT_STORAGE_KEY = "hpc9_lm_audit_logs_v1";
+
+const clone = (x) => JSON.parse(JSON.stringify(x));
+const num = (v) => (Number.isFinite(Number(v)) ? Number(v) : 0);
+const show = (v) => (v === "" || v === null || v === undefined ? "-" : v);
+const todayThai = () => new Date().toLocaleString("th-TH", { dateStyle: "medium", timeStyle: "short" });
+const createAuditEntry = ({ adminUser, action, hn, detail = "" }) => ({
+  id: `${Date.now()}-${Math.random().toString(36).slice(2)}`,
+  at: todayThai(),
+  adminId: adminUser?.id || "-",
+  adminName: adminUser?.name || "-",
+  role: adminUser?.role || "-",
+  action,
+  hn: hn || "-",
+  detail,
+});
+
+function downloadTextFile(filename, content, mime = "text/plain;charset=utf-8") {
+  const blob = new Blob([content], { type: mime });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function csvCell(value) {
+  return `"${String(value ?? "").replace(/"/g, '""')}"`;
+}
+
+function exportRecordsCSV(records) {
+  const header = ["HN", "ชื่อ", "เพศ", "อายุ", "เป้าหมาย", "จำนวนครั้ง", "วันที่ล่าสุด", "น้ำหนักล่าสุด", "Body Fat ล่าสุด", "Muscle ล่าสุด", "รอบเอวล่าสุด", "แก้ไขล่าสุดโดย", "แก้ไขล่าสุดเมื่อ"];
+  const rows = Object.values(records).map((record) => {
+    const sessions = completedSessions(record);
+    const latest = sessions[sessions.length - 1] || session(1);
+    return [
+      record.hn,
+      record.name,
+      record.sex,
+      record.age,
+      record.goal,
+      sessions.length,
+      latest.date,
+      latest.inbody.weight,
+      latest.inbody.bodyFat,
+      latest.inbody.muscle,
+      latest.inbody.waist,
+      record.updatedBy || "-",
+      record.updatedAt || "-",
+    ];
+  });
+  const csv = [header, ...rows].map((row) => row.map(csvCell).join(",")).join("\n");
+  downloadTextFile("health-assessment-summary.csv", `﻿${csv}`, "text/csv;charset=utf-8");
+}
+
+function printPage() {
+  window.print();
+}
+
+function loadJsonFromStorage(key, fallback) {
+  try {
+    const raw = window.localStorage.getItem(key);
+    return raw ? JSON.parse(raw) : fallback;
+  } catch (error) {
+    console.warn(`Cannot load ${key} from localStorage`, error);
+    return fallback;
+  }
+}
+
+function saveJsonToStorage(key, value) {
+  try {
+    window.localStorage.setItem(key, JSON.stringify(value));
+    return true;
+  } catch (error) {
+    console.warn(`Cannot save ${key} to localStorage`, error);
+    return false;
+  }
+}
+
+function exportFullBackup(records, auditLogs) {
+  const payload = {
+    app: "HPC9 LM Health Assessment",
+    version: 1,
+    exportedAt: todayThai(),
+    records,
+    auditLogs,
+  };
+  downloadTextFile(`hpc9-lm-health-backup-${Date.now()}.json`, JSON.stringify(payload, null, 2), "application/json;charset=utf-8");
+}
+
+function validateBackupPayload(payload) {
+  if (!payload || typeof payload !== "object" || !payload.records || typeof payload.records !== "object") return false;
+  return Object.values(payload.records).every((record) => record && typeof record === "object" && typeof record.hn === "string" && Array.isArray(record.sessions));
+}
+
+function normalizeRecord(record) {
+  const merged = { ...clone(blankRecord), ...clone(record) };
+  merged.parq = Array.isArray(merged.parq) ? [...blankRecord.parq.map((x, i) => merged.parq[i] ?? x)] : clone(blankRecord.parq);
+  merged.program = { ...clone(blankRecord.program), ...(record.program || {}) };
+  merged.sessions = [0, 1, 2, 3].map((i) => ({ ...session(i + 1), ...(record.sessions?.[i] || {}), no: i + 1 }));
+  return merged;
+}
+
+function normalizeRecords(records) {
+  return Object.fromEntries(Object.entries(records || {}).map(([hn, record]) => [hn, normalizeRecord(record)]));
+}
+
+function fieldToneClass(tone) {
+  if (tone === "fat") return "border-amber-200 bg-amber-50 focus:border-amber-500";
+  if (tone === "muscle") return "border-rose-200 bg-rose-50 focus:border-rose-500";
+  return "border-slate-200 bg-white focus:border-slate-700";
+}
+
+function panelToneClass(tone) {
+  if (tone === "fat") return "border-amber-200 bg-amber-50";
+  if (tone === "muscle") return "border-rose-200 bg-rose-50";
+  if (tone === "good") return "border-emerald-200 bg-emerald-50";
+  if (tone === "admin") return "border-sky-200 bg-sky-50";
+  return "border-slate-200 bg-slate-50";
+}
+
+function metricTone(key) {
+  if (["bodyFat", "fatMass", "visceral"].includes(key)) return "fat";
+  if (key === "muscle") return "muscle";
+  return "default";
+}
+
+function checkRange(label, value, min, max, issues) {
+  if (value === "" || value === null || value === undefined) return;
+  const n = Number(value);
+  if (!Number.isFinite(n) || n < min || n > max) issues.push(`${label} ควรอยู่ประมาณ ${min}–${max}`);
+}
+
+function recordQuality(record) {
+  const issues = [];
+  if (!record.hn) issues.push("ยังไม่มี HN");
+  if (!record.name) issues.push("ยังไม่มีชื่อ-สกุล");
+  checkRange("อายุ", record.age, 1, 120, issues);
+  checkRange("ส่วนสูง", record.height, 80, 230, issues);
+
+  completedSessions(record).forEach((s) => {
+    const prefix = `ครั้งที่ ${s.no}`;
+    if (!s.date) issues.push(`${prefix}: ยังไม่มีวันที่ประเมิน`);
+    checkRange(`${prefix}: น้ำหนัก`, s.inbody.weight, 20, 250, issues);
+    checkRange(`${prefix}: Body Fat %`, s.inbody.bodyFat, 3, 70, issues);
+    checkRange(`${prefix}: Muscle Mass`, s.inbody.muscle, 5, 80, issues);
+    checkRange(`${prefix}: Fat Mass`, s.inbody.fatMass, 1, 150, issues);
+    checkRange(`${prefix}: Visceral Fat`, s.inbody.visceral, 1, 30, issues);
+    checkRange(`${prefix}: รอบเอว`, s.inbody.waist, 40, 200, issues);
+    checkRange(`${prefix}: Step Test HR`, s.fitness.step, 40, 220, issues);
+    checkRange(`${prefix}: Handgrip`, s.fitness.grip, 1, 100, issues);
+    checkRange(`${prefix}: Sit to Stand`, s.fitness.sitstand, 0, 100, issues);
+    checkRange(`${prefix}: Sit and Reach`, s.fitness.sitreach, -40, 60, issues);
+    checkRange(`${prefix}: TUG`, s.fitness.tug, 1, 60, issues);
+  });
+
+  const filled = completedSessions(record).length;
+  const latest = completedSessions(record).slice(-1)[0];
+  const missingLatest = [];
+  if (latest) {
+    if (!latest.inbody.weight || !latest.inbody.bodyFat || !latest.inbody.muscle) missingLatest.push("InBody สำคัญยังไม่ครบ");
+    if (metrics.fitness.some(([key]) => !latest.fitness[key])) missingLatest.push("Fitness Test ยังไม่ครบ");
+  }
+  return { issues, filled, missingLatest, complete: issues.length === 0 && missingLatest.length === 0 };
+}
+
+const metrics = {
+  inbody: [
+    ["weight", "น้ำหนัก", "kg", "lower"],
+    ["bmi", "ดัชนีมวลกาย (BMI)", "kg/m²", "lower"],
+    ["bodyFat", "เปอร์เซ็นต์ไขมัน (Body Fat %)", "%", "lower"],
+    ["muscle", "มวลกล้ามเนื้อโครงร่าง (Skeletal Muscle Mass)", "kg", "higher"],
+    ["fatMass", "มวลไขมัน (Fat Mass)", "kg", "lower"],
+    ["visceral", "ไขมันในช่องท้อง (Visceral Fat)", "level", "lower"],
+    ["waist", "รอบเอว", "cm", "lower"],
+  ],
+  fitness: [
+    ["step", "ก้าวขึ้นลง 3 นาที (Step Test)", "bpm", "lower"],
+    ["grip", "แรงบีบมือ (Handgrip)", "kg", "higher"],
+    ["sitstand", "ลุก-นั่ง 1 นาที (Sit to Stand)", "ครั้ง", "higher"],
+    ["sitreach", "นั่งงอตัวแตะปลายเท้า (Sit and Reach)", "cm", "higher"],
+    ["tug", "ลุกเดินไป-กลับ (Timed Up and Go)", "วินาที", "lower"],
+  ],
+};
+
+const ohsItems = [
+  "ลำตัวตั้งตรง",
+  "เข่าอยู่แนวเดียวกับปลายเท้า",
+  "สะโพกลดต่ำได้",
+  "ส้นเท้าติดพื้น",
+  "แขนอยู่เหนือศีรษะ",
+  "ควบคุมสมดุลได้",
+];
+
+const parqQuestions = [
+  "มีโรคหัวใจหรือโรคประจำตัวที่มีผลต่อการออกกำลังกาย",
+  "เจ็บแน่นหน้าอกขณะออกแรงหรือออกกำลังกาย",
+  "เวียนศีรษะ หน้ามืด เป็นลม หรือเสียการทรงตัว",
+  "มีปัญหากระดูก ข้อ หรือกล้ามเนื้อ",
+  "ใช้ยารักษาโรคหัวใจ ความดัน หรือโรคเรื้อรัง",
+  "มีอาการเจ็บป่วยหรือข้อจำกัดที่ไม่ควรเริ่มออกกำลังกาย",
+  "ตั้งครรภ์ เพิ่งคลอด หรือยังไม่ได้รับคำแนะนำ",
+];
+
+const focusOptions = [
+  "Shoulder Mobility",
+  "Thoracic Mobility",
+  "Core Stability",
+  "Hip Mobility",
+  "Glute Control",
+  "Ankle Mobility",
+  "Balance Control",
+  "Knee Control",
+];
+
+function session(no, v = {}) {
+  return {
+    no,
+    date: v.date || "",
+    inbody: {
+      weight: v.weight || "",
+      bmi: v.bmi || "",
+      bodyFat: v.bodyFat || "",
+      muscle: v.muscle || "",
+      fatMass: v.fatMass || "",
+      visceral: v.visceral || "",
+      waist: v.waist || "",
+      bmr: v.bmr || "",
+    },
+    fitness: {
+      step: v.step || "",
+      grip: v.grip || "",
+      sitstand: v.sitstand || "",
+      sitreach: v.sitreach || "",
+      tug: v.tug || "",
+    },
+    ohs: v.ohs || ["ปกติ", "ปกติ", "ปกติ", "ปกติ", "ปกติ", "ปกติ"],
+    note: v.note || "",
+    attachment: v.attachment || "",
+  };
+}
+
+const blankRecord = {
+  hn: "",
+  name: "",
+  sex: "ชาย",
+  age: "",
+  height: "",
+  goal: "สุขภาพทั่วไป",
+  disease: "",
+  medication: "",
+  injury: "",
+  parq: [false, false, false, false, false, false, false],
+  program: {
+    type: "Full Body",
+    cardioType: "เดินเร็ว",
+    cardioFrequency: "3",
+    cardioDuration: "30",
+    strengthFrequency: "2",
+    strengthDose: "สุขภาพทั่วไป: 2–3 เซต × 8–12 ครั้ง",
+    intensity: "Moderate",
+    rpe: "4–6",
+    talk: "พูดเป็นประโยค",
+    focus: "Core Stability / Hip Mobility / Ankle Mobility",
+    precaution: "",
+    followUp: "",
+    note: "",
+  },
+  sessions: [session(1), session(2), session(3), session(4)],
+};
+
+const initialRecords = {
+  "68000123": {
+    ...blankRecord,
+    hn: "68000123",
+    name: "นายตัวอย่าง สุขภาพดี",
+    age: "26",
+    height: "170",
+    goal: "ลดไขมัน / เพิ่มกล้ามเนื้อ",
+    disease: "ไม่มี",
+    medication: "ไม่มี",
+    injury: "ปวดหลังส่วนล่างเล็กน้อย",
+    program: {
+      type: "Upper/Lower",
+      cardioType: "เดินเร็ว / Zone 2",
+      cardioFrequency: "2–3",
+      cardioDuration: "30–45",
+      strengthFrequency: "4",
+      strengthDose: "เพิ่มกล้ามเนื้อ: 3–4 เซต × 8–12 ครั้ง",
+      intensity: "Individualized",
+      rpe: "4–6",
+      talk: "พูดเป็นประโยค",
+      focus: "Core Stability / Hip Mobility / Ankle Mobility / Glute Control",
+      precaution: "หลีกเลี่ยงท่าที่กระตุ้นปวดหลังส่วนล่าง และไม่กลั้นหายใจขณะออกแรง",
+      followUp: "ติดตามครั้งถัดไปตามรอบประเมิน",
+      note: "เวท 4 วัน/สัปดาห์ + เดิน Zone 2 2–3 วัน/สัปดาห์ เน้นแกนกลาง สะโพก และข้อเท้า",
+    },
+    sessions: [
+      session(1, { date: "2569-04-01", weight: "63.0", bmi: "21.8", bodyFat: "22.0", muscle: "29.5", fatMass: "13.9", visceral: "6", waist: "82", bmr: "1450", step: "132", grip: "34", sitstand: "32", sitreach: "7", tug: "8.9", ohs: ["ต้องระวัง", "ควรปรับแก้", "ต้องระวัง", "ควรปรับแก้", "ปกติ", "ต้องระวัง"] }),
+      session(2, { date: "2569-04-15", weight: "62.5", bmi: "21.6", bodyFat: "20.8", muscle: "29.9", fatMass: "13.0", visceral: "6", waist: "80", bmr: "1470", step: "128", grip: "35", sitstand: "34", sitreach: "8", tug: "8.4", ohs: ["ต้องระวัง", "ต้องระวัง", "ปกติ", "ต้องระวัง", "ปกติ", "ปกติ"] }),
+      session(3, { date: "2569-04-30", weight: "62.2", bmi: "21.5", bodyFat: "19.8", muscle: "30.2", fatMass: "12.3", visceral: "5", waist: "79", bmr: "1485", step: "126", grip: "37", sitstand: "36", sitreach: "10", tug: "8.0", ohs: ["ปกติ", "ต้องระวัง", "ปกติ", "ต้องระวัง", "ปกติ", "ปกติ"] }),
+      session(4, { date: "2569-05-15", weight: "61.8", bmi: "21.4", bodyFat: "18.9", muscle: "30.5", fatMass: "11.7", visceral: "5", waist: "77", bmr: "1500", step: "123", grip: "39", sitstand: "39", sitreach: "12", tug: "7.5", ohs: ["ปกติ", "ปกติ", "ปกติ", "ปกติ", "ปกติ", "ปกติ"] }),
+    ],
+  },
+  "68000456": {
+    ...blankRecord,
+    hn: "68000456",
+    name: "นางสาวตัวอย่าง ต้องติดตาม",
+    sex: "หญิง",
+    age: "31",
+    height: "160",
+    goal: "ลดไขมัน / ควบคุมน้ำหนัก",
+    disease: "ความดันโลหิตสูง",
+    medication: "ยาความดัน",
+    program: {
+      type: "Home Program",
+      cardioType: "เดินสะสม",
+      cardioFrequency: "5",
+      cardioDuration: "30",
+      strengthFrequency: "2–3",
+      strengthDose: "เริ่มต้น/ผู้สูงอายุ: 1–2 เซต × 10–15 ครั้ง",
+      intensity: "Moderate",
+      rpe: "4–6",
+      talk: "พูดเป็นประโยค",
+      focus: "Knee Control / Core Stability / Balance Control",
+      precaution: "ติดตามอาการเหนื่อยผิดปกติ เวียนศีรษะ และค่าความดัน",
+      followUp: "ติดตามภายใน 2–4 สัปดาห์",
+      note: "เน้นเดินสะสม 7,000 ก้าว/วัน และฝึกแรงต้านเบื้องต้น",
+    },
+    parq: [false, false, false, false, true, false, false],
+    sessions: [
+      session(1, { date: "2569-04-05", weight: "70.0", bmi: "27.3", bodyFat: "34.0", muscle: "23.0", fatMass: "23.8", visceral: "9", waist: "91", step: "138", grip: "26", sitstand: "25", sitreach: "5", tug: "9.4", ohs: ["ต้องระวัง", "ต้องระวัง", "ต้องระวัง", "ควรปรับแก้", "ปกติ", "ต้องระวัง"] }),
+      session(2, { date: "2569-04-25", weight: "71.2", bmi: "27.8", bodyFat: "35.5", muscle: "22.5", fatMass: "25.3", visceral: "10", waist: "94", step: "144", grip: "24", sitstand: "23", sitreach: "4", tug: "10.1", ohs: ["ต้องระวัง", "ควรปรับแก้", "ต้องระวัง", "ควรปรับแก้", "ต้องระวัง", "ต้องระวัง"] }),
+      session(3),
+      session(4),
+    ],
+  },
+  "68000789": {
+    ...blankRecord,
+    hn: "68000789",
+    name: "นายตัวอย่าง รอติดตาม",
+    age: "45",
+    height: "172",
+    goal: "สุขภาพทั่วไป",
+    sessions: [
+      session(1, { date: "2569-04-10", weight: "68.0", bmi: "23.0", bodyFat: "25.0", muscle: "28.0", waist: "86", step: "135", grip: "32", sitstand: "28", sitreach: "6", tug: "8.8" }),
+      session(2),
+      session(3),
+      session(4),
+    ],
+  },
+  "68000999": {
+    ...blankRecord,
+    hn: "68000999",
+    name: "นางสาวจำลอง พัฒนาการดี",
+    sex: "หญิง",
+    age: "38",
+    height: "158",
+    goal: "ลดไขมัน / เพิ่มความแข็งแรง",
+    disease: "ไม่มี",
+    medication: "ไม่มี",
+    injury: "ปวดเข่าเล็กน้อยเวลาเดินขึ้นบันได",
+    program: {
+      type: "Full Body",
+      cardioType: "เดินเร็ว",
+      cardioFrequency: "4",
+      cardioDuration: "30",
+      strengthFrequency: "3",
+      strengthDose: "สุขภาพทั่วไป: 2–3 เซต × 10–15 ครั้ง",
+      intensity: "Moderate",
+      rpe: "4–6",
+      talk: "พูดเป็นประโยค",
+      focus: "Knee Control / Core Stability / Glute Control",
+      precaution: "หลีกเลี่ยงแรงกระแทกสูง หากปวดเข่าให้ลดระยะก้าวและลดความเร็ว",
+      followUp: "ติดตามภายใน 4 สัปดาห์",
+      note: "เน้นเดินเร็วและฝึกกล้ามเนื้อขาแบบควบคุมแนวเข่า",
+    },
+    parq: [false, false, false, true, false, false, false],
+    sessions: [
+      session(1, { date: "2569-05-02", weight: "64.0", bmi: "25.6", bodyFat: "31.0", muscle: "22.8", fatMass: "19.8", visceral: "8", waist: "84", step: "130", grip: "27", sitstand: "27", sitreach: "4", tug: "9.2", ohs: ["ต้องระวัง", "ควรปรับแก้", "ต้องระวัง", "ปกติ", "ปกติ", "ต้องระวัง"] }),
+      session(2, { date: "2569-05-16", weight: "63.4", bmi: "25.4", bodyFat: "30.1", muscle: "23.1", fatMass: "19.1", visceral: "8", waist: "82", step: "126", grip: "28", sitstand: "30", sitreach: "6", tug: "8.8", ohs: ["ต้องระวัง", "ต้องระวัง", "ปกติ", "ปกติ", "ปกติ", "ปกติ"] }),
+      session(3, { date: "2569-05-30", weight: "62.8", bmi: "25.2", bodyFat: "29.2", muscle: "23.6", fatMass: "18.3", visceral: "7", waist: "80", step: "122", grip: "30", sitstand: "32", sitreach: "8", tug: "8.3", ohs: ["ปกติ", "ต้องระวัง", "ปกติ", "ปกติ", "ปกติ", "ปกติ"] }),
+      session(4),
+    ],
+  },
+};
+
+function valueOf(s, key) {
+  if (s.inbody[key] !== undefined) return num(s.inbody[key]);
+  if (s.fitness[key] !== undefined) return num(s.fitness[key]);
+  if (key === "ohs") return s.ohs.filter((x) => x === "ปกติ").length;
+  return 0;
+}
+
+function closeYAxisDomain(values) {
+  const clean = values.filter((v) => Number.isFinite(v));
+  if (clean.length === 0) return ["auto", "auto"];
+  const min = Math.min(...clean);
+  const max = Math.max(...clean);
+  if (min === max) {
+    const pad = Math.max(Math.abs(max) * 0.05, 1);
+    return [Number((min - pad).toFixed(1)), Number((max + pad).toFixed(1))];
+  }
+  const range = max - min;
+  const pad = Math.max(range * 0.18, 0.2);
+  return [Number((min - pad).toFixed(1)), Number((max + pad).toFixed(1))];
+}
+
+function completedSessions(record) {
+  return record.sessions.filter((s) => {
+    const inbodyFilled = Object.values(s.inbody).some((v) => v !== "" && v !== null && v !== undefined);
+    const fitnessFilled = Object.values(s.fitness).some((v) => v !== "" && v !== null && v !== undefined);
+    return Boolean(s.date || inbodyFilled || fitnessFilled || s.note || s.attachment);
+  });
+}
+
+function deltaFromSessions(sessions, item) {
+  const [key, , unit, better] = item;
+  if (!sessions || sessions.length < 2) return { text: "ข้อมูลไม่พอ", tone: "gray", raw: 0, valid: false };
+  const first = sessions[0];
+  const last = sessions[sessions.length - 1];
+  const a = valueOf(first, key);
+  const b = valueOf(last, key);
+  if ((!a && a !== 0) || (!b && b !== 0)) return { text: "ข้อมูลไม่พอ", tone: "gray", raw: 0, valid: false };
+  const d = b - a;
+  const good = better === "higher" ? d > 0 : d < 0;
+  const sign = d > 0 ? "+" : "";
+  return { text: `${sign}${Number.isInteger(d) ? d : d.toFixed(1)} ${unit}`, tone: good ? "good" : d === 0 ? "gray" : "bad", raw: d, valid: true };
+}
+
+function delta(record, item) {
+  const sessions = completedSessions(record);
+  return deltaFromSessions(sessions, item);
+}
+
+function bmi(weight, height) {
+  const w = num(weight);
+  const h = num(height) / 100;
+  return w && h ? (w / (h * h)).toFixed(1) : "";
+}
+
+function hrTargets(age) {
+  const max = 220 - num(age);
+  if (!max || max <= 0) return null;
+  const range = (low, high) => `${Math.round(max * low)}–${Math.round(max * high)} bpm`;
+  return {
+    max,
+    light: range(0.5, 0.63),
+    moderate: range(0.64, 0.76),
+    vigorous: range(0.77, 0.93),
+  };
+}
+
+function targetHrText(age, intensity) {
+  const hr = hrTargets(age);
+  if (!hr) return "กรอกอายุก่อน";
+  if (intensity === "Light") return `${hr.light} (50–63%)`;
+  if (intensity === "Vigorous") return `${hr.vigorous} (77–93%)`;
+  if (intensity === "Individualized") return `ปรับรายบุคคล • อ้างอิง Moderate ${hr.moderate}`;
+  return `${hr.moderate} (64–76%)`;
+}
+
+function ageGroup(age) {
+  const a = num(age);
+  if (a <= 25) return "18-25";
+  if (a <= 35) return "26-35";
+  if (a <= 45) return "36-45";
+  if (a <= 55) return "46-55";
+  if (a <= 65) return "56-65";
+  return "66+";
+}
+
+function adminAgeGroup(age) {
+  const a = num(age);
+  if (!a) return "unknown";
+  if (a < 20) return "under20";
+  if (a <= 29) return "20-29";
+  if (a <= 39) return "30-39";
+  if (a <= 49) return "40-49";
+  if (a <= 59) return "50-59";
+  if (a <= 69) return "60-69";
+  if (a <= 79) return "70-79";
+  return "80+";
+}
+
+function sexKey(sex) {
+  return String(sex || "").includes("หญิง") ? "female" : "male";
+}
+
+function resultTone(label) {
+  if (label === "ดีมาก") return "good";
+  if (label === "ต่ำกว่าเกณฑ์") return "bad";
+  return "gray";
+}
+
+function makeInterpret(label, detail = "") {
+  return { label, tone: resultTone(label), detail };
+}
+
+const stepNorms = {
+  male: {
+    "18-25": [[77, "ดีมาก"], [120, "ตามเกณฑ์"], [999, "ต่ำกว่าเกณฑ์"]],
+    "26-35": [[77, "ดีมาก"], [121, "ตามเกณฑ์"], [999, "ต่ำกว่าเกณฑ์"]],
+    "36-45": [[77, "ดีมาก"], [122, "ตามเกณฑ์"], [999, "ต่ำกว่าเกณฑ์"]],
+    "46-55": [[84, "ดีมาก"], [125, "ตามเกณฑ์"], [999, "ต่ำกว่าเกณฑ์"]],
+    "56-65": [[81, "ดีมาก"], [128, "ตามเกณฑ์"], [999, "ต่ำกว่าเกณฑ์"]],
+    "66+": [[83, "ดีมาก"], [128, "ตามเกณฑ์"], [999, "ต่ำกว่าเกณฑ์"]],
+  },
+  female: {
+    "18-25": [[82, "ดีมาก"], [121, "ตามเกณฑ์"], [999, "ต่ำกว่าเกณฑ์"]],
+    "26-35": [[82, "ดีมาก"], [124, "ตามเกณฑ์"], [999, "ต่ำกว่าเกณฑ์"]],
+    "36-45": [[86, "ดีมาก"], [127, "ตามเกณฑ์"], [999, "ต่ำกว่าเกณฑ์"]],
+    "46-55": [[92, "ดีมาก"], [129, "ตามเกณฑ์"], [999, "ต่ำกว่าเกณฑ์"]],
+    "56-65": [[94, "ดีมาก"], [130, "ตามเกณฑ์"], [999, "ต่ำกว่าเกณฑ์"]],
+    "66+": [[93, "ดีมาก"], [134, "ตามเกณฑ์"], [999, "ต่ำกว่าเกณฑ์"]],
+  },
+};
+
+function expectedGrip(age, sex) {
+  const a = num(age);
+  const female = sexKey(sex) === "female";
+  if (a < 30) return female ? 29 : 47;
+  if (a < 40) return female ? 30 : 49;
+  if (a < 50) return female ? 28 : 46;
+  if (a < 60) return female ? 25 : 41;
+  if (a < 70) return female ? 22 : 35;
+  return female ? 19 : 30;
+}
+
+function expectedSitStand(age, sex, bmiValue) {
+  const female = sexKey(sex) === "female" ? 1 : 0;
+  const useBmi = num(bmiValue) || 23;
+  return Math.max(8, 61.53 - (0.34 * num(age)) - (3.57 * female) - (0.33 * useBmi));
+}
+
+function sitReachThreshold(age, sex) {
+  const a = num(age);
+  const female = sexKey(sex) === "female";
+  if (a <= 35) return female ? { good: 12, standard: 2 } : { good: 10, standard: 0 };
+  if (a <= 55) return female ? { good: 10, standard: 0 } : { good: 8, standard: -2 };
+  return female ? { good: 7, standard: -3 } : { good: 5, standard: -5 };
+}
+
+function tugThreshold(age) {
+  const a = num(age);
+  if (a < 60) return { good: 7, standard: 10 };
+  if (a < 70) return { good: 8, standard: 9.5 };
+  if (a < 80) return { good: 9, standard: 10.5 };
+  return { good: 10, standard: 12.6 };
+}
+
+function classifyHigher(value, expected, detail) {
+  const v = num(value);
+  if (!v) return makeInterpret("รอข้อมูล", "");
+  if (v >= expected * 1.1) return makeInterpret("ดีมาก", detail);
+  if (v >= expected * 0.85) return makeInterpret("ตามเกณฑ์", detail);
+  return makeInterpret("ต่ำกว่าเกณฑ์", detail);
+}
+
+function classifyFitness(record, key, value, sessionData) {
+  const age = record.age;
+  const sex = record.sex;
+  const v = num(value);
+  if (!v || !num(age) || !sex) return makeInterpret("รอข้อมูล", "กรอกอายุ/เพศและค่าทดสอบให้ครบ");
+
+  if (key === "step") {
+    const group = ageGroup(age);
+    const rules = stepNorms[sexKey(sex)][group];
+    const found = rules.find(([max]) => v <= max);
+    return makeInterpret(found?.[1] || "ต่ำกว่าเกณฑ์", `YMCA 3-min Step Test • ${group}`);
+  }
+
+  if (key === "grip") {
+    const expected = expectedGrip(age, sex);
+    return classifyHigher(v, expected, `อ้างอิงค่าเฉลี่ยแรงบีบมือตามอายุ/เพศ ≈ ${expected} kg`);
+  }
+
+  if (key === "sitstand") {
+    const expected = expectedSitStand(age, sex, sessionData?.inbody?.bmi);
+    return classifyHigher(v, expected, `คาดการณ์ตามอายุ/เพศ/BMI ≈ ${expected.toFixed(0)} ครั้ง`);
+  }
+
+  if (key === "sitreach") {
+    const t = sitReachThreshold(age, sex);
+    if (v >= t.good) return makeInterpret("ดีมาก", `สมมติ 0 cm = แตะปลายเท้า`);
+    if (v >= t.standard) return makeInterpret("ตามเกณฑ์", `สมมติ 0 cm = แตะปลายเท้า`);
+    return makeInterpret("ต่ำกว่าเกณฑ์", `สมมติ 0 cm = แตะปลายเท้า`);
+  }
+
+  if (key === "tug") {
+    const t = tugThreshold(age);
+    if (v <= t.good) return makeInterpret("ดีมาก", `TUG ตามช่วงอายุ`);
+    if (v <= t.standard) return makeInterpret("ตามเกณฑ์", `TUG ตามช่วงอายุ`);
+    return makeInterpret("ต่ำกว่าเกณฑ์", `TUG ตามช่วงอายุ`);
+  }
+
+  return makeInterpret("รอข้อมูล", "");
+}
+
+function ohsSummary(s) {
+  const normal = s.ohs.filter((x) => x === "ปกติ").length;
+  if (normal >= 5) return { text: "Normal", normal, tone: "good" };
+  if (normal >= 3) return { text: "Caution", normal, tone: "warn" };
+  return { text: "ควรปรับแก้", normal, tone: "bad" };
+}
+
+function setDeep(obj, path, val) {
+  const next = clone(obj);
+  let cur = next;
+  path.slice(0, -1).forEach((p) => (cur = cur[p]));
+  cur[path[path.length - 1]] = val;
+  return next;
+}
+
+function focusStringToArray(value) {
+  const text = String(value || "");
+  return focusOptions.filter((option) => text.split(" / ").includes(option));
+}
+
+function toggleFocusValue(currentValue, option) {
+  const selected = focusStringToArray(currentValue);
+  const next = selected.includes(option)
+    ? selected.filter((x) => x !== option)
+    : [...selected, option];
+  return next.join(" / ");
+}
+
+function runSelfTests() {
+  const r = initialRecords["68000123"];
+  const poor = initialRecords["68000456"];
+  const single = initialRecords["68000789"];
+  const dWeight = delta(r, metrics.inbody[0]);
+  const dMuscle = delta(r, metrics.inbody[3]);
+  const poorFat = delta(poor, metrics.inbody[2]);
+  const singleWeight = delta(single, metrics.inbody[0]);
+  const o4 = ohsSummary(r.sessions[3]);
+  console.assert(dWeight.text === "-1.2 kg" && dWeight.tone === "good", "delta weight should compare first to latest filled session");
+  console.assert(dMuscle.text === "+1.0 kg" && dMuscle.tone === "good", "delta muscle should compare first to latest filled session");
+  console.assert(poorFat.tone === "bad", "worsened body fat should be red/bad");
+  console.assert(singleWeight.valid === false, "single-session record should not be compared in admin summary");
+  console.assert(o4.normal === 6 && o4.text === "Normal", "OHS session 4 should be Normal 6/6");
+  console.assert(bmi("63", "170") === "21.8", "BMI calculation should be correct");
+  console.assert(hrTargets("26").max === 194, "HRmax should be 220-age");
+  console.assert(targetHrText("26", "Moderate").includes("124–147"), "Moderate target HR should use 64–76% HRmax");
+  console.assert(classifyFitness(r, "step", "123", r.sessions[3]).label === "ต่ำกว่าเกณฑ์", "Step test interpretation should use YMCA age/sex rules");
+  console.assert(classifyFitness(r, "sitstand", "39", r.sessions[3]).label !== "รอข้อมูล", "Sit-to-stand interpretation should return a valid label");
+  const domain = closeYAxisDomain([63, 62.5, 62.2, 61.8]);
+  console.assert(domain[0] > 50 && domain[1] < 70, "chart domain should zoom close to the actual data range");
+}
+// runSelfTests(); // ใช้เฉพาะตอนพัฒนาเว็บจริง ควรย้ายไป test file แยก
+
+function Pill({ children, tone = "gray" }) {
+  const cls = {
+    gray: "border-slate-200 bg-slate-50 text-slate-700",
+    dark: "border-slate-900 bg-slate-900 text-white",
+    good: "border-emerald-200 bg-emerald-50 text-emerald-700",
+    warn: "border-amber-200 bg-amber-50 text-amber-700",
+    bad: "border-rose-200 bg-rose-50 text-rose-700",
+  }[tone];
+  return <span className={`inline-flex rounded-full border px-3 py-1 text-sm font-semibold ${cls}`}>{children}</span>;
+}
+
+function Card({ title, icon: Icon, right, children }) {
+  return (
+    <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+      <div className="mb-4 flex items-center justify-between gap-3 border-b border-slate-100 pb-3">
+        <div className="flex items-center gap-2">
+          {Icon && <Icon className="h-6 w-6 text-slate-500" />}
+          <h2 className="text-xl font-bold tracking-tight text-slate-900">{title}</h2>
+        </div>
+        {right}
+      </div>
+      {children}
+    </section>
+  );
+}
+
+function Field({ label, value, onChange, type = "text", tone = "default" }) {
+  return (
+    <label className="flex h-full flex-col">
+      <span className="mb-1 flex min-h-[2.6rem] items-end text-sm font-semibold text-slate-500">{label}</span>
+      <input
+        value={value || ""}
+        type={type}
+        onChange={(e) => onChange(e.target.value)}
+        className={`h-12 w-full rounded-xl border px-3 py-3 text-base outline-none ${fieldToneClass(tone)}`}
+      />
+    </label>
+  );
+}
+
+function Select({ label, value, onChange, options }) {
+  return (
+    <label className="flex h-full flex-col">
+      <span className="mb-1 flex min-h-[2.6rem] items-end text-sm font-semibold text-slate-500">{label}</span>
+      <select value={value || ""} onChange={(e) => onChange(e.target.value)} className="h-12 w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-base outline-none focus:border-slate-700">
+        {options.map((opt) => {
+          const item = typeof opt === "string" ? { value: opt, label: opt } : opt;
+          return <option key={item.value} value={item.value}>{item.label}</option>;
+        })}
+      </select>
+    </label>
+  );
+}
+
+function Header({ mode, setMode, isAdmin, adminUser, onLogout }) {
+  return (
+    <header className="border-b border-slate-200 bg-white">
+      <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4">
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-slate-200 bg-slate-50"><HeartIcon className="h-6 w-6 text-slate-700" /></div>
+          <div>
+            <h1 className="text-2xl font-bold text-slate-900">คลินิกเวชศาสตร์วิถีชีวิต ศูนย์อนามัยที่ 9 นครราชสีมา</h1>
+            <p className="text-sm text-slate-500">ระบบติดตามสุขภาพและสมรรถภาพรายบุคคล • 4 ครั้ง • HN Login</p>
+          </div>
+        </div>
+        {isAdmin && (
+          <div className="flex flex-wrap items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 p-1 text-base font-semibold">
+            <button onClick={() => setMode("client")} className={`rounded-lg px-4 py-3 ${mode === "client" ? "bg-white shadow-sm" : "text-slate-500"}`}>ดูผลด้วย HN</button>
+            <button onClick={() => setMode("admin")} className={`rounded-lg px-4 py-3 ${mode === "admin" ? "bg-white shadow-sm" : "text-slate-500"}`}>สรุปแอดมิน</button>
+            <button onClick={() => setMode("staff")} className={`rounded-lg px-4 py-3 ${mode === "staff" ? "bg-white shadow-sm" : "text-slate-500"}`}>บันทึกข้อมูล</button>
+            {adminUser && (
+              <div className="rounded-xl border border-sky-200 bg-white px-4 py-2 shadow-sm">
+                <div className="text-xs font-bold uppercase tracking-wide text-sky-600">Logged in admin</div>
+                <div className="text-base font-bold text-slate-900">{adminUser.name}</div>
+                <div className="text-xs text-slate-500">ID: {adminUser.id} • {adminUser.role}</div>
+              </div>
+            )}
+            <button onClick={onLogout} className="rounded-lg px-4 py-3 text-rose-600 hover:bg-white">ออกจากระบบ</button>
+          </div>
+        )}
+      </div>
+    </header>
+  );
+}
+
+function Login({ records, openRecord, openAdminLogin }) {
+  const [hn, setHn] = useState("");
+  const [error, setError] = useState("");
+  return (
+    <main className="mx-auto flex min-h-[70vh] max-w-xl items-center px-4 py-8">
+      <Card title="ดูผลสุขภาพด้วย HN" icon={SearchIcon}>
+        <div className="space-y-4">
+          <Field label="HN" value={hn} onChange={(v) => { setHn(v); setError(""); }} />
+          {error && <p className="text-base font-semibold text-rose-600">{error}</p>}
+          <button
+            onClick={() => { const code = hn.trim(); records[code] ? openRecord(code) : setError("ไม่พบข้อมูล HN นี้"); }}
+            className="flex w-full items-center justify-center gap-2 rounded-xl bg-slate-900 px-4 py-3 text-lg font-bold text-white hover:bg-slate-800"
+          >
+            <SearchIcon className="h-5 w-5 text-white" /> ดูผลการประเมิน
+          </button>
+          <button onClick={openAdminLogin} className="w-full text-center text-sm font-semibold text-slate-400 hover:text-slate-700">
+            สำหรับผู้ดูแลระบบ
+          </button>
+        </div>
+      </Card>
+    </main>
+  );
+}
+
+function AdminLogin({ onSuccess, onCancel }) {
+  const [username, setUsername] = useState("admin1");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  async function login() {
+    setLoading(true);
+    setError("");
+    try {
+      const admin = await signInAdminWithSupabase(username.trim(), password);
+      onSuccess(admin);
+    } catch (err) {
+      console.error(err);
+      setError("Admin ID หรือรหัสผ่านไม่ถูกต้อง หรือยังไม่ได้ผูกผู้ใช้ใน Supabase");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <main className="mx-auto max-w-xl px-4 py-10">
+      <Card title="เข้าสู่ระบบผู้ดูแล" icon={UserIcon} right={<Pill tone="dark">Admin only</Pill>}>
+        <div className="space-y-4">
+          <Field label="Username / Admin ID" value={username} onChange={(v) => { setUsername(v); setError(""); }} />
+          <label className="flex h-full flex-col">
+            <span className="mb-1 flex min-h-[2.6rem] items-end text-sm font-semibold text-slate-500">Password</span>
+            <input
+              value={password}
+              type="password"
+              onChange={(e) => { setPassword(e.target.value); setError(""); }}
+              onKeyDown={(e) => { if (e.key === "Enter") login(); }}
+              className="h-12 w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-base outline-none focus:border-slate-700"
+            />
+          </label>
+          {error && <div className="rounded-xl border border-rose-200 bg-rose-50 p-3 text-base font-semibold text-rose-700">{error}</div>}
+          <button onClick={login} disabled={loading} className="w-full rounded-xl bg-slate-900 px-4 py-3 text-lg font-bold text-white hover:bg-slate-800 disabled:opacity-50">{loading ? "กำลังเข้าสู่ระบบ..." : "เข้าสู่ระบบ"}</button>
+          <button onClick={onCancel} className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-base font-semibold text-slate-600 hover:bg-slate-50">กลับหน้ากรอก HN</button>
+          <div className="rounded-xl border border-slate-200 bg-slate-50 p-3 text-sm text-slate-600">
+            <div className="font-semibold text-slate-800">ผู้ดูแลระบบ</div>
+            <div>admin1 — ชัยวัฒน์</div>
+            <div>admin2 — ธนาวุฒิ</div>
+          </div>
+        </div>
+      </Card>
+    </main>
+  );
+}
+
+function Summary({ record }) {
+  const weight = delta(record, metrics.inbody[0]);
+  const fat = delta(record, metrics.inbody[2]);
+  const muscle = delta(record, metrics.inbody[3]);
+  const ohs = ohsSummary(record.sessions[3]);
+  const items = [
+    ["น้ำหนัก 1→4", weight.text, `ล่าสุด ${show(record.sessions[3].inbody.weight)} kg`, weight.tone],
+    ["Body Fat 1→4", fat.text, `ล่าสุด ${show(record.sessions[3].inbody.bodyFat)}%`, fat.tone],
+    ["Muscle 1→4", muscle.text, `ล่าสุด ${show(record.sessions[3].inbody.muscle)} kg`, muscle.tone],
+    ["OHS ครั้งที่ 4", ohs.text, `ปกติ ${ohs.normal}/6 ข้อ`, ohs.tone],
+  ];
+  return <div className="grid gap-4 md:grid-cols-4">{items.map(([a, b, c, t]) => <div key={a} className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm"><div className="mb-2"><Pill tone={t}>{a}</Pill></div><div className="text-3xl font-bold text-slate-900">{b}</div><div className="mt-1 text-sm font-semibold text-slate-500">{c}</div></div>)}</div>;
+}
+
+function Trend({ record }) {
+  const all = [...metrics.inbody, ...metrics.fitness, ["ohs", "คะแนน OHS ปกติ", "/6", "higher"]];
+  const [key, setKey] = useState("weight");
+  const item = all.find((m) => m[0] === key) || all[0];
+  const filledSessions = completedSessions(record);
+  const data = filledSessions.map((s) => ({ name: `ครั้งที่ ${s.no}`, date: s.date, value: valueOf(s, item[0]) }));
+  const values = data.map((d) => d.value).filter((v) => Number.isFinite(v));
+  const yDomain = closeYAxisDomain(values);
+  const d = delta(record, item);
+  return (
+    <Card title="กราฟแนวโน้ม ครั้งที่ 1–4" icon={ActivityIcon} right={<div className="flex flex-wrap gap-2"><Pill>Auto zoom scale</Pill><Pill tone={d.tone}>เปลี่ยนแปลง {d.text}</Pill></div>}>
+      <div className="mb-4 max-w-sm"><Select label="เลือกตัวชี้วัด" value={key} onChange={setKey} options={all.map((m) => ({ value: m[0], label: m[1] }))} /></div>
+      <div className="h-80">
+        <ResponsiveContainer>
+          <LineChart data={data} margin={{ top: 12, right: 18, left: 8, bottom: 6 }}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="name" tick={{ fontSize: 14 }} />
+            <YAxis tick={{ fontSize: 14 }} domain={yDomain} allowDecimals={true} tickFormatter={(v) => Number(v).toFixed(Number.isInteger(v) ? 0 : 1)} />
+            <Tooltip formatter={(v) => [`${v} ${item[2]}`, item[1]]} labelFormatter={(label, payload) => `${label}${payload?.[0]?.payload?.date ? ` • ${payload[0].payload.date}` : ""}`} />
+            <Line type="monotone" dataKey="value" stroke="#0f172a" strokeWidth={4} dot={{ r: 6 }} activeDot={{ r: 8 }} />
+          </LineChart>
+        </ResponsiveContainer>
+      </div>
+      <p className="mt-2 text-sm text-slate-500">หมายเหตุ: กราฟนี้ใช้สเกลอัตโนมัติแบบใกล้ข้อมูล เพื่อให้เห็นแนวโน้มการเปลี่ยนแปลงชัดขึ้น</p>
+    </Card>
+  );
+}
+
+function CompareTable({ record, title, icon, list, withFitnessInterpretation = false }) {
+  const latestSession = completedSessions(record).slice(-1)[0] || record.sessions[3];
+  return (
+    <Card title={title} icon={icon}>
+      <div className="overflow-x-auto rounded-xl border border-slate-200">
+        <table className="w-full min-w-[780px] text-left text-base">
+          <thead className="bg-slate-50 text-sm text-slate-500">
+            <tr>
+              <th className="p-3">รายการ</th>
+              {record.sessions.map((s) => <th key={s.no} className="p-3">ครั้งที่ {s.no}<br /><span className="font-normal">{s.date || "-"}</span></th>)}
+              <th className="p-3">สรุป 1→4</th>
+              {withFitnessInterpretation && <th className="p-3">แปลผลล่าสุด</th>}
+            </tr>
+          </thead>
+          <tbody>
+            {list.map((m) => {
+              const d = delta(record, m);
+              const rowTone = metricTone(m[0]);
+              const rowClass = rowTone === "fat" ? "bg-amber-50/55" : rowTone === "muscle" ? "bg-rose-50/55" : "";
+              const interpret = withFitnessInterpretation ? classifyFitness(record, m[0], valueOf(latestSession, m[0]), latestSession) : null;
+              return (
+                <tr key={m[0]} className={`border-t border-slate-100 ${rowClass}`}>
+                  <td className="p-3 font-semibold text-slate-900">{m[1]} <span className="font-normal text-slate-400">({m[2]})</span></td>
+                  {record.sessions.map((s) => <td key={s.no} className="p-3">{show(valueOf(s, m[0]))}</td>)}
+                  <td className="p-3"><Pill tone={d.tone}>{d.text}</Pill></td>
+                  {withFitnessInterpretation && <td className="p-3"><Pill tone={interpret.tone}>{interpret.label}</Pill><div className="mt-1 text-sm text-slate-500">{interpret.detail}</div></td>}
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+      {withFitnessInterpretation && <p className="mt-3 text-sm leading-6 text-slate-500">การแปลผลนี้เทียบตามอายุ/เพศและ protocol ที่กำหนด ใช้เพื่อคัดกรองและติดตามแนวโน้ม ไม่ใช่การวินิจฉัยโรค</p>}
+    </Card>
+  );
+}
+
+function OhsTable({ record }) {
+  const chart = record.sessions.map((s) => ({ name: `ครั้งที่ ${s.no}`, normal: ohsSummary(s).normal }));
+  return (
+    <Card title="Overhead Deep Squat ครั้งที่ 1–4" icon={ClipboardIcon}>
+      <div className="grid gap-6 lg:grid-cols-[1.3fr_.7fr]">
+        <div className="overflow-x-auto rounded-xl border border-slate-200">
+          <table className="w-full min-w-[760px] text-left text-base">
+            <thead className="bg-slate-50 text-sm text-slate-500"><tr><th className="p-3">รายการ</th>{record.sessions.map((s) => <th key={s.no} className="p-3">ครั้งที่ {s.no}</th>)}</tr></thead>
+            <tbody>
+              {ohsItems.map((x, i) => <tr key={x} className="border-t border-slate-100"><td className="p-3 font-semibold text-slate-900">{x}</td>{record.sessions.map((s) => <td key={s.no} className="p-3"><Pill tone={s.ohs[i] === "ปกติ" ? "good" : s.ohs[i] === "ต้องระวัง" ? "warn" : "bad"}>{s.ohs[i]}</Pill></td>)}</tr>)}
+              <tr className="border-t border-slate-100 bg-slate-50"><td className="p-3 font-bold">สรุป</td>{record.sessions.map((s) => { const o = ohsSummary(s); return <td key={s.no} className="p-3"><Pill tone={o.tone}>{o.text} {o.normal}/6</Pill></td>; })}</tr>
+            </tbody>
+          </table>
+        </div>
+        <div className="h-72">
+          <ResponsiveContainer>
+            <BarChart data={chart}><CartesianGrid strokeDasharray="3 3" /><XAxis dataKey="name" tick={{ fontSize: 14 }} /><YAxis domain={[0, 6]} tick={{ fontSize: 12 }} /><Tooltip /><Bar dataKey="normal" fill="#0f172a" radius={[6, 6, 0, 0]} /></BarChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+    </Card>
+  );
+}
+
+function Dashboard({ record, back }) {
+  const risk = record.parq.some(Boolean);
+  return (
+    <main className="mx-auto max-w-7xl space-y-5 px-4 py-6">
+      <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div className="flex flex-col justify-between gap-3 md:flex-row md:items-center">
+          <div>
+            <div className="mb-2 flex flex-wrap gap-2"><Pill tone="dark">HN {record.hn}</Pill><Pill>บันทึก 4 ครั้ง</Pill><Pill tone={risk ? "bad" : "good"}>{risk ? "PAR-Q ควรประเมินเพิ่ม" : "PAR-Q ผ่าน"}</Pill></div>
+            <h2 className="text-3xl font-bold text-slate-900">{record.name || "ไม่ระบุชื่อ"}</h2>
+            <p className="mt-1 text-base text-slate-500">{record.sex} • อายุ {show(record.age)} ปี • ส่วนสูง {show(record.height)} ซม. • เป้าหมาย: {record.goal}</p>
+          </div>
+          <div className="flex flex-wrap gap-2"><button onClick={printPage} className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-base font-semibold text-slate-700 hover:bg-slate-50">พิมพ์ / PDF รายบุคคล</button><button onClick={back} className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-base font-semibold text-slate-700 hover:bg-slate-100">กลับไปกรอก HN</button></div>
+        </div>
+      </section>
+      <Summary record={record} />
+      <div className="grid gap-5 lg:grid-cols-[1.2fr_.8fr]">
+        <Trend record={record} />
+        <Card title="โปรแกรมที่ได้รับ" icon={FileIcon}>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <Info label="Program Type" value={record.program.type || record.program.split} /><Info label="Cardio" value={`${show(record.program.cardioType)} • ${show(record.program.cardioFrequency)} วัน/สัปดาห์ • ${show(record.program.cardioDuration)} นาที`} /><Info label="Strength" value={`${show(record.program.strengthFrequency)} วัน/สัปดาห์ • ${show(record.program.strengthDose)}`} /><Info label="Intensity" value={`${show(record.program.intensity)} • RPE ${show(record.program.rpe)}`} /><Info label="Talk Test" value={record.program.talk} /><Info label="Target HR" value={targetHrText(record.age, record.program.intensity)} /><Info label="Focus" value={record.program.focus} />
+          </div>
+          <div className="mt-3 grid gap-3">
+            {record.program.precaution && <div className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-base leading-6 text-amber-800"><b>ข้อควรระวัง:</b> {record.program.precaution}</div>}
+            {record.program.followUp && <div className="rounded-xl border border-slate-200 bg-slate-50 p-3 text-base leading-6 text-slate-700"><b>ติดตาม:</b> {record.program.followUp}</div>}
+            <div className="rounded-xl border border-slate-200 bg-slate-50 p-3 text-base leading-6 text-slate-700"><b>คำแนะนำ:</b> {show(record.program.note)}</div>
+          </div>
+        </Card>
+      </div>
+      <CompareTable record={record} title="ตารางเปรียบเทียบ InBody / Body Composition" icon={HeartIcon} list={metrics.inbody} />
+      <CompareTable record={record} title="ตารางเปรียบเทียบ Fitness Test 5 ด้าน" icon={ActivityIcon} list={metrics.fitness} withFitnessInterpretation />
+      <OhsTable record={record} />
+    </main>
+  );
+}
+
+function Info({ label, value, tone = "default" }) {
+  return (
+    <div className={`flex h-full min-h-[5.4rem] flex-col justify-between rounded-xl border p-3 ${panelToneClass(tone)}`}>
+      <div className="text-sm font-semibold text-slate-500">{label}</div>
+      <div className="mt-1 font-bold text-slate-900">{show(value)}</div>
+    </div>
+  );
+}
+
+function InsightListPanel({ title, rows, tone = "default" }) {
+  const wrapClass = tone === "good"
+    ? "border-emerald-200 bg-emerald-50"
+    : tone === "bad"
+      ? "border-rose-200 bg-rose-50"
+      : "border-slate-200 bg-slate-50";
+  const titleClass = tone === "good" ? "text-emerald-900" : tone === "bad" ? "text-rose-900" : "text-slate-900";
+  return (
+    <div className={`rounded-xl border p-4 ${wrapClass}`}>
+      <h3 className={`mb-3 text-lg font-bold ${titleClass}`}>{title}</h3>
+      <div className="overflow-hidden rounded-xl border border-slate-200 bg-white">
+        {rows.map((row, index) => {
+          const label = row.label || row.nameTh || row.name || "-";
+          const sub = row.sub || row.nameEn || "";
+          const count = row.count ?? row.value ?? 0;
+          const badgeTone = row.tone || (count > 0 ? (tone === "good" ? "good" : tone === "bad" ? "bad" : "gray") : "gray");
+          return (
+            <div key={`${label}-${index}`} className={`grid grid-cols-[minmax(0,1fr)_88px] items-center gap-3 px-4 py-3 ${index !== 0 ? "border-t border-slate-100" : ""}`}>
+              <div className="min-w-0">
+                <div className="text-base font-semibold leading-6 text-slate-800">{label}</div>
+                {sub && <div className="text-sm leading-5 text-slate-400">{sub}</div>}
+              </div>
+              <div className="flex justify-end"><Pill tone={badgeTone}>{count} คน</Pill></div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function AuditLogPanel({ auditLogs }) {
+  return (
+    <Card title="Audit Log / ประวัติการบันทึกและแก้ไข" icon={ClipboardIcon}>
+      <div className="overflow-x-auto rounded-xl border border-slate-200">
+        <table className="w-full min-w-[760px] text-left text-base">
+          <thead className="bg-slate-50 text-sm text-slate-500">
+            <tr><th className="p-3">เวลา</th><th className="p-3">ผู้ดำเนินการ</th><th className="p-3">Action</th><th className="p-3">HN</th><th className="p-3">รายละเอียด</th></tr>
+          </thead>
+          <tbody>
+            {auditLogs.slice(0, 50).map((log) => (
+              <tr key={log.id} className="border-t border-slate-100">
+                <td className="p-3 text-sm text-slate-600">{log.at}</td>
+                <td className="p-3"><div className="font-bold text-slate-900">{log.adminName}</div><div className="text-sm text-slate-500">{log.adminId} • {log.role}</div></td>
+                <td className="p-3"><Pill tone={log.action.includes("ลบ") ? "bad" : log.action.includes("สร้าง") || log.action.includes("กู้คืน") ? "good" : "gray"}>{log.action}</Pill></td>
+                <td className="p-3 font-semibold text-slate-900">{log.hn}</td>
+                <td className="p-3 text-slate-600">{show(log.detail)}</td>
+              </tr>
+            ))}
+            {auditLogs.length === 0 && <tr><td className="p-4 text-center text-slate-500" colSpan="5">ยังไม่มีประวัติการบันทึก/แก้ไขในรอบการใช้งานนี้</td></tr>}
+          </tbody>
+        </table>
+      </div>
+      <p className="mt-3 text-sm text-slate-500">Prototype นี้เก็บ Audit Log ระหว่างเปิดหน้าเว็บเท่านั้น เว็บจริงควรบันทึกลงฐานข้อมูลถาวร</p>
+    </Card>
+  );
+}
+
+function AdminSummary({ records, auditLogs, onFullBackup, onRestoreBackup }) {
+  const restoreInputRef = useRef(null);
+
+  function handleRestoreFile(event) {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const payload = JSON.parse(String(reader.result || "{}"));
+        if (!validateBackupPayload(payload)) {
+          alert("ไฟล์สำรองข้อมูลไม่ถูกต้อง");
+          return;
+        }
+        const ok = window.confirm(`ยืนยันการนำเข้าข้อมูลสำรอง
+
+ข้อมูลในหน้าจอปัจจุบันจะถูกแทนที่ด้วยข้อมูลจากไฟล์ backup
+
+ต้องการดำเนินการต่อหรือไม่?`);
+        if (!ok) return;
+        onRestoreBackup(normalizeRecords(payload.records), Array.isArray(payload.auditLogs) ? payload.auditLogs : []);
+      } catch (error) {
+        alert("อ่านไฟล์สำรองข้อมูลไม่สำเร็จ");
+      } finally {
+        event.target.value = "";
+      }
+    };
+    reader.readAsText(file);
+  }
+  const thaiMonths = [
+    "มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน",
+    "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม",
+  ];
+
+  function parseSessionDate(dateText) {
+    const text = String(dateText || "").trim();
+    if (!text) return null;
+    let y = 0;
+    let m = 0;
+
+    if (text.includes("-")) {
+      const parts = text.split("-");
+      if (parts.length !== 3) return null;
+      y = Number(parts[0]);
+      m = Number(parts[1]);
+    } else if (text.includes("/")) {
+      const parts = text.split("/");
+      if (parts.length !== 3) return null;
+      y = Number(parts[2]);
+      m = Number(parts[1]);
+    } else {
+      return null;
+    }
+
+    const yearBE = y < 2400 ? y + 543 : y;
+    if (!yearBE || !m || m < 1 || m > 12) return null;
+    return { yearBE, month: m };
+  }
+
+  function sessionsInPeriod(record, yearFilter, monthFilter) {
+    return completedSessions(record).filter((s) => {
+      if (yearFilter === "all" && monthFilter === "all") return true;
+      const parsed = parseSessionDate(s.date);
+      if (!parsed) return false;
+      const yearOk = yearFilter === "all" || parsed.yearBE === Number(yearFilter);
+      const monthOk = monthFilter === "all" || parsed.month === Number(monthFilter);
+      return yearOk && monthOk;
+    });
+  }
+
+  const all = Object.values(records);
+  const availableYears = Array.from(new Set(
+    all.flatMap((record) => completedSessions(record).map((s) => parseSessionDate(s.date)?.yearBE).filter(Boolean))
+  )).sort((a, b) => b - a);
+
+  const [yearFilter, setYearFilter] = useState("all");
+  const [monthFilter, setMonthFilter] = useState("all");
+  const [ageFilter, setAgeFilter] = useState("all");
+  const [adminSearch, setAdminSearch] = useState("");
+  const [page, setPage] = useState(1);
+
+  const ageOptions = [
+    { value: "all", label: "ทุกช่วงอายุ" },
+    { value: "unknown", label: "ไม่ระบุอายุ" },
+    { value: "under20", label: "ต่ำกว่า 20 ปี" },
+    { value: "20-29", label: "20–29 ปี" },
+    { value: "30-39", label: "30–39 ปี" },
+    { value: "40-49", label: "40–49 ปี" },
+    { value: "50-59", label: "50–59 ปี" },
+    { value: "60-69", label: "60–69 ปี" },
+    { value: "70-79", label: "70–79 ปี" },
+    { value: "80+", label: "80 ปีขึ้นไป" },
+  ];
+  const ageFilteredRecords = all.filter((record) => ageFilter === "all" || adminAgeGroup(record.age) === ageFilter);
+
+  const rows = ageFilteredRecords.map((record) => {
+    const sessions = sessionsInPeriod(record, yearFilter, monthFilter);
+    const first = sessions[0];
+    const last = sessions[sessions.length - 1];
+    const bodyFat = deltaFromSessions(sessions, metrics.inbody[2]);
+    const weight = deltaFromSessions(sessions, metrics.inbody[0]);
+    const muscle = deltaFromSessions(sessions, metrics.inbody[3]);
+    const waist = deltaFromSessions(sessions, metrics.inbody[6]);
+    const grip = deltaFromSessions(sessions, metrics.fitness[1]);
+    const tug = deltaFromSessions(sessions, metrics.fitness[4]);
+    const step = deltaFromSessions(sessions, metrics.fitness[0]);
+    const ohsDelta = sessions.length >= 2
+      ? { text: `${ohsSummary(first).normal}→${ohsSummary(last).normal}/6`, tone: ohsSummary(last).normal > ohsSummary(first).normal ? "good" : ohsSummary(last).normal < ohsSummary(first).normal ? "bad" : "gray" }
+      : { text: "ข้อมูลไม่พอ", tone: "gray" };
+    const badCount = [bodyFat, weight, muscle, waist, grip, tug, step, ohsDelta].filter((x) => x.tone === "bad").length;
+    const goodCount = [bodyFat, weight, muscle, waist, grip, tug, step, ohsDelta].filter((x) => x.tone === "good").length;
+    return { record, sessions, first, last, bodyFat, weight, muscle, waist, grip, tug, step, ohsDelta, badCount, goodCount };
+  });
+
+  const comparable = rows.filter((r) => r.sessions.length >= 2);
+  const notEnough = rows.filter((r) => r.sessions.length < 2);
+  const needFollow = comparable.filter((r) => r.badCount > 0).length;
+  const improved = comparable.filter((r) => r.badCount === 0 && r.goodCount > 0).length;
+  const noChange = comparable.filter((r) => r.badCount === 0 && r.goodCount === 0).length;
+  const ageLabel = ageOptions.find((x) => x.value === ageFilter)?.label || "ทุกช่วงอายุ";
+  const periodLabel = `${yearFilter === "all" ? "ทุกปี" : `พ.ศ. ${yearFilter}`} • ${monthFilter === "all" ? "ทุกเดือน" : thaiMonths[Number(monthFilter) - 1]} • ${ageLabel}`;
+  const searchText = adminSearch.trim().toLowerCase();
+  const filteredComparable = comparable.filter((r) => {
+    if (!searchText) return true;
+    return `${r.record.hn} ${r.record.name}`.toLowerCase().includes(searchText);
+  });
+  const pageCount = Math.max(1, Math.ceil(filteredComparable.length / PAGE_SIZE));
+  const safePage = Math.min(page, pageCount);
+  const pagedComparable = filteredComparable.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
+
+  const ageSummaryRows = ageOptions.filter((x) => x.value !== "all").map((ageOption) => {
+    const groupRecords = all.filter((record) => adminAgeGroup(record.age) === ageOption.value);
+    const groupRows = groupRecords.map((record) => {
+      const sessions = sessionsInPeriod(record, yearFilter, monthFilter);
+      const bodyFat = deltaFromSessions(sessions, metrics.inbody[2]);
+      const weight = deltaFromSessions(sessions, metrics.inbody[0]);
+      const muscle = deltaFromSessions(sessions, metrics.inbody[3]);
+      const waist = deltaFromSessions(sessions, metrics.inbody[6]);
+      const grip = deltaFromSessions(sessions, metrics.fitness[1]);
+      const tug = deltaFromSessions(sessions, metrics.fitness[4]);
+      const step = deltaFromSessions(sessions, metrics.fitness[0]);
+      const first = sessions[0];
+      const last = sessions[sessions.length - 1];
+      const ohsDelta = sessions.length >= 2
+        ? { tone: ohsSummary(last).normal > ohsSummary(first).normal ? "good" : ohsSummary(last).normal < ohsSummary(first).normal ? "bad" : "gray" }
+        : { tone: "gray" };
+      const badCount = [bodyFat, weight, muscle, waist, grip, tug, step, ohsDelta].filter((x) => x.tone === "bad").length;
+      const goodCount = [bodyFat, weight, muscle, waist, grip, tug, step, ohsDelta].filter((x) => x.tone === "good").length;
+      return { sessions, badCount, goodCount };
+    });
+    const groupComparable = groupRows.filter((r) => r.sessions.length >= 2);
+    return {
+      age: ageOption.label,
+      total: groupRecords.length,
+      comparable: groupComparable.length,
+      ดีขึ้น: groupComparable.filter((r) => r.badCount === 0 && r.goodCount > 0).length,
+      แย่ลง: groupComparable.filter((r) => r.badCount > 0).length,
+      คงเดิม: groupComparable.filter((r) => r.badCount === 0 && r.goodCount === 0).length,
+      ข้อมูลไม่พอ: groupRows.filter((r) => r.sessions.length < 2).length,
+    };
+  });
+
+  const urgentRows = comparable.filter((r) => {
+    const latest = r.last;
+    const fitnessBelow = metrics.fitness.some(([key]) => classifyFitness(r.record, key, valueOf(latest, key), latest).label === "ต่ำกว่าเกณฑ์");
+    return r.badCount >= 2 || r.record.parq.some(Boolean) || r.bodyFat.tone === "bad" || r.waist.tone === "bad" || r.muscle.tone === "bad" || r.tug.tone === "bad" || fitnessBelow;
+  });
+
+  const issueRows = [
+    { name: "Body Fat เพิ่ม", count: comparable.filter((r) => r.bodyFat.tone === "bad").length },
+    { name: "รอบเอวเพิ่ม", count: comparable.filter((r) => r.waist.tone === "bad").length },
+    { name: "Muscle ลด", count: comparable.filter((r) => r.muscle.tone === "bad").length },
+    { name: "Step Test แย่ลง", count: comparable.filter((r) => r.step.tone === "bad").length },
+    { name: "Grip ลด", count: comparable.filter((r) => r.grip.tone === "bad").length },
+    { name: "TUG แย่ลง", count: comparable.filter((r) => r.tug.tone === "bad").length },
+    { name: "OHS ลดลง", count: comparable.filter((r) => r.ohsDelta.tone === "bad").length },
+  ].sort((a, b) => b.count - a.count).slice(0, 5);
+
+  const improvedRows = [
+    { name: "Body Fat ลด", count: comparable.filter((r) => r.bodyFat.tone === "good").length },
+    { name: "รอบเอวลด", count: comparable.filter((r) => r.waist.tone === "good").length },
+    { name: "Muscle เพิ่ม", count: comparable.filter((r) => r.muscle.tone === "good").length },
+    { name: "Step Test ดีขึ้น", count: comparable.filter((r) => r.step.tone === "good").length },
+    { name: "Grip เพิ่ม", count: comparable.filter((r) => r.grip.tone === "good").length },
+    { name: "TUG ดีขึ้น", count: comparable.filter((r) => r.tug.tone === "good").length },
+    { name: "OHS ดีขึ้น", count: comparable.filter((r) => r.ohsDelta.tone === "good").length },
+  ].sort((a, b) => b.count - a.count).slice(0, 5);
+
+  const incompleteSummary = [
+    { label: "มีข้อมูล < 2 ครั้ง", value: notEnough.length },
+    { label: "ไม่มีอายุ/เพศ", value: rows.filter((r) => !r.record.age || !r.record.sex).length },
+    { label: "InBody ไม่ครบ", value: rows.filter((r) => {
+      const latest = r.sessions.slice(-1)[0];
+      return !latest || !latest.inbody.weight || !latest.inbody.bodyFat || !latest.inbody.muscle;
+    }).length },
+    { label: "Fitness ไม่ครบ", value: rows.filter((r) => {
+      const latest = r.sessions.slice(-1)[0];
+      return !latest || metrics.fitness.some(([key]) => !latest.fitness[key]);
+    }).length },
+  ];
+
+  const sexSummaryRows = ["ชาย", "หญิง", "อื่น ๆ"].map((sexLabel) => {
+    const groupRows = rows.filter((r) => sexLabel === "อื่น ๆ" ? !["ชาย", "หญิง"].includes(r.record.sex) : r.record.sex === sexLabel);
+    const groupComparable = groupRows.filter((r) => r.sessions.length >= 2);
+    return {
+      sex: sexLabel,
+      total: groupRows.length,
+      comparable: groupComparable.length,
+      improved: groupComparable.filter((r) => r.badCount === 0 && r.goodCount > 0).length,
+      worsened: groupComparable.filter((r) => r.badCount > 0).length,
+      incomplete: groupRows.filter((r) => r.sessions.length < 2).length,
+    };
+  }).filter((r) => r.total > 0);
+
+  const fitnessBelowRows = metrics.fitness.map(([key, label]) => {
+    const count = comparable.filter((r) => classifyFitness(r.record, key, valueOf(r.last, key), r.last).label === "ต่ำกว่าเกณฑ์").length;
+    const nameTh = label.split(" (")[0];
+    const nameEn = label.includes("(") ? label.substring(label.indexOf("(") + 1, label.lastIndexOf(")")) : key;
+    return { name: label, nameTh, nameEn, count };
+  }).sort((a, b) => b.count - a.count);
+
+  return (
+    <main className="mx-auto max-w-7xl space-y-5 px-4 py-6">
+      <input ref={restoreInputRef} type="file" accept="application/json,.json" className="hidden" onChange={handleRestoreFile} />
+      <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div className="flex flex-col justify-between gap-4 lg:flex-row lg:items-center">
+          <div>
+            <h2 className="text-3xl font-bold text-slate-900">สรุปภาพรวมผู้รับบริการทั้งหมด</h2>
+            <p className="text-base text-slate-500">เลือกดูตาม พ.ศ. / เดือน หรือดูทั้งหมด ระบบเทียบจากครั้งแรก → ครั้งล่าสุดในช่วงที่เลือก และนับเฉพาะคนที่มีข้อมูลมากกว่า 1 ครั้ง</p>
+          </div>
+          <div className="grid gap-3 sm:grid-cols-2 lg:w-[980px] lg:grid-cols-4">
+            <Field label="ค้นหา HN / ชื่อ" value={adminSearch} onChange={(v) => { setAdminSearch(v); setPage(1); }} />
+            <Select
+              label="เลือกปี พ.ศ."
+              value={yearFilter}
+              onChange={setYearFilter}
+              options={[{ value: "all", label: "ทั้งหมด / ทุกปี" }, ...availableYears.map((y) => ({ value: String(y), label: `พ.ศ. ${y}` }))]}
+            />
+            <Select
+              label="เลือกเดือน"
+              value={monthFilter}
+              onChange={setMonthFilter}
+              options={[{ value: "all", label: "ทั้งหมด / ทุกเดือน" }, ...thaiMonths.map((m, i) => ({ value: String(i + 1), label: `${i + 1}. ${m}` }))]}
+            />
+            <Select
+              label="เลือกช่วงอายุ"
+              value={ageFilter}
+              onChange={setAgeFilter}
+              options={ageOptions}
+            />
+          </div>
+        </div>
+      </section>
+
+      <div className="grid gap-4 md:grid-cols-4">
+        <Info label="ช่วงที่เลือก" value={periodLabel} />
+        <Info label="ผู้รับบริการในช่วงที่เลือก" value={`${rows.length} คน`} />
+        <Info label="นำมาเปรียบเทียบได้" value={`${comparable.length} คน`} />
+        <Info label="ผลการค้นหา" value={`${filteredComparable.length} คน`} />
+      </div>
+
+      <Card title="สรุปจำนวน ดีขึ้น / แย่ลง / คงเดิม" icon={ActivityIcon}>
+        <div className="h-72">
+          <ResponsiveContainer>
+            <BarChart data={[{ name: "ช่วงที่เลือก", ดีขึ้น: improved, แย่ลง: needFollow, คงเดิม: noChange, ข้อมูลไม่พอ: notEnough.length }]}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="name" tick={{ fontSize: 14 }} />
+              <YAxis allowDecimals={false} tick={{ fontSize: 14 }} />
+              <Tooltip />
+              <Bar dataKey="ดีขึ้น" fill="#059669" radius={[6, 6, 0, 0]} />
+              <Bar dataKey="แย่ลง" fill="#e11d48" radius={[6, 6, 0, 0]} />
+              <Bar dataKey="คงเดิม" fill="#64748b" radius={[6, 6, 0, 0]} />
+              <Bar dataKey="ข้อมูลไม่พอ" fill="#cbd5e1" radius={[6, 6, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      </Card>
+
+      <Card title="Key Insights / ผลลัพธ์เด่นและจุดที่ควรติดตาม" icon={ClipboardIcon}>
+        <div className="grid gap-4 md:grid-cols-4">
+          <Info label="ต้องติดตามเร่งด่วน" value={`${urgentRows.length} คน`} tone={urgentRows.length ? "fat" : "default"} />
+          <Info label="ตัวชี้วัดดีขึ้นสูงสุด" value={improvedRows[0] ? `${improvedRows[0].name}: ${improvedRows[0].count} คน` : "ไม่มี"} />
+          <Info label="ตัวชี้วัดแย่ลงสูงสุด" value={issueRows[0] ? `${issueRows[0].name}: ${issueRows[0].count} คน` : "ไม่มี"} tone={issueRows[0]?.count ? "fat" : "default"} />
+          <Info label="Fitness ต่ำกว่าเกณฑ์สูงสุด" value={fitnessBelowRows[0] ? `${fitnessBelowRows[0].nameTh}: ${fitnessBelowRows[0].count} คน` : "ไม่มี"} tone={fitnessBelowRows[0]?.count ? "fat" : "default"} />
+        </div>
+        <div className="mt-5 grid gap-5 lg:grid-cols-4">
+          <InsightListPanel title="ตัวชี้วัดที่ดีขึ้นบ่อย" tone="good" rows={improvedRows.map((row) => ({ label: row.name, count: row.count }))} />
+          <InsightListPanel title="ตัวชี้วัดที่แย่ลงบ่อย" tone="bad" rows={issueRows.map((row) => ({ label: row.name, count: row.count }))} />
+          <InsightListPanel title="Fitness ต่ำกว่าเกณฑ์" tone="bad" rows={fitnessBelowRows.map((row) => ({ label: row.nameTh, sub: row.nameEn, count: row.count }))} />
+          <InsightListPanel title="ข้อมูลไม่ครบ" rows={incompleteSummary.map((row) => ({ label: row.label, count: row.value }))} />
+        </div>
+      </Card>
+
+      <Card title="สรุปตามเพศ" icon={UserIcon}>
+        <div className="overflow-x-auto rounded-xl border border-slate-200">
+          <table className="w-full min-w-[620px] text-left text-base">
+            <thead className="bg-slate-50 text-sm text-slate-500">
+              <tr><th className="p-3">เพศ</th><th className="p-3">ทั้งหมด</th><th className="p-3">เทียบได้</th><th className="p-3">ดีขึ้น</th><th className="p-3">แย่ลง</th><th className="p-3">ข้อมูลไม่พอ</th></tr>
+            </thead>
+            <tbody>
+              {sexSummaryRows.map((row) => (
+                <tr key={row.sex} className="border-t border-slate-100">
+                  <td className="p-3 font-semibold text-slate-900">{row.sex}</td>
+                  <td className="p-3">{row.total}</td>
+                  <td className="p-3">{row.comparable}</td>
+                  <td className="p-3"><Pill tone="good">{row.improved}</Pill></td>
+                  <td className="p-3"><Pill tone="bad">{row.worsened}</Pill></td>
+                  <td className="p-3"><Pill>{row.incomplete}</Pill></td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </Card>
+
+      <Card title="สรุปตามช่วงอายุ" icon={UserIcon}>
+        <div className="grid gap-6 lg:grid-cols-[1fr_1.1fr]">
+          <div className="h-80">
+            <ResponsiveContainer>
+              <BarChart data={ageSummaryRows}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="age" tick={{ fontSize: 12 }} />
+                <YAxis allowDecimals={false} tick={{ fontSize: 14 }} />
+                <Tooltip />
+                <Bar dataKey="ดีขึ้น" fill="#059669" radius={[6, 6, 0, 0]} />
+                <Bar dataKey="แย่ลง" fill="#e11d48" radius={[6, 6, 0, 0]} />
+                <Bar dataKey="คงเดิม" fill="#64748b" radius={[6, 6, 0, 0]} />
+                <Bar dataKey="ข้อมูลไม่พอ" fill="#cbd5e1" radius={[6, 6, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+          <div className="overflow-x-auto rounded-xl border border-slate-200">
+            <table className="w-full min-w-[560px] text-left text-base">
+              <thead className="bg-slate-50 text-sm text-slate-500">
+                <tr><th className="p-3">ช่วงอายุ</th><th className="p-3">ทั้งหมด</th><th className="p-3">เทียบได้</th><th className="p-3">ดีขึ้น</th><th className="p-3">แย่ลง</th><th className="p-3">ข้อมูลไม่พอ</th></tr>
+              </thead>
+              <tbody>
+                {ageSummaryRows.map((row) => (
+                  <tr key={row.age} className="border-t border-slate-100">
+                    <td className="p-3 font-semibold text-slate-900">{row.age}</td>
+                    <td className="p-3">{row.total}</td>
+                    <td className="p-3">{row.comparable}</td>
+                    <td className="p-3"><Pill tone="good">{row.ดีขึ้น}</Pill></td>
+                    <td className="p-3"><Pill tone="bad">{row.แย่ลง}</Pill></td>
+                    <td className="p-3"><Pill>{row.ข้อมูลไม่พอ}</Pill></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </Card>
+
+      <AuditLogPanel auditLogs={auditLogs} />
+
+      <Card title="ตารางสรุปทุกคน สำหรับแอดมิน" icon={ClipboardIcon} right={<div className="flex flex-wrap gap-2"><button onClick={() => exportRecordsCSV(records)} className="rounded-full border border-slate-200 bg-white px-3 py-1 text-sm font-semibold text-slate-700 hover:bg-slate-50">Export Excel/CSV</button><button onClick={onFullBackup} className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-sm font-semibold text-emerald-700 hover:bg-emerald-100">Backup JSON</button><button onClick={() => restoreInputRef.current?.click()} className="rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-sm font-semibold text-amber-700 hover:bg-amber-100">Restore JSON</button><button onClick={printPage} className="rounded-full border border-slate-200 bg-white px-3 py-1 text-sm font-semibold text-slate-700 hover:bg-slate-50">พิมพ์ / PDF</button><Pill tone="dark">{periodLabel}</Pill></div>}>
+        <div className="overflow-x-auto rounded-xl border border-slate-200">
+          <table className="w-full min-w-[1180px] text-left text-base">
+            <thead className="bg-slate-50 text-sm text-slate-500">
+              <tr>
+                <th className="p-3">HN / ชื่อ</th>
+                <th className="p-3">จำนวนครั้งในช่วงที่เลือก</th>
+                <th className="p-3">ช่วงที่เทียบ</th>
+                <th className="p-3">น้ำหนัก</th>
+                <th className="p-3">Body Fat</th>
+                <th className="p-3">Muscle</th>
+                <th className="p-3">รอบเอว</th>
+                <th className="p-3">Step Test</th>
+                <th className="p-3">Grip</th>
+                <th className="p-3">TUG</th>
+                <th className="p-3">OHS</th>
+                <th className="p-3">สรุป</th>
+              </tr>
+            </thead>
+            <tbody>
+              {pagedComparable.map((r) => (
+                <tr key={r.record.hn} className={`border-t border-slate-100 ${r.badCount > 0 ? "bg-rose-50/60" : ""}`}>
+                  <td className="p-3"><div className="font-bold text-slate-900">HN {r.record.hn}</div><div className="text-sm text-slate-500">{r.record.name || "ไม่ระบุชื่อ"}</div></td>
+                  <td className="p-3"><Pill>{r.sessions.length} ครั้ง</Pill></td>
+                  <td className="p-3 text-sm text-slate-600">ครั้งที่ {r.first.no} → {r.last.no}<br />{r.first.date || "-"} → {r.last.date || "-"}</td>
+                  <td className="p-3"><Pill tone={r.weight.tone}>{r.weight.text}</Pill></td>
+                  <td className="p-3"><Pill tone={r.bodyFat.tone}>{r.bodyFat.text}</Pill></td>
+                  <td className="p-3"><Pill tone={r.muscle.tone}>{r.muscle.text}</Pill></td>
+                  <td className="p-3"><Pill tone={r.waist.tone}>{r.waist.text}</Pill></td>
+                  <td className="p-3"><Pill tone={r.step.tone}>{r.step.text}</Pill></td>
+                  <td className="p-3"><Pill tone={r.grip.tone}>{r.grip.text}</Pill></td>
+                  <td className="p-3"><Pill tone={r.tug.tone}>{r.tug.text}</Pill></td>
+                  <td className="p-3"><Pill tone={r.ohsDelta.tone}>{r.ohsDelta.text}</Pill></td>
+                  <td className="p-3"><Pill tone={r.badCount > 0 ? "bad" : r.goodCount > 0 ? "good" : "gray"}>{r.badCount > 0 ? `แย่ลง ${r.badCount} ตัวชี้วัด` : r.goodCount > 0 ? "แนวโน้มดี" : "คงเดิม"}</Pill></td>
+                </tr>
+              ))}
+              {filteredComparable.length === 0 && <tr><td className="p-4 text-center text-slate-500" colSpan="12">ยังไม่มีผู้รับบริการที่มีข้อมูลมากกว่า 1 ครั้งในช่วงที่เลือก หรือไม่พบตามคำค้นหา</td></tr>}
+            </tbody>
+          </table>
+        </div>
+        <div className="mt-4 flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
+          <p className="text-sm text-slate-500">แสดง {pagedComparable.length} รายการต่อหน้า จากทั้งหมด {filteredComparable.length} รายการ • หน้า {safePage}/{pageCount}</p>
+          <div className="flex gap-2">
+            <button onClick={() => setPage(Math.max(1, safePage - 1))} disabled={safePage <= 1} className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 disabled:opacity-40">ก่อนหน้า</button>
+            <button onClick={() => setPage(Math.min(pageCount, safePage + 1))} disabled={safePage >= pageCount} className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 disabled:opacity-40">ถัดไป</button>
+          </div>
+        </div>
+      </Card>
+
+      {notEnough.length > 0 && (
+        <Card title="รายชื่อที่ยังเปรียบเทียบไม่ได้ในช่วงที่เลือก" icon={UserIcon} right={<Pill>ต้องมีมากกว่า 1 ครั้ง</Pill>}>
+          <div className="grid gap-3 md:grid-cols-3">
+            {notEnough.map((r) => <div key={r.record.hn} className="rounded-xl border border-slate-200 bg-slate-50 p-3"><div className="font-bold text-slate-900">HN {r.record.hn}</div><div className="text-base text-slate-500">{r.record.name || "ไม่ระบุชื่อ"}</div><div className="mt-2"><Pill>{r.sessions.length} ครั้งในช่วงที่เลือก</Pill></div></div>)}
+          </div>
+        </Card>
+      )}
+    </main>
+  );
+}
+
+function Staff({ records, setRecords, adminUser, addAuditLog, refreshData }) {
+  const first = Object.keys(records)[0] || "";
+  const [hn, setHn] = useState(first);
+  const [draft, setDraft] = useState(clone(records[first] || blankRecord));
+  const [tab, setTab] = useState("general");
+  const [idx, setIdx] = useState(0);
+  const [staffSearch, setStaffSearch] = useState("");
+  const [staffPage, setStaffPage] = useState(1);
+  const [deletedBackup, setDeletedBackup] = useState(null);
+  const staffSearchText = staffSearch.trim().toLowerCase();
+  const filteredPatients = Object.values(records).filter((r) => {
+    if (!staffSearchText) return true;
+    return `${r.hn} ${r.name}`.toLowerCase().includes(staffSearchText);
+  });
+  const staffPageCount = Math.max(1, Math.ceil(filteredPatients.length / PAGE_SIZE));
+  const safeStaffPage = Math.min(staffPage, staffPageCount);
+  const pagedPatients = filteredPatients.slice((safeStaffPage - 1) * PAGE_SIZE, safeStaffPage * PAGE_SIZE);
+
+  function selectRecord(x) {
+    setHn(x);
+    setDraft(clone(records[x]));
+    setIdx(0);
+    setTab("general");
+  }
+
+  function update(path, value) {
+    let next = setDeep(draft, path, value);
+    if (path[0] === "sessions" && path[2] === "inbody" && path[3] === "weight") {
+      next.sessions[path[1]].inbody.bmi = bmi(value, next.height);
+    }
+    if (path[0] === "height") {
+      next.sessions = next.sessions.map((s) => ({ ...s, inbody: { ...s.inbody, bmi: bmi(s.inbody.weight, value) || s.inbody.bmi } }));
+    }
+    setDraft(next);
+  }
+
+  async function save() {
+    if (!draft.hn) return alert("กรุณากรอก HN");
+    const quality = recordQuality(draft);
+    if (quality.issues.length > 0) {
+      const ok = window.confirm(`พบข้อมูลที่ควรตรวจสอบ ${quality.issues.length} รายการ
+
+${quality.issues.slice(0, 8).join("\n")}
+
+ต้องการบันทึกต่อหรือไม่?`);
+      if (!ok) return;
+    }
+    const existed = Boolean(records[draft.hn]);
+    const saved = { ...clone(draft), updatedBy: adminUser?.name || "admin", updatedById: adminUser?.id || "admin", updatedAt: todayThai() };
+    try {
+      await saveRecordToSupabase(saved, adminUser);
+      setRecords((old) => ({ ...old, [saved.hn]: saved }));
+      addAuditLog(existed ? "แก้ไขข้อมูล" : "สร้าง HN ใหม่", saved.hn, existed ? "บันทึกการแก้ไขข้อมูลสุขภาพ" : "เพิ่มผู้รับบริการใหม่");
+      setDraft(saved);
+      setHn(saved.hn);
+      await refreshData?.();
+      alert("บันทึกข้อมูลลง Supabase แล้ว");
+    } catch (error) {
+      console.error(error);
+      alert(`บันทึกข้อมูลไม่สำเร็จ: ${error.message || error}`);
+    }
+  }
+
+  function createNew() {
+    setHn("");
+    setDraft(clone(blankRecord));
+    setTab("general");
+    setIdx(0);
+  }
+
+  async function deleteCurrentRecord() {
+    const targetHN = String(draft.hn || hn || "").trim();
+    if (!targetHN) return alert("ยังไม่มี HN ให้ลบ");
+    if (!records[targetHN]) {
+      alert("HN นี้ยังไม่ได้ถูกบันทึกในระบบ จึงไม่มีข้อมูลให้ลบ");
+      createNew();
+      return;
+    }
+
+    const ok = window.confirm(`ยืนยันการลบข้อมูล HN ${targetHN}
+
+การลบนี้จะลบข้อมูลทั่วไป, PAR-Q, โปรแกรม และผลประเมินทั้ง 4 ครั้งของ HN นี้ออกจากระบบ
+
+ต้องการลบจริงหรือไม่?`);
+    if (!ok) return;
+
+    const nextRecords = { ...records };
+    const deletedRecord = clone(nextRecords[targetHN]);
+    delete nextRecords[targetHN];
+    const firstHN = Object.keys(nextRecords)[0] || "";
+
+    try {
+      await deleteRecordFromSupabase(targetHN, adminUser);
+      setRecords(nextRecords);
+      setDeletedBackup(deletedRecord);
+      addAuditLog("ลบ HN", targetHN, "ลบข้อมูลผู้รับบริการทั้งชุดแบบ soft delete ใน Supabase");
+      setHn(firstHN);
+      setDraft(firstHN ? clone(nextRecords[firstHN]) : clone(blankRecord));
+      setTab("general");
+      setIdx(0);
+      await refreshData?.();
+      alert(`ลบข้อมูล HN ${targetHN} แล้ว`);
+    } catch (error) {
+      console.error(error);
+      alert(`ลบข้อมูลไม่สำเร็จ: ${error.message || error}`);
+    }
+  }
+
+  function restoreDeletedRecord() {
+    if (!deletedBackup) return;
+    setRecords((old) => ({ ...old, [deletedBackup.hn]: clone(deletedBackup) }));
+    setHn(deletedBackup.hn);
+    setDraft(clone(deletedBackup));
+    addAuditLog("กู้คืน HN", deletedBackup.hn, "กู้คืนข้อมูลที่เพิ่งลบใน Prototype");
+    setDeletedBackup(null);
+    alert(`กู้คืนข้อมูล HN ${deletedBackup.hn} แล้ว`);
+  }
+
+  return (
+    <main className="mx-auto grid max-w-7xl gap-5 px-4 py-6 lg:grid-cols-[280px_1fr]">
+      <aside className="space-y-4">
+        <Card title="รายชื่อ HN" icon={UserIcon}>
+          <button onClick={createNew} className="mb-3 w-full rounded-xl bg-slate-900 px-4 py-3 text-lg font-bold text-white">+ เพิ่ม HN ใหม่</button>
+          <div className="mb-3"><Field label="ค้นหา HN / ชื่อ" value={staffSearch} onChange={(v) => { setStaffSearch(v); setStaffPage(1); }} /></div>
+          <div className="space-y-2">{pagedPatients.map((r) => <button key={r.hn} onClick={() => selectRecord(r.hn)} className={`w-full rounded-xl border px-3 py-3 text-left text-base ${hn === r.hn ? "border-slate-900 bg-slate-900 text-white" : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"}`}><div className="font-bold">HN {r.hn}</div><div className="truncate text-sm opacity-70">{r.name}</div></button>)}</div>
+          <div className="mt-3 flex items-center justify-between gap-2 text-sm text-slate-500">
+            <span>{filteredPatients.length} รายการ • หน้า {safeStaffPage}/{staffPageCount}</span>
+            <div className="flex gap-1">
+              <button onClick={() => setStaffPage(Math.max(1, safeStaffPage - 1))} disabled={safeStaffPage <= 1} className="rounded-lg border border-slate-200 bg-white px-3 py-1 font-semibold disabled:opacity-40">ก่อนหน้า</button>
+              <button onClick={() => setStaffPage(Math.min(staffPageCount, safeStaffPage + 1))} disabled={safeStaffPage >= staffPageCount} className="rounded-lg border border-slate-200 bg-white px-3 py-1 font-semibold disabled:opacity-40">ถัดไป</button>
+            </div>
+          </div>
+        </Card>
+        <Card title="เมนู" icon={ClipboardIcon}>
+          <div className="grid gap-2">
+            <button onClick={() => setTab("general")} className={`rounded-xl px-4 py-3 text-left text-base font-semibold ${tab === "general" ? "bg-slate-900 text-white" : "bg-slate-50 text-slate-700"}`}>ข้อมูลทั่วไป</button>
+            <button onClick={() => setTab("parq")} className={`rounded-xl px-4 py-3 text-left text-base font-semibold ${tab === "parq" ? "bg-slate-900 text-white" : "bg-slate-50 text-slate-700"}`}>PAR-Q</button>
+            <button onClick={() => setTab("program")} className={`rounded-xl px-4 py-3 text-left text-base font-semibold ${tab === "program" ? "bg-slate-900 text-white" : "bg-slate-50 text-slate-700"}`}>โปรแกรม</button>
+            {[0, 1, 2, 3].map((i) => <button key={i} onClick={() => { setIdx(i); setTab("session"); }} className={`rounded-xl px-4 py-3 text-left text-base font-semibold ${tab === "session" && idx === i ? "bg-slate-900 text-white" : "bg-slate-50 text-slate-700"}`}>บันทึกครั้งที่ {i + 1}</button>)}
+          </div>
+        </Card>
+      </aside>
+
+      <section className="space-y-5">
+        <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+          <div className="flex flex-col justify-between gap-3 md:flex-row md:items-center">
+            <div className="space-y-3"><div><h2 className="text-3xl font-bold text-slate-900">บันทึกข้อมูลสุขภาพ</h2><p className="text-base text-slate-500">กรอกข้อมูลตัวเลข/ตัวเลือก ระบบจะทำตารางและกราฟ 4 ครั้งให้อัตโนมัติ</p></div><div className="grid gap-3 sm:grid-cols-2"><div className="rounded-xl border border-sky-200 bg-sky-50 p-3"><div className="text-sm font-semibold text-sky-700">ผู้ที่กำลังบันทึกข้อมูล</div><div className="text-2xl font-bold text-slate-900">{show(adminUser?.name)}</div><div className="text-sm text-slate-500">Admin ID: {show(adminUser?.id)}</div></div><div className="rounded-xl border border-slate-200 bg-slate-50 p-3"><div className="text-sm font-semibold text-slate-500">แก้ไขล่าสุด</div><div className="text-lg font-bold text-slate-900">{show(draft.updatedAt)}</div><div className="text-sm text-slate-500">โดย {show(draft.updatedBy)}</div></div></div></div>
+            <div className="flex flex-wrap gap-2">
+              {deletedBackup && <button onClick={restoreDeletedRecord} className="rounded-xl border border-amber-200 bg-amber-50 px-5 py-3 text-lg font-bold text-amber-700 hover:bg-amber-100">กู้คืน HN ที่ลบล่าสุด</button>}
+              <button onClick={deleteCurrentRecord} className="rounded-xl border border-rose-200 bg-rose-50 px-5 py-3 text-lg font-bold text-rose-700 hover:bg-rose-100">ลบ HN นี้</button>
+              <button onClick={save} className="rounded-xl bg-emerald-600 px-5 py-3 text-lg font-bold text-white shadow-sm hover:bg-emerald-700">บันทึกข้อมูล</button>
+            </div>
+          </div>
+        </section>
+        <DataQualityPanel record={draft} />
+        {tab === "general" && <GeneralForm draft={draft} update={update} />}
+        {tab === "parq" && <ParqForm draft={draft} update={update} />}
+        {tab === "program" && <ProgramForm draft={draft} update={update} />}
+        {tab === "session" && <SessionForm draft={draft} update={update} idx={idx} />}
+      </section>
+    </main>
+  );
+}
+
+function DataQualityPanel({ record }) {
+  const quality = recordQuality(record);
+  return (
+    <Card title="สถานะข้อมูล" icon={ClipboardIcon} right={<Pill tone={quality.complete ? "good" : quality.issues.length ? "bad" : "warn"}>{quality.complete ? "ครบพร้อมใช้" : "ควรตรวจสอบ"}</Pill>}>
+      <div className="grid gap-3 md:grid-cols-3">
+        <Info label="จำนวนครั้งที่มีข้อมูล" value={`${quality.filled}/4 ครั้ง`} />
+        <Info label="ข้อมูลล่าสุด" value={quality.missingLatest.length ? quality.missingLatest.join(" / ") : "ครบสำหรับสรุปหลัก"} tone={quality.missingLatest.length ? "fat" : "default"} />
+        <Info label="ค่าที่ควรตรวจสอบ" value={`${quality.issues.length} รายการ`} tone={quality.issues.length ? "fat" : "default"} />
+      </div>
+      {quality.issues.length > 0 && <div className="mt-3 rounded-xl border border-amber-200 bg-amber-50 p-3 text-base text-amber-900">{quality.issues.slice(0, 6).map((x) => <div key={x}>• {x}</div>)}</div>}
+    </Card>
+  );
+}
+
+function GeneralForm({ draft, update }) {
+  return <Card title="ข้อมูลทั่วไป" icon={UserIcon}><div className="grid gap-4 md:grid-cols-3"><Field label="HN" value={draft.hn} onChange={(v) => update(["hn"], v)} /><Field label="ชื่อ-สกุล" value={draft.name} onChange={(v) => update(["name"], v)} /><Select label="เพศ" value={draft.sex} onChange={(v) => update(["sex"], v)} options={["ชาย", "หญิง", "อื่น ๆ"]} /><Field label="อายุ" value={draft.age} onChange={(v) => update(["age"], v)} type="number" /><Field label="ส่วนสูง (ซม.)" value={draft.height} onChange={(v) => update(["height"], v)} type="number" /><Select label="เป้าหมาย" value={draft.goal} onChange={(v) => update(["goal"], v)} options={["ลดไขมัน / ควบคุมน้ำหนัก", "เพิ่มกล้ามเนื้อ", "เพิ่มความแข็งแรง", "เพิ่มความทนทานของหัวใจและปอด", "ลดปวด / ฟื้นฟูการเคลื่อนไหว", "สุขภาพทั่วไป"]} /><Field label="โรคประจำตัว" value={draft.disease} onChange={(v) => update(["disease"], v)} /><Field label="ยาที่ใช้ประจำ" value={draft.medication} onChange={(v) => update(["medication"], v)} /><Field label="ประวัติบาดเจ็บ/ผ่าตัด" value={draft.injury} onChange={(v) => update(["injury"], v)} /></div></Card>;
+}
+
+function ParqForm({ draft, update }) {
+  const risk = draft.parq.some(Boolean);
+  return <Card title="PAR-Q แบบย่อ" icon={FileIcon} right={<Pill tone={risk ? "bad" : "good"}>{risk ? "ควรประเมินเพิ่มเติม" : "ผ่านการคัดกรอง"}</Pill>}><div className="space-y-2">{parqQuestions.map((q, i) => <div key={q} className="flex items-center justify-between gap-3 rounded-xl border border-slate-200 bg-slate-50 p-3"><p className="text-base font-semibold text-slate-700">{i + 1}. {q}</p><div className="flex rounded-lg border border-slate-200 bg-white p-1"><button onClick={() => update(["parq", i], true)} className={`rounded-md px-3 py-2 text-base font-bold ${draft.parq[i] ? "bg-slate-900 text-white" : "text-slate-500"}`}>ใช่</button><button onClick={() => update(["parq", i], false)} className={`rounded-md px-3 py-2 text-base font-bold ${!draft.parq[i] ? "bg-slate-900 text-white" : "text-slate-500"}`}>ไม่ใช่</button></div></div>)}</div></Card>;
+}
+
+function ProgramForm({ draft, update }) {
+  const program = draft.program || {};
+  return (
+    <div className="space-y-5">
+      <Card title="Exercise Prescription" icon={FileIcon}>
+        <div className="grid gap-4 md:grid-cols-2">
+          <Select label="Program Type" value={program.type || program.split || "Full Body"} onChange={(v) => update(["program", "type"], v)} options={["Full Body", "Upper/Lower", "PPL", "Bro Split", "Mobility/Corrective", "Home Program"]} />
+          <Select label="Intensity" value={program.intensity || "Moderate"} onChange={(v) => update(["program", "intensity"], v)} options={["Light", "Moderate", "Vigorous", "Individualized"]} />
+        </div>
+      </Card>
+
+      <div className="grid items-stretch gap-5 lg:grid-cols-2">
+        <Card title="Cardio Plan" icon={ActivityIcon}>
+          <div className="grid gap-4 md:grid-cols-3">
+            <Select label="ประเภท" value={program.cardioType || "เดินเร็ว"} onChange={(v) => update(["program", "cardioType"], v)} options={["เดินเร็ว", "เดินสะสม", "ปั่นจักรยาน", "วิ่งเบา", "ว่ายน้ำ", "อื่น ๆ"]} />
+            <Field label="วัน/สัปดาห์" value={program.cardioFrequency || ""} onChange={(v) => update(["program", "cardioFrequency"], v)} />
+            <Field label="นาที/ครั้ง" value={program.cardioDuration || ""} onChange={(v) => update(["program", "cardioDuration"], v)} />
+          </div>
+          <div className="mt-4 grid gap-4 md:grid-cols-2">
+            <Select label="RPE" value={program.rpe || "4–6"} onChange={(v) => update(["program", "rpe"], v)} options={["2–3", "4–6", "7–8"]} />
+            <Select label="Talk Test" value={program.talk || "พูดเป็นประโยค"} onChange={(v) => update(["program", "talk"], v)} options={["พูดสบาย", "พูดเป็นประโยค", "พูดเป็นคำ ๆ"]} />
+          </div>
+          <div className="mt-4 grid gap-4 md:grid-cols-2">
+            <Info label="HRmax" value={draft.age ? `${220 - num(draft.age)} bpm` : "กรอกอายุก่อน"} />
+            <Info label="Target HR" value={targetHrText(draft.age, program.intensity || "Moderate")} />
+          </div>
+        </Card>
+
+        <Card title="Strength Plan" icon={ActivityIcon}>
+          <div className="grid gap-4 md:grid-cols-2">
+            <Field label="วันฝึกกล้ามเนื้อ/สัปดาห์" value={program.strengthFrequency || ""} onChange={(v) => update(["program", "strengthFrequency"], v)} />
+            <Select label="Sets × Reps" value={program.strengthDose || "สุขภาพทั่วไป: 2–3 เซต × 8–12 ครั้ง"} onChange={(v) => update(["program", "strengthDose"], v)} options={[
+              "เริ่มต้น/ผู้สูงอายุ: 1–2 เซต × 10–15 ครั้ง",
+              "สุขภาพทั่วไป: 2–3 เซต × 10–15 ครั้ง",
+              "สุขภาพทั่วไป: 2–3 เซต × 8–12 ครั้ง",
+              "เพิ่มกล้ามเนื้อ: 3–4 เซต × 8–12 ครั้ง",
+              "ความทนทานกล้ามเนื้อ: 2–3 เซต × 12–20 ครั้ง",
+              "เพิ่มความแข็งแรง: 3–5 เซต × 3–6 ครั้ง",
+              "Corrective/Mobility: 1–2 เซต × 8–12 ครั้ง/ข้าง",
+              "ตามรายบุคคล",
+            ]} />
+          </div>
+          <div className="mt-4">
+            <span className="mb-2 block text-sm font-semibold text-slate-500">Focus / จุดเน้น</span>
+            <div className="flex flex-wrap gap-2">
+              {focusOptions.map((option) => {
+                const selected = focusStringToArray(program.focus).includes(option);
+                return (
+                  <button
+                    key={option}
+                    type="button"
+                    onClick={() => update(["program", "focus"], toggleFocusValue(program.focus, option))}
+                    className={`rounded-full border px-4 py-2 text-sm font-semibold ${selected ? "border-slate-900 bg-slate-900 text-white" : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"}`}
+                  >
+                    {option}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </Card>
+      </div>
+
+      <Card title="ข้อควรระวังและการติดตาม" icon={ClipboardIcon}>
+        <div className="grid gap-4 md:grid-cols-2">
+          <label className="block">
+            <span className="mb-1 block text-sm font-semibold text-slate-500">Precaution / ข้อควรระวัง</span>
+            <textarea value={program.precaution || ""} onChange={(e) => update(["program", "precaution"], e.target.value)} placeholder="เช่น หลีกเลี่ยงแรงกระแทก / ปวดเข่า / ความดันสูง / ไม่กลั้นหายใจ" className="min-h-24 w-full rounded-xl border border-slate-200 p-3 text-base outline-none focus:border-slate-700" />
+          </label>
+          <label className="block">
+            <span className="mb-1 block text-sm font-semibold text-slate-500">Follow-up / นัดติดตาม</span>
+            <textarea value={program.followUp || ""} onChange={(e) => update(["program", "followUp"], e.target.value)} placeholder="เช่น ติดตามภายใน 2–4 สัปดาห์ / ประเมินครั้งถัดไป" className="min-h-24 w-full rounded-xl border border-slate-200 p-3 text-base outline-none focus:border-slate-700" />
+          </label>
+        </div>
+      </Card>
+    </div>
+  );
+}
+
+function SessionForm({ draft, update, idx }) {
+  const s = draft.sessions[idx];
+  const base = ["sessions", idx];
+  return <div className="space-y-5"><Card title={`ข้อมูลครั้งที่ ${idx + 1}`} icon={ClipboardIcon} right={<div className="flex flex-wrap items-center gap-2"><button type="button" onClick={() => { const ok = window.confirm(`ยืนยันการลบข้อมูลครั้งที่ ${idx + 1}
+
+ข้อมูล InBody, Fitness Test, OHS, วันที่ประเมิน และหมายเหตุของครั้งนี้จะถูกล้างออก
+
+ต้องการลบจริงหรือไม่?`); if (ok) update(["sessions", idx], session(idx + 1)); }} className="rounded-full border border-rose-200 bg-rose-50 px-3 py-1 text-sm font-semibold text-rose-700 hover:bg-rose-100">ลบครั้งนี้</button><Pill tone="dark">ครั้งที่ {idx + 1}/4</Pill></div>}><div className="grid gap-4 md:grid-cols-2"><Field label="วันที่ประเมิน (พ.ศ. YYYY-MM-DD)" value={s.date} onChange={(v) => update([...base, "date"], v)} /><Field label="หมายเหตุสั้น ๆ" value={s.note} onChange={(v) => update([...base, "note"], v)} /></div></Card><Card title="InBody / Body Composition" icon={HeartIcon}><div className="grid items-stretch gap-4 md:grid-cols-4"><Info label="BMI คำนวณอัตโนมัติ" value={s.inbody.bmi || "กรอกน้ำหนักและส่วนสูง"} />{metrics.inbody.filter(([key]) => key !== "bmi").map(([key, label, unit]) => <Field key={key} label={`${label} (${unit})`} value={s.inbody[key]} onChange={(v) => update([...base, "inbody", key], v)} type="number" tone={metricTone(key)} />)}</div></Card><Card title="Fitness Test 5 ด้าน" icon={ActivityIcon}><div className="grid gap-4 md:grid-cols-5">{metrics.fitness.map(([key, label, unit]) => <Field key={key} label={`${label} (${unit})`} value={s.fitness[key]} onChange={(v) => update([...base, "fitness", key], v)} type="number" />)}</div></Card><Card title="Overhead Deep Squat" icon={ClipboardIcon}><div className="grid gap-3 md:grid-cols-2">{ohsItems.map((x, i) => <Select key={x} label={x} value={s.ohs[i]} onChange={(v) => update([...base, "ohs", i], v)} options={["ปกติ", "ต้องระวัง", "ควรปรับแก้"]} />)}</div></Card></div>;
+}
+
 export default function App() {
   const [records, setRecords] = useState(() => normalizeRecords(loadJsonFromStorage(RECORDS_STORAGE_KEY, initialRecords)));
   const [mode, setMode] = useState("client");
@@ -1719,14 +3468,40 @@ export default function App() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [adminUser, setAdminUser] = useState(null);
   const [auditLogs, setAuditLogs] = useState(() => loadJsonFromStorage(AUDIT_STORAGE_KEY, []));
+  const [syncStatus, setSyncStatus] = useState("local");
+
   useEffect(() => { saveJsonToStorage(RECORDS_STORAGE_KEY, records); }, [records]);
   useEffect(() => { saveJsonToStorage(AUDIT_STORAGE_KEY, auditLogs); }, [auditLogs]);
+
   const active = activeHN ? records[activeHN] : null;
   const total = useMemo(() => Object.keys(records).length, [records]);
 
   function addAuditLog(action, hn, detail = "") {
     setAuditLogs((old) => [createAuditEntry({ adminUser, action, hn, detail }), ...old].slice(0, 200));
   }
+
+  async function refreshData() {
+    if (!isAdmin) return;
+    setSyncStatus("loading");
+    try {
+      const [dbRecords, dbAuditLogs] = await Promise.all([
+        loadAllRecords(),
+        loadAuditLogs(),
+      ]);
+      const normalized = normalizeRecords(dbRecords);
+      setRecords(normalized);
+      setAuditLogs(dbAuditLogs || []);
+      setSyncStatus("online");
+    } catch (error) {
+      console.error(error);
+      setSyncStatus("error");
+      alert(`โหลดข้อมูลจาก Supabase ไม่สำเร็จ: ${error.message || error}`);
+    }
+  }
+
+  useEffect(() => {
+    if (isAdmin) refreshData();
+  }, [isAdmin]);
 
   function restoreFullBackup(nextRecords, nextAuditLogs = []) {
     setRecords(nextRecords);
@@ -1749,11 +3524,17 @@ export default function App() {
     setActiveHN(null);
   }
 
-  function logout() {
+  async function logout() {
+    try {
+      await signOutAdminFromSupabase();
+    } catch (error) {
+      console.warn(error);
+    }
     setIsAdmin(false);
     setAdminUser(null);
     setMode("client");
     setActiveHN(null);
+    setSyncStatus("local");
   }
 
   return (
@@ -1763,7 +3544,15 @@ export default function App() {
       {mode === "client" && active && <Dashboard record={active} back={() => setActiveHN(null)} />}
       {mode === "adminLogin" && <AdminLogin onSuccess={(admin) => { setIsAdmin(true); setAdminUser(admin); setMode("admin"); }} onCancel={() => setMode("client")} />}
       {mode === "admin" && isAdmin && <AdminSummary records={records} auditLogs={auditLogs} onFullBackup={() => exportFullBackup(records, auditLogs)} onRestoreBackup={restoreFullBackup} />}
-      {mode === "staff" && isAdmin && <><div className="mx-auto grid max-w-7xl gap-4 px-4 pt-6 md:grid-cols-2"><Info label="จำนวน HN" value={total} /><Info label="รูปแบบข้อมูล" value="4 ครั้งต่อ 1 HN" /></div><Staff records={records} setRecords={setRecords} adminUser={adminUser} addAuditLog={addAuditLog} /></>}
+      {mode === "staff" && isAdmin && (
+        <>
+          <div className="mx-auto grid max-w-7xl gap-4 px-4 pt-6 md:grid-cols-2">
+            <Info label="จำนวน HN" value={total} />
+            <Info label="รูปแบบข้อมูล" value={syncStatus === "online" ? "Supabase Database" : syncStatus === "loading" ? "กำลังโหลด Supabase" : syncStatus === "error" ? "เชื่อมต่อผิดพลาด" : "Local fallback"} />
+          </div>
+          <Staff records={records} setRecords={setRecords} adminUser={adminUser} addAuditLog={addAuditLog} refreshData={refreshData} />
+        </>
+      )}
     </div>
   );
 }
