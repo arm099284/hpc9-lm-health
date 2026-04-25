@@ -927,33 +927,32 @@ function AdminLogin({ onSuccess, onCancel }) {
 }
 
 function Summary({ record }) {
-  const latest = latestCompletedSession(record) || record.sessions[3];
+  const latestFor = (key) => {
+    const sessions = completedSessions(record).filter((s) => {
+      const v = valueOf(s, key);
+      return v !== null && v !== undefined && Number.isFinite(Number(v));
+    });
+    return sessions.length ? sessions[sessions.length - 1] : null;
+  };
 
   const weight = delta(record, metrics.inbody[0]);
   const fatMass = delta(record, metrics.inbody[4]);
   const muscle = delta(record, metrics.inbody[3]);
-  const ohs = ohsSummary(latest);
+  const latestOhs = latestCompletedSession(record) || record.sessions[3];
+  const ohs = ohsSummary(latestOhs);
+
+  const latestWeight = latestFor("weight");
+  const latestFatMass = latestFor("fatMass");
+  const latestMuscle = latestFor("muscle");
 
   const items = [
-    ["น้ำหนัก 1→ล่าสุด", weight.text, `ล่าสุด ${show(latest?.inbody?.weight)} kg`, weight.tone],
-    ["Fat Mass 1→ล่าสุด", fatMass.text, `ล่าสุด ${show(latest?.inbody?.fatMass)} kg`, fatMass.tone],
-    ["Muscle 1→ล่าสุด", muscle.text, `ล่าสุด ${show(latest?.inbody?.muscle)} kg`, muscle.tone],
+    ["น้ำหนัก 1→ล่าสุด", weight.text, `ล่าสุด ${show(latestWeight?.inbody?.weight)} kg`, weight.tone],
+    ["Fat Mass 1→ล่าสุด", fatMass.text, `ล่าสุด ${show(latestFatMass?.inbody?.fatMass)} kg`, fatMass.tone],
+    ["Muscle 1→ล่าสุด", muscle.text, `ล่าสุด ${show(latestMuscle?.inbody?.muscle)} kg`, muscle.tone],
     ["OHS ล่าสุด", ohs.text, `ปกติ ${ohs.normal}/6 ข้อ`, ohs.tone],
   ];
 
-  return (
-    <div className="grid gap-4 md:grid-cols-4">
-      {items.map(([a, b, c, t]) => (
-        <div key={a} className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-          <div className="mb-2">
-            <Pill tone={t}>{a}</Pill>
-          </div>
-          <div className="text-3xl font-bold text-slate-900">{b}</div>
-          <div className="mt-1 text-sm font-semibold text-slate-500">{c}</div>
-        </div>
-      ))}
-    </div>
-  );
+  return <div className="grid gap-4 md:grid-cols-4">{items.map(([a, b, c, t]) => <div key={a} className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm"><div className="mb-2"><Pill tone={t}>{a}</Pill></div><div className="text-3xl font-bold text-slate-900">{b}</div><div className="mt-1 text-sm font-semibold text-slate-500">{c}</div></div>)}</div>;
 }
 
 function Trend({ record }) {
