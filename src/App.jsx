@@ -1315,6 +1315,20 @@ function AdminSummary({ records, auditLogs, onFullBackup, onRestoreBackup }) {
     });
   }
 
+  function summaryTone(goodCount, badCount) {
+    if (goodCount > badCount) return "good";
+    if (badCount > goodCount) return "bad";
+    if (goodCount > 0 && badCount > 0) return "warn";
+    return "gray";
+  }
+
+  function summaryText(goodCount, badCount) {
+    if (goodCount > badCount) return `ดีขึ้น ${goodCount} ตัวชี้วัด`;
+    if (badCount > goodCount) return `แย่ลง ${badCount} ตัวชี้วัด`;
+    if (goodCount > 0 && badCount > 0) return `ผสม ดีขึ้น ${goodCount} / แย่ลง ${badCount}`;
+    return "คงเดิม";
+  }
+
   const all = Object.values(records);
 
   const availableYears = Array.from(
@@ -1433,9 +1447,10 @@ function AdminSummary({ records, auditLogs, onFullBackup, onRestoreBackup }) {
   const comparable = rows.filter((r) => r.sessions.length >= 2);
   const notEnough = rows.filter((r) => r.sessions.length < 2);
 
-  const needFollow = comparable.filter((r) => r.badCount > 0).length;
-  const improved = comparable.filter((r) => r.badCount === 0 && r.goodCount > 0).length;
-  const noChange = comparable.filter((r) => r.badCount === 0 && r.goodCount === 0).length;
+  const improved = comparable.filter((r) => r.goodCount > r.badCount).length;
+  const needFollow = comparable.filter((r) => r.badCount > r.goodCount).length;
+  const mixed = comparable.filter((r) => r.goodCount === r.badCount && r.goodCount > 0).length;
+  const noChange = comparable.filter((r) => r.goodCount === 0 && r.badCount === 0).length;
 
   const ageLabel = ageOptions.find((x) => x.value === ageFilter)?.label || "ทุกช่วงอายุ";
 
@@ -1472,7 +1487,6 @@ function AdminSummary({ records, auditLogs, onFullBackup, onRestoreBackup }) {
         const fatMass = deltaFromSessions(sessions, metrics.inbody[4]);
         const weight = deltaFromSessions(sessions, metrics.inbody[0]);
         const muscle = deltaFromSessions(sessions, metrics.inbody[3]);
-        const waist = deltaFromSessions(sessions, metrics.inbody[6]);
 
         const step = deltaFromSessions(sessions, metrics.fitness[0]);
         const grip = deltaFromSessions(sessions, metrics.fitness[1]);
@@ -1536,9 +1550,10 @@ function AdminSummary({ records, auditLogs, onFullBackup, onRestoreBackup }) {
         age: ageOption.label,
         total: groupRecords.length,
         comparable: groupComparable.length,
-        ดีขึ้น: groupComparable.filter((r) => r.badCount === 0 && r.goodCount > 0).length,
-        แย่ลง: groupComparable.filter((r) => r.badCount > 0).length,
-        คงเดิม: groupComparable.filter((r) => r.badCount === 0 && r.goodCount === 0).length,
+        ดีขึ้น: groupComparable.filter((r) => r.goodCount > r.badCount).length,
+        แย่ลง: groupComparable.filter((r) => r.badCount > r.goodCount).length,
+        ผสม: groupComparable.filter((r) => r.goodCount === r.badCount && r.goodCount > 0).length,
+        คงเดิม: groupComparable.filter((r) => r.goodCount === 0 && r.badCount === 0).length,
         ข้อมูลไม่พอ: groupRows.filter((r) => r.sessions.length < 2).length,
       };
     });
@@ -1626,8 +1641,9 @@ function AdminSummary({ records, auditLogs, onFullBackup, onRestoreBackup }) {
         sex: sexLabel,
         total: groupRows.length,
         comparable: groupComparable.length,
-        improved: groupComparable.filter((r) => r.badCount === 0 && r.goodCount > 0).length,
-        worsened: groupComparable.filter((r) => r.badCount > 0).length,
+        improved: groupComparable.filter((r) => r.goodCount > r.badCount).length,
+        worsened: groupComparable.filter((r) => r.badCount > r.goodCount).length,
+        mixed: groupComparable.filter((r) => r.goodCount === r.badCount && r.goodCount > 0).length,
         incomplete: groupRows.filter((r) => r.sessions.length < 2).length,
       };
     })
@@ -1658,6 +1674,7 @@ function AdminSummary({ records, auditLogs, onFullBackup, onRestoreBackup }) {
   const summaryChartRows = [
     { name: "ดีขึ้น", value: improved },
     { name: "ต้องติดตาม", value: needFollow },
+    { name: "ผสม", value: mixed },
     { name: "คงเดิม", value: noChange },
     { name: "ข้อมูลไม่พอ", value: notEnough.length },
   ];
@@ -1756,11 +1773,12 @@ function AdminSummary({ records, auditLogs, onFullBackup, onRestoreBackup }) {
           <Pill tone="dark">{periodLabel}</Pill>
         </div>
 
-        <div className="grid gap-4 md:grid-cols-4">
+        <div className="grid gap-4 md:grid-cols-5">
           <Info label="ทั้งหมด" value={`${rows.length} คน`} />
           <Info label="เทียบได้ ≥2 ครั้ง" value={`${comparable.length} คน`} tone="admin" />
           <Info label="ดีขึ้น" value={`${improved} คน`} tone="good" />
           <Info label="ต้องติดตาม" value={`${needFollow} คน`} tone={needFollow ? "fat" : "default"} />
+          <Info label="ผสม" value={`${mixed} คน`} tone={mixed ? "admin" : "default"} />
         </div>
       </Card>
 
@@ -1840,7 +1858,7 @@ function AdminSummary({ records, auditLogs, onFullBackup, onRestoreBackup }) {
       <div className="grid gap-5 lg:grid-cols-2">
         <Card title="สรุปตามเพศ" icon={UserIcon}>
           <div className="overflow-x-auto rounded-xl border border-slate-200">
-            <table className="w-full min-w-[560px] text-left text-base">
+            <table className="w-full min-w-[620px] text-left text-base">
               <thead className="bg-slate-50 text-sm text-slate-500">
                 <tr>
                   <th className="p-3">เพศ</th>
@@ -1848,6 +1866,7 @@ function AdminSummary({ records, auditLogs, onFullBackup, onRestoreBackup }) {
                   <th className="p-3">เทียบได้</th>
                   <th className="p-3">ดีขึ้น</th>
                   <th className="p-3">แย่ลง</th>
+                  <th className="p-3">ผสม</th>
                   <th className="p-3">ข้อมูลไม่พอ</th>
                 </tr>
               </thead>
@@ -1864,6 +1883,9 @@ function AdminSummary({ records, auditLogs, onFullBackup, onRestoreBackup }) {
                     <td className="p-3">
                       <Pill tone={row.worsened ? "bad" : "gray"}>{row.worsened}</Pill>
                     </td>
+                    <td className="p-3">
+                      <Pill tone={row.mixed ? "warn" : "gray"}>{row.mixed}</Pill>
+                    </td>
                     <td className="p-3">{row.incomplete}</td>
                   </tr>
                 ))}
@@ -1874,7 +1896,7 @@ function AdminSummary({ records, auditLogs, onFullBackup, onRestoreBackup }) {
 
         <Card title="สรุปตามช่วงอายุ" icon={UserIcon}>
           <div className="overflow-x-auto rounded-xl border border-slate-200">
-            <table className="w-full min-w-[640px] text-left text-base">
+            <table className="w-full min-w-[700px] text-left text-base">
               <thead className="bg-slate-50 text-sm text-slate-500">
                 <tr>
                   <th className="p-3">ช่วงอายุ</th>
@@ -1882,6 +1904,7 @@ function AdminSummary({ records, auditLogs, onFullBackup, onRestoreBackup }) {
                   <th className="p-3">เทียบได้</th>
                   <th className="p-3">ดีขึ้น</th>
                   <th className="p-3">แย่ลง</th>
+                  <th className="p-3">ผสม</th>
                   <th className="p-3">ข้อมูลไม่พอ</th>
                 </tr>
               </thead>
@@ -1898,6 +1921,9 @@ function AdminSummary({ records, auditLogs, onFullBackup, onRestoreBackup }) {
                     <td className="p-3">
                       <Pill tone={row.แย่ลง ? "bad" : "gray"}>{row.แย่ลง}</Pill>
                     </td>
+                    <td className="p-3">
+                      <Pill tone={row.ผสม ? "warn" : "gray"}>{row.ผสม}</Pill>
+                    </td>
                     <td className="p-3">{row.ข้อมูลไม่พอ}</td>
                   </tr>
                 ))}
@@ -1909,7 +1935,7 @@ function AdminSummary({ records, auditLogs, onFullBackup, onRestoreBackup }) {
 
       <Card title="ตารางสรุปทุกคน สำหรับแอดมิน" icon={ClipboardIcon}>
         <div className="overflow-x-auto rounded-xl border border-slate-200">
-          <table className="w-full min-w-[1420px] text-left text-base">
+          <table className="w-full min-w-[1380px] text-left text-base">
             <thead className="bg-slate-50 text-sm text-slate-500">
               <tr>
                 <th className="p-3">HN / ชื่อ</th>
@@ -1934,7 +1960,7 @@ function AdminSummary({ records, auditLogs, onFullBackup, onRestoreBackup }) {
                 <tr
                   key={r.record.hn}
                   className={`border-t border-slate-100 ${
-                    r.badCount > 0 ? "bg-rose-50/45" : ""
+                    r.badCount > r.goodCount ? "bg-rose-50/45" : ""
                   }`}
                 >
                   <td className="p-3">
@@ -1993,12 +2019,8 @@ function AdminSummary({ records, auditLogs, onFullBackup, onRestoreBackup }) {
                   </td>
 
                   <td className="p-3">
-                    <Pill tone={r.badCount > 0 ? "bad" : r.goodCount > 0 ? "good" : "gray"}>
-                      {r.badCount > 0
-                        ? `แย่ลง ${r.badCount} ตัวชี้วัด`
-                        : r.goodCount > 0
-                          ? `ดีขึ้น ${r.goodCount} ตัวชี้วัด`
-                          : "คงเดิม"}
+                    <Pill tone={summaryTone(r.goodCount, r.badCount)}>
+                      {summaryText(r.goodCount, r.badCount)}
                     </Pill>
                   </td>
                 </tr>
