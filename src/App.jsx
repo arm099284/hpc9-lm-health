@@ -1046,6 +1046,7 @@ function OhsTable({ record }) {
 
 function Dashboard({ record, back }) {
   const risk = record.parq.some(Boolean);
+
   return (
     <main className="mx-auto max-w-7xl space-y-5 px-4 py-6">
       <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
