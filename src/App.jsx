@@ -860,23 +860,80 @@ function Header({ mode, setMode, isAdmin, adminUser, onLogout }) {
 function Login({ records, openRecord, openAdminLogin }) {
   const [hn, setHn] = useState("");
   const [error, setError] = useState("");
+
+  function submit(e) {
+    e.preventDefault();
+    const key = String(hn || "").trim();
+
+    if (!key) {
+      setError("กรุณากรอก HN");
+      return;
+    }
+
+    if (!records[key]) {
+      setError("ไม่พบข้อมูล HN นี้");
+      return;
+    }
+
+    setError("");
+    openRecord(key);
+  }
+
   return (
-    <main className="mx-auto flex min-h-[70vh] max-w-xl items-center px-4 py-8">
-      <Card title="ดูผลสุขภาพด้วย HN" icon={SearchIcon}>
-        <div className="space-y-4">
-          <Field label="HN" value={hn} onChange={(v) => { setHn(v); setError(""); }} />
-          {error && <p className="text-base font-semibold text-rose-600">{error}</p>}
-          <button
-            onClick={() => { const code = hn.trim(); records[code] ? openRecord(code) : setError("ไม่พบข้อมูล HN นี้"); }}
-            className="flex w-full items-center justify-center gap-2 rounded-xl bg-slate-900 px-4 py-3 text-lg font-bold text-white hover:bg-slate-800"
-          >
-            <SearchIcon className="h-5 w-5 text-white" /> ดูผลการประเมิน
-          </button>
-          <button onClick={openAdminLogin} className="w-full text-center text-sm font-semibold text-slate-400 hover:text-slate-700">
-            สำหรับผู้ดูแลระบบ
-          </button>
+    <main className="mx-auto flex min-h-[calc(100vh-120px)] w-full max-w-7xl items-center justify-center px-4 py-10">
+      <div className="w-full max-w-xl">
+        <div className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm md:p-10">
+          <div className="mb-6 flex items-center gap-3">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-slate-200 bg-slate-50 text-slate-500">
+              <SearchIcon />
+            </div>
+            <div>
+              <h2 className="text-3xl font-bold text-slate-900">ดูผลสุขภาพด้วย HN</h2>
+              <p className="mt-1 text-base text-slate-500">ค้นหาผลการประเมินรายบุคคล</p>
+            </div>
+          </div>
+
+          <div className="mb-6 border-t border-slate-100" />
+
+          <form onSubmit={submit} className="space-y-5">
+            <div>
+              <label className="mb-2 block text-lg font-semibold text-slate-700">
+                HN
+              </label>
+              <input
+                value={hn}
+                onChange={(e) => {
+                  setHn(e.target.value);
+                  if (error) setError("");
+                }}
+                placeholder="กรอกเลข HN"
+                className="h-16 w-full rounded-2xl border border-slate-300 bg-white px-5 text-2xl font-medium text-slate-900 outline-none transition focus:border-slate-400 focus:ring-4 focus:ring-slate-100"
+              />
+              {error && (
+                <p className="mt-3 text-base font-medium text-rose-600">{error}</p>
+              )}
+            </div>
+
+            <button
+              type="submit"
+              className="flex h-16 w-full items-center justify-center gap-3 rounded-2xl bg-slate-950 px-6 text-xl font-bold text-white transition hover:bg-slate-800"
+            >
+              <SearchIcon />
+              ดูผลการประเมิน
+            </button>
+          </form>
+
+          <div className="mt-6 text-center">
+            <button
+              type="button"
+              onClick={openAdminLogin}
+              className="text-base font-medium text-slate-400 transition hover:text-slate-600"
+            >
+              สำหรับผู้ดูแลระบบ
+            </button>
+          </div>
         </div>
-      </Card>
+      </div>
     </main>
   );
 }
