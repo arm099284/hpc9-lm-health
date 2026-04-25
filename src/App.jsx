@@ -1394,7 +1394,7 @@ function NutritionPlanCard({ record }) {
   );
 }
 
-ffunction Dashboard({ record, back }) {
+function Dashboard({ record, back }) {
   const risk = record.parq.some(Boolean);
 
   return (
