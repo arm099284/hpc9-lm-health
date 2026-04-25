@@ -525,16 +525,28 @@ function latestCompletedSession(record) {
 
 function deltaFromSessions(sessions, item) {
   const [key, , unit, better] = item;
-  if (!sessions || sessions.length < 2) return { text: "ข้อมูลไม่พอ", tone: "gray", raw: 0, valid: false };
-  const first = sessions[0];
-  const last = sessions[sessions.length - 1];
+  const usableSessions = (sessions || []).filter((s) => {
+    const v = valueOf(s, key);
+    return v !== null && v !== undefined && Number.isFinite(Number(v));
+  });
+
+  if (usableSessions.length < 2) return { text: "ข้อมูลไม่พอ", tone: "gray", raw: 0, valid: false };
+
+  const first = usableSessions[0];
+  const last = usableSessions[usableSessions.length - 1];
   const a = valueOf(first, key);
   const b = valueOf(last, key);
-  if ((!a && a !== 0) || (!b && b !== 0)) return { text: "ข้อมูลไม่พอ", tone: "gray", raw: 0, valid: false };
+
   const d = b - a;
   const good = better === "higher" ? d > 0 : d < 0;
   const sign = d > 0 ? "+" : "";
-  return { text: `${sign}${Number.isInteger(d) ? d : d.toFixed(1)} ${unit}`, tone: good ? "good" : d === 0 ? "gray" : "bad", raw: d, valid: true };
+
+  return {
+    text: `${sign}${Number.isInteger(d) ? d : d.toFixed(1)} ${unit}`,
+    tone: good ? "good" : d === 0 ? "gray" : "bad",
+    raw: d,
+    valid: true,
+  };
 }
 
 function delta(record, item) {
