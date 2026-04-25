@@ -1214,74 +1214,118 @@ function AdminSummary({ records, auditLogs, onFullBackup, onRestoreBackup }) {
   function handleRestoreFile(event) {
     const file = event.target.files?.[0];
     if (!file) return;
+
     const reader = new FileReader();
+
     reader.onload = () => {
       try {
         const payload = JSON.parse(String(reader.result || "{}"));
+
         if (!validateBackupPayload(payload)) {
           alert("ไฟล์สำรองข้อมูลไม่ถูกต้อง");
           return;
         }
+
         const ok = window.confirm(`ยืนยันการนำเข้าข้อมูลสำรอง
 
 ข้อมูลในหน้าจอปัจจุบันจะถูกแทนที่ด้วยข้อมูลจากไฟล์ backup
 
 ต้องการดำเนินการต่อหรือไม่?`);
+
         if (!ok) return;
-        onRestoreBackup(normalizeRecords(payload.records), Array.isArray(payload.auditLogs) ? payload.auditLogs : []);
+
+        onRestoreBackup(
+          normalizeRecords(payload.records),
+          Array.isArray(payload.auditLogs) ? payload.auditLogs : []
+        );
       } catch (error) {
         alert("อ่านไฟล์สำรองข้อมูลไม่สำเร็จ");
       } finally {
         event.target.value = "";
       }
     };
+
     reader.readAsText(file);
   }
+
   const thaiMonths = [
-    "มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน",
-    "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม",
+    "มกราคม",
+    "กุมภาพันธ์",
+    "มีนาคม",
+    "เมษายน",
+    "พฤษภาคม",
+    "มิถุนายน",
+    "กรกฎาคม",
+    "สิงหาคม",
+    "กันยายน",
+    "ตุลาคม",
+    "พฤศจิกายน",
+    "ธันวาคม",
   ];
 
   function parseSessionDate(dateText) {
     const text = String(dateText || "").trim();
     if (!text) return null;
-    let y = 0;
-    let m = 0;
+
+    if (text.includes("/")) {
+      const parts = text.split("/");
+      if (parts.length !== 3) return null;
+
+      const d = Number(parts[0]);
+      const m = Number(parts[1]);
+      const y = Number(parts[2]);
+
+      if (!d || !m || !y) return null;
+
+      return {
+        yearBE: y < 2400 ? y + 543 : y,
+        month: m,
+      };
+    }
 
     if (text.includes("-")) {
       const parts = text.split("-");
       if (parts.length !== 3) return null;
-      y = Number(parts[0]);
-      m = Number(parts[1]);
-    } else if (text.includes("/")) {
-      const parts = text.split("/");
-      if (parts.length !== 3) return null;
-      y = Number(parts[2]);
-      m = Number(parts[1]);
-    } else {
-      return null;
+
+      const y = Number(parts[0]);
+      const m = Number(parts[1]);
+
+      if (!y || !m) return null;
+
+      return {
+        yearBE: y < 2400 ? y + 543 : y,
+        month: m,
+      };
     }
 
-    const yearBE = y < 2400 ? y + 543 : y;
-    if (!yearBE || !m || m < 1 || m > 12) return null;
-    return { yearBE, month: m };
+    return null;
   }
 
   function sessionsInPeriod(record, yearFilter, monthFilter) {
     return completedSessions(record).filter((s) => {
       if (yearFilter === "all" && monthFilter === "all") return true;
+
       const parsed = parseSessionDate(s.date);
       if (!parsed) return false;
+
       const yearOk = yearFilter === "all" || parsed.yearBE === Number(yearFilter);
       const monthOk = monthFilter === "all" || parsed.month === Number(monthFilter);
+
       return yearOk && monthOk;
     });
   }
 
   const all = Object.values(records);
-  const availableYears = Array.from(new Set(
-    all.flatMap((record) => completedSessions(record).map((s) => parseSessionDate(s.date)?.yearBE).filter(Boolean))
-  )).sort((a, b) => b - a);
+
+  const availableYears = Array.from(
+    new Set(
+      all.flatMap((record) =>
+        completedSessions(record)
+          .map((s) => parseSessionDate(s.date)?.yearBE)
+          .filter(Boolean)
+      )
+    )
+  ).sort((a, b) => b - a);
 
   const [yearFilter, setYearFilter] = useState("all");
   const [monthFilter, setMonthFilter] = useState("all");
@@ -1301,186 +1345,434 @@ function AdminSummary({ records, auditLogs, onFullBackup, onRestoreBackup }) {
     { value: "70-79", label: "70–79 ปี" },
     { value: "80+", label: "80 ปีขึ้นไป" },
   ];
-  const ageFilteredRecords = all.filter((record) => ageFilter === "all" || adminAgeGroup(record.age) === ageFilter);
+
+  const ageFilteredRecords = all.filter(
+    (record) => ageFilter === "all" || adminAgeGroup(record.age) === ageFilter
+  );
 
   const rows = ageFilteredRecords.map((record) => {
     const sessions = sessionsInPeriod(record, yearFilter, monthFilter);
     const first = sessions[0];
     const last = sessions[sessions.length - 1];
+
     const bodyFat = deltaFromSessions(sessions, metrics.inbody[2]);
+    const fatMass = deltaFromSessions(sessions, metrics.inbody[4]);
     const weight = deltaFromSessions(sessions, metrics.inbody[0]);
     const muscle = deltaFromSessions(sessions, metrics.inbody[3]);
     const waist = deltaFromSessions(sessions, metrics.inbody[6]);
-    const grip = deltaFromSessions(sessions, metrics.fitness[1]);
-    const tug = deltaFromSessions(sessions, metrics.fitness[4]);
+
     const step = deltaFromSessions(sessions, metrics.fitness[0]);
-    const ohsDelta = sessions.length >= 2
-      ? { text: `${ohsSummary(first).normal}→${ohsSummary(last).normal}/6`, tone: ohsSummary(last).normal > ohsSummary(first).normal ? "good" : ohsSummary(last).normal < ohsSummary(first).normal ? "bad" : "gray" }
-      : { text: "ข้อมูลไม่พอ", tone: "gray" };
-    const badCount = [bodyFat, weight, muscle, waist, grip, tug, step, ohsDelta].filter((x) => x.tone === "bad").length;
-    const goodCount = [bodyFat, weight, muscle, waist, grip, tug, step, ohsDelta].filter((x) => x.tone === "good").length;
-    return { record, sessions, first, last, bodyFat, weight, muscle, waist, grip, tug, step, ohsDelta, badCount, goodCount };
+    const grip = deltaFromSessions(sessions, metrics.fitness[1]);
+    const sitstand = deltaFromSessions(sessions, metrics.fitness[2]);
+    const sitreach = deltaFromSessions(sessions, metrics.fitness[3]);
+    const tug = deltaFromSessions(sessions, metrics.fitness[4]);
+
+    const ohsDelta =
+      sessions.length >= 2
+        ? {
+            text: `${ohsSummary(first).normal}→${ohsSummary(last).normal}/6`,
+            tone:
+              ohsSummary(last).normal > ohsSummary(first).normal
+                ? "good"
+                : ohsSummary(last).normal < ohsSummary(first).normal
+                  ? "bad"
+                  : "gray",
+          }
+        : {
+            text: "ข้อมูลไม่พอ",
+            tone: "gray",
+          };
+
+    const badCount = [
+      bodyFat,
+      fatMass,
+      weight,
+      muscle,
+      step,
+      grip,
+      sitstand,
+      sitreach,
+      tug,
+      ohsDelta,
+    ].filter((x) => x.tone === "bad").length;
+
+    const goodCount = [
+      bodyFat,
+      fatMass,
+      weight,
+      muscle,
+      step,
+      grip,
+      sitstand,
+      sitreach,
+      tug,
+      ohsDelta,
+    ].filter((x) => x.tone === "good").length;
+
+    return {
+      record,
+      sessions,
+      first,
+      last,
+      bodyFat,
+      fatMass,
+      weight,
+      muscle,
+      waist,
+      step,
+      grip,
+      sitstand,
+      sitreach,
+      tug,
+      ohsDelta,
+      badCount,
+      goodCount,
+    };
   });
 
   const comparable = rows.filter((r) => r.sessions.length >= 2);
   const notEnough = rows.filter((r) => r.sessions.length < 2);
+
   const needFollow = comparable.filter((r) => r.badCount > 0).length;
   const improved = comparable.filter((r) => r.badCount === 0 && r.goodCount > 0).length;
   const noChange = comparable.filter((r) => r.badCount === 0 && r.goodCount === 0).length;
+
   const ageLabel = ageOptions.find((x) => x.value === ageFilter)?.label || "ทุกช่วงอายุ";
-  const periodLabel = `${yearFilter === "all" ? "ทุกปี" : `พ.ศ. ${yearFilter}`} • ${monthFilter === "all" ? "ทุกเดือน" : thaiMonths[Number(monthFilter) - 1]} • ${ageLabel}`;
+
+  const periodLabel = `${yearFilter === "all" ? "ทุกปี" : `พ.ศ. ${yearFilter}`} • ${
+    monthFilter === "all" ? "ทุกเดือน" : thaiMonths[Number(monthFilter) - 1]
+  } • ${ageLabel}`;
+
   const searchText = adminSearch.trim().toLowerCase();
+
   const filteredComparable = comparable.filter((r) => {
     if (!searchText) return true;
     return `${r.record.hn} ${r.record.name}`.toLowerCase().includes(searchText);
   });
+
   const pageCount = Math.max(1, Math.ceil(filteredComparable.length / PAGE_SIZE));
   const safePage = Math.min(page, pageCount);
-  const pagedComparable = filteredComparable.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
 
-  const ageSummaryRows = ageOptions.filter((x) => x.value !== "all").map((ageOption) => {
-    const groupRecords = all.filter((record) => adminAgeGroup(record.age) === ageOption.value);
-    const groupRows = groupRecords.map((record) => {
-      const sessions = sessionsInPeriod(record, yearFilter, monthFilter);
-      const bodyFat = deltaFromSessions(sessions, metrics.inbody[2]);
-      const weight = deltaFromSessions(sessions, metrics.inbody[0]);
-      const muscle = deltaFromSessions(sessions, metrics.inbody[3]);
-      const waist = deltaFromSessions(sessions, metrics.inbody[6]);
-      const grip = deltaFromSessions(sessions, metrics.fitness[1]);
-      const tug = deltaFromSessions(sessions, metrics.fitness[4]);
-      const step = deltaFromSessions(sessions, metrics.fitness[0]);
-      const first = sessions[0];
-      const last = sessions[sessions.length - 1];
-      const ohsDelta = sessions.length >= 2
-        ? { tone: ohsSummary(last).normal > ohsSummary(first).normal ? "good" : ohsSummary(last).normal < ohsSummary(first).normal ? "bad" : "gray" }
-        : { tone: "gray" };
-      const badCount = [bodyFat, weight, muscle, waist, grip, tug, step, ohsDelta].filter((x) => x.tone === "bad").length;
-      const goodCount = [bodyFat, weight, muscle, waist, grip, tug, step, ohsDelta].filter((x) => x.tone === "good").length;
-      return { sessions, badCount, goodCount };
+  const pagedComparable = filteredComparable.slice(
+    (safePage - 1) * PAGE_SIZE,
+    safePage * PAGE_SIZE
+  );
+
+  const ageSummaryRows = ageOptions
+    .filter((x) => x.value !== "all")
+    .map((ageOption) => {
+      const groupRecords = all.filter(
+        (record) => adminAgeGroup(record.age) === ageOption.value
+      );
+
+      const groupRows = groupRecords.map((record) => {
+        const sessions = sessionsInPeriod(record, yearFilter, monthFilter);
+
+        const bodyFat = deltaFromSessions(sessions, metrics.inbody[2]);
+        const fatMass = deltaFromSessions(sessions, metrics.inbody[4]);
+        const weight = deltaFromSessions(sessions, metrics.inbody[0]);
+        const muscle = deltaFromSessions(sessions, metrics.inbody[3]);
+        const waist = deltaFromSessions(sessions, metrics.inbody[6]);
+
+        const step = deltaFromSessions(sessions, metrics.fitness[0]);
+        const grip = deltaFromSessions(sessions, metrics.fitness[1]);
+        const sitstand = deltaFromSessions(sessions, metrics.fitness[2]);
+        const sitreach = deltaFromSessions(sessions, metrics.fitness[3]);
+        const tug = deltaFromSessions(sessions, metrics.fitness[4]);
+
+        const first = sessions[0];
+        const last = sessions[sessions.length - 1];
+
+        const ohsDelta =
+          sessions.length >= 2
+            ? {
+                tone:
+                  ohsSummary(last).normal > ohsSummary(first).normal
+                    ? "good"
+                    : ohsSummary(last).normal < ohsSummary(first).normal
+                      ? "bad"
+                      : "gray",
+              }
+            : {
+                tone: "gray",
+              };
+
+        const badCount = [
+          bodyFat,
+          fatMass,
+          weight,
+          muscle,
+          step,
+          grip,
+          sitstand,
+          sitreach,
+          tug,
+          ohsDelta,
+        ].filter((x) => x.tone === "bad").length;
+
+        const goodCount = [
+          bodyFat,
+          fatMass,
+          weight,
+          muscle,
+          step,
+          grip,
+          sitstand,
+          sitreach,
+          tug,
+          ohsDelta,
+        ].filter((x) => x.tone === "good").length;
+
+        return {
+          sessions,
+          badCount,
+          goodCount,
+        };
+      });
+
+      const groupComparable = groupRows.filter((r) => r.sessions.length >= 2);
+
+      return {
+        age: ageOption.label,
+        total: groupRecords.length,
+        comparable: groupComparable.length,
+        ดีขึ้น: groupComparable.filter((r) => r.badCount === 0 && r.goodCount > 0).length,
+        แย่ลง: groupComparable.filter((r) => r.badCount > 0).length,
+        คงเดิม: groupComparable.filter((r) => r.badCount === 0 && r.goodCount === 0).length,
+        ข้อมูลไม่พอ: groupRows.filter((r) => r.sessions.length < 2).length,
+      };
     });
-    const groupComparable = groupRows.filter((r) => r.sessions.length >= 2);
-    return {
-      age: ageOption.label,
-      total: groupRecords.length,
-      comparable: groupComparable.length,
-      ดีขึ้น: groupComparable.filter((r) => r.badCount === 0 && r.goodCount > 0).length,
-      แย่ลง: groupComparable.filter((r) => r.badCount > 0).length,
-      คงเดิม: groupComparable.filter((r) => r.badCount === 0 && r.goodCount === 0).length,
-      ข้อมูลไม่พอ: groupRows.filter((r) => r.sessions.length < 2).length,
-    };
-  });
 
   const urgentRows = comparable.filter((r) => {
     const latest = r.last;
-    const fitnessBelow = metrics.fitness.some(([key]) => classifyFitness(r.record, key, valueOf(latest, key), latest).label === "ต่ำกว่าเกณฑ์");
-    return r.badCount >= 2 || r.record.parq.some(Boolean) || r.bodyFat.tone === "bad" || r.waist.tone === "bad" || r.muscle.tone === "bad" || r.tug.tone === "bad" || fitnessBelow;
+
+    const fitnessBelow = metrics.fitness.some(
+      ([key]) =>
+        classifyFitness(r.record, key, valueOf(latest, key), latest).label ===
+        "ต่ำกว่าเกณฑ์"
+    );
+
+    return (
+      r.badCount >= 2 ||
+      r.record.parq.some(Boolean) ||
+      r.bodyFat.tone === "bad" ||
+      r.fatMass.tone === "bad" ||
+      r.muscle.tone === "bad" ||
+      r.sitstand.tone === "bad" ||
+      r.sitreach.tone === "bad" ||
+      r.tug.tone === "bad" ||
+      fitnessBelow
+    );
   });
 
   const issueRows = [
     { name: "Body Fat เพิ่ม", count: comparable.filter((r) => r.bodyFat.tone === "bad").length },
-    { name: "รอบเอวเพิ่ม", count: comparable.filter((r) => r.waist.tone === "bad").length },
+    { name: "Fat Mass เพิ่ม", count: comparable.filter((r) => r.fatMass.tone === "bad").length },
     { name: "Muscle ลด", count: comparable.filter((r) => r.muscle.tone === "bad").length },
     { name: "Step Test แย่ลง", count: comparable.filter((r) => r.step.tone === "bad").length },
     { name: "Grip ลด", count: comparable.filter((r) => r.grip.tone === "bad").length },
+    { name: "Sit to Stand ลด", count: comparable.filter((r) => r.sitstand.tone === "bad").length },
+    { name: "Sit and Reach ลด", count: comparable.filter((r) => r.sitreach.tone === "bad").length },
     { name: "TUG แย่ลง", count: comparable.filter((r) => r.tug.tone === "bad").length },
     { name: "OHS ลดลง", count: comparable.filter((r) => r.ohsDelta.tone === "bad").length },
-  ].sort((a, b) => b.count - a.count).slice(0, 5);
+  ]
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 5);
 
   const improvedRows = [
     { name: "Body Fat ลด", count: comparable.filter((r) => r.bodyFat.tone === "good").length },
-    { name: "รอบเอวลด", count: comparable.filter((r) => r.waist.tone === "good").length },
+    { name: "Fat Mass ลด", count: comparable.filter((r) => r.fatMass.tone === "good").length },
     { name: "Muscle เพิ่ม", count: comparable.filter((r) => r.muscle.tone === "good").length },
     { name: "Step Test ดีขึ้น", count: comparable.filter((r) => r.step.tone === "good").length },
     { name: "Grip เพิ่ม", count: comparable.filter((r) => r.grip.tone === "good").length },
+    { name: "Sit to Stand เพิ่ม", count: comparable.filter((r) => r.sitstand.tone === "good").length },
+    { name: "Sit and Reach เพิ่ม", count: comparable.filter((r) => r.sitreach.tone === "good").length },
     { name: "TUG ดีขึ้น", count: comparable.filter((r) => r.tug.tone === "good").length },
     { name: "OHS ดีขึ้น", count: comparable.filter((r) => r.ohsDelta.tone === "good").length },
-  ].sort((a, b) => b.count - a.count).slice(0, 5);
+  ]
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 5);
 
   const incompleteSummary = [
     { label: "มีข้อมูล < 2 ครั้ง", value: notEnough.length },
     { label: "ไม่มีอายุ/เพศ", value: rows.filter((r) => !r.record.age || !r.record.sex).length },
-    { label: "InBody ไม่ครบ", value: rows.filter((r) => {
-      const latest = r.sessions.slice(-1)[0];
-      return !latest || !latest.inbody.weight || !latest.inbody.fatMass || !latest.inbody.muscle;
-    }).length },
-    { label: "Fitness ไม่ครบ", value: rows.filter((r) => {
-      const latest = r.sessions.slice(-1)[0];
-      return !latest || metrics.fitness.some(([key]) => !latest.fitness[key]);
-    }).length },
+    {
+      label: "InBody ไม่ครบ",
+      value: rows.filter((r) => {
+        const latest = r.sessions.slice(-1)[0];
+        return !latest || !latest.inbody.weight || !latest.inbody.fatMass || !latest.inbody.muscle;
+      }).length,
+    },
+    {
+      label: "Fitness ไม่ครบ",
+      value: rows.filter((r) => {
+        const latest = r.sessions.slice(-1)[0];
+        return !latest || metrics.fitness.some(([key]) => !latest.fitness[key]);
+      }).length,
+    },
   ];
 
-  const sexSummaryRows = ["ชาย", "หญิง", "อื่น ๆ"].map((sexLabel) => {
-    const groupRows = rows.filter((r) => sexLabel === "อื่น ๆ" ? !["ชาย", "หญิง"].includes(r.record.sex) : r.record.sex === sexLabel);
-    const groupComparable = groupRows.filter((r) => r.sessions.length >= 2);
-    return {
-      sex: sexLabel,
-      total: groupRows.length,
-      comparable: groupComparable.length,
-      improved: groupComparable.filter((r) => r.badCount === 0 && r.goodCount > 0).length,
-      worsened: groupComparable.filter((r) => r.badCount > 0).length,
-      incomplete: groupRows.filter((r) => r.sessions.length < 2).length,
-    };
-  }).filter((r) => r.total > 0);
+  const sexSummaryRows = ["ชาย", "หญิง", "อื่น ๆ"]
+    .map((sexLabel) => {
+      const groupRows = rows.filter((r) =>
+        sexLabel === "อื่น ๆ"
+          ? !["ชาย", "หญิง"].includes(r.record.sex)
+          : r.record.sex === sexLabel
+      );
 
-  const fitnessBelowRows = metrics.fitness.map(([key, label]) => {
-    const count = comparable.filter((r) => classifyFitness(r.record, key, valueOf(r.last, key), r.last).label === "ต่ำกว่าเกณฑ์").length;
-    const nameTh = label.split(" (")[0];
-    const nameEn = label.includes("(") ? label.substring(label.indexOf("(") + 1, label.lastIndexOf(")")) : key;
-    return { name: label, nameTh, nameEn, count };
-  }).sort((a, b) => b.count - a.count);
+      const groupComparable = groupRows.filter((r) => r.sessions.length >= 2);
+
+      return {
+        sex: sexLabel,
+        total: groupRows.length,
+        comparable: groupComparable.length,
+        improved: groupComparable.filter((r) => r.badCount === 0 && r.goodCount > 0).length,
+        worsened: groupComparable.filter((r) => r.badCount > 0).length,
+        incomplete: groupRows.filter((r) => r.sessions.length < 2).length,
+      };
+    })
+    .filter((r) => r.total > 0);
+
+  const fitnessBelowRows = metrics.fitness
+    .map(([key, label]) => {
+      const count = comparable.filter(
+        (r) =>
+          classifyFitness(r.record, key, valueOf(r.last, key), r.last).label ===
+          "ต่ำกว่าเกณฑ์"
+      ).length;
+
+      const nameTh = label.split(" (")[0];
+      const nameEn = label.includes("(")
+        ? label.match(/\((.*?)\)/)?.[1] || ""
+        : "";
+
+      return {
+        key,
+        nameTh,
+        nameEn,
+        count,
+      };
+    })
+    .sort((a, b) => b.count - a.count);
+
+  const summaryChartRows = [
+    { name: "ดีขึ้น", value: improved },
+    { name: "ต้องติดตาม", value: needFollow },
+    { name: "คงเดิม", value: noChange },
+    { name: "ข้อมูลไม่พอ", value: notEnough.length },
+  ];
+
+  useEffect(() => {
+    setPage(1);
+  }, [yearFilter, monthFilter, ageFilter, adminSearch]);
 
   return (
     <main className="mx-auto max-w-7xl space-y-5 px-4 py-6">
-      <input ref={restoreInputRef} type="file" accept="application/json,.json" className="hidden" onChange={handleRestoreFile} />
-      <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-        <div className="flex flex-col justify-between gap-4 lg:flex-row lg:items-center">
-          <div>
-            <h2 className="text-3xl font-bold text-slate-900">สรุปภาพรวมผู้รับบริการทั้งหมด</h2>
-            <p className="text-base text-slate-500">เลือกดูตาม พ.ศ. / เดือน หรือดูทั้งหมด ระบบเทียบจากครั้งแรก → ครั้งล่าสุดในช่วงที่เลือก และนับเฉพาะคนที่มีข้อมูลมากกว่า 1 ครั้ง</p>
-          </div>
-          <div className="grid gap-3 sm:grid-cols-2 lg:w-[980px] lg:grid-cols-4">
-            <Field label="ค้นหา HN / ชื่อ" value={adminSearch} onChange={(v) => { setAdminSearch(v); setPage(1); }} />
-            <Select
-              label="เลือกปี พ.ศ."
-              value={yearFilter}
-              onChange={setYearFilter}
-              options={[{ value: "all", label: "ทั้งหมด / ทุกปี" }, ...availableYears.map((y) => ({ value: String(y), label: `พ.ศ. ${y}` }))]}
-            />
-            <Select
-              label="เลือกเดือน"
-              value={monthFilter}
-              onChange={setMonthFilter}
-              options={[{ value: "all", label: "ทั้งหมด / ทุกเดือน" }, ...thaiMonths.map((m, i) => ({ value: String(i + 1), label: `${i + 1}. ${m}` }))]}
-            />
-            <Select
-              label="เลือกช่วงอายุ"
-              value={ageFilter}
-              onChange={setAgeFilter}
-              options={ageOptions}
-            />
-          </div>
+      <Card title="สรุปภาพรวมแอดมิน" icon={ClipboardIcon}>
+        <div className="mb-4 flex flex-wrap items-center gap-2">
+          <select
+            value={yearFilter}
+            onChange={(e) => setYearFilter(e.target.value)}
+            className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-base font-semibold text-slate-700 outline-none"
+          >
+            <option value="all">ทุกปี</option>
+            {availableYears.map((year) => (
+              <option key={year} value={year}>
+                พ.ศ. {year}
+              </option>
+            ))}
+          </select>
+
+          <select
+            value={monthFilter}
+            onChange={(e) => setMonthFilter(e.target.value)}
+            className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-base font-semibold text-slate-700 outline-none"
+          >
+            <option value="all">ทุกเดือน</option>
+            {thaiMonths.map((month, index) => (
+              <option key={month} value={index + 1}>
+                {month}
+              </option>
+            ))}
+          </select>
+
+          <select
+            value={ageFilter}
+            onChange={(e) => setAgeFilter(e.target.value)}
+            className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-base font-semibold text-slate-700 outline-none"
+          >
+            {ageOptions.map((opt) => (
+              <option key={opt.value} value={opt.value}>
+                {opt.label}
+              </option>
+            ))}
+          </select>
+
+          <input
+            value={adminSearch}
+            onChange={(e) => setAdminSearch(e.target.value)}
+            placeholder="ค้นหา HN / ชื่อ"
+            className="min-w-[220px] rounded-xl border border-slate-200 bg-white px-3 py-2 text-base outline-none focus:border-slate-700"
+          />
+
+          <button
+            onClick={() => exportRecordsCSV(records)}
+            className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-base font-bold text-slate-700 hover:bg-slate-50"
+          >
+            Export Excel/CSV
+          </button>
+
+          <button
+            onClick={onFullBackup}
+            className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2 text-base font-bold text-emerald-700 hover:bg-emerald-100"
+          >
+            Backup JSON
+          </button>
+
+          <button
+            onClick={() => restoreInputRef.current?.click()}
+            className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-2 text-base font-bold text-amber-700 hover:bg-amber-100"
+          >
+            Restore JSON
+          </button>
+
+          <button
+            onClick={printPage}
+            className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-base font-bold text-slate-700 hover:bg-slate-50"
+          >
+            พิมพ์ / PDF
+          </button>
+
+          <input
+            ref={restoreInputRef}
+            type="file"
+            accept="application/json,.json"
+            className="hidden"
+            onChange={handleRestoreFile}
+          />
         </div>
-      </section>
 
-      <div className="grid gap-4 md:grid-cols-4">
-        <Info label="ช่วงที่เลือก" value={periodLabel} />
-        <Info label="ผู้รับบริการในช่วงที่เลือก" value={`${rows.length} คน`} />
-        <Info label="นำมาเปรียบเทียบได้" value={`${comparable.length} คน`} />
-        <Info label="ผลการค้นหา" value={`${filteredComparable.length} คน`} />
-      </div>
+        <div className="mb-4">
+          <Pill tone="dark">{periodLabel}</Pill>
+        </div>
 
-      <Card title="สรุปจำนวน ดีขึ้น / แย่ลง / คงเดิม" icon={ActivityIcon}>
+        <div className="grid gap-4 md:grid-cols-4">
+          <Info label="ทั้งหมด" value={`${rows.length} คน`} />
+          <Info label="เทียบได้ ≥2 ครั้ง" value={`${comparable.length} คน`} tone="admin" />
+          <Info label="ดีขึ้น" value={`${improved} คน`} tone="good" />
+          <Info label="ต้องติดตาม" value={`${needFollow} คน`} tone={needFollow ? "fat" : "default"} />
+        </div>
+      </Card>
+
+      <Card title="ภาพรวมผลลัพธ์" icon={ActivityIcon}>
         <div className="h-72">
           <ResponsiveContainer>
-            <BarChart data={[{ name: "ช่วงที่เลือก", ดีขึ้น: improved, แย่ลง: needFollow, คงเดิม: noChange, ข้อมูลไม่พอ: notEnough.length }]}>
+            <BarChart data={summaryChartRows}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="name" tick={{ fontSize: 14 }} />
-              <YAxis allowDecimals={false} tick={{ fontSize: 14 }} />
+              <YAxis allowDecimals={false} tick={{ fontSize: 12 }} />
               <Tooltip />
-              <Bar dataKey="ดีขึ้น" fill="#059669" radius={[6, 6, 0, 0]} />
-              <Bar dataKey="แย่ลง" fill="#e11d48" radius={[6, 6, 0, 0]} />
-              <Bar dataKey="คงเดิม" fill="#64748b" radius={[6, 6, 0, 0]} />
-              <Bar dataKey="ข้อมูลไม่พอ" fill="#cbd5e1" radius={[6, 6, 0, 0]} />
+              <Bar dataKey="value" fill="#0f172a" radius={[6, 6, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>
@@ -1488,84 +1780,136 @@ function AdminSummary({ records, auditLogs, onFullBackup, onRestoreBackup }) {
 
       <Card title="Key Insights / ผลลัพธ์เด่นและจุดที่ควรติดตาม" icon={ClipboardIcon}>
         <div className="grid gap-4 md:grid-cols-4">
-          <Info label="ต้องติดตามเร่งด่วน" value={`${urgentRows.length} คน`} tone={urgentRows.length ? "fat" : "default"} />
-          <Info label="ตัวชี้วัดดีขึ้นสูงสุด" value={improvedRows[0] ? `${improvedRows[0].name}: ${improvedRows[0].count} คน` : "ไม่มี"} />
-          <Info label="ตัวชี้วัดแย่ลงสูงสุด" value={issueRows[0] ? `${issueRows[0].name}: ${issueRows[0].count} คน` : "ไม่มี"} tone={issueRows[0]?.count ? "fat" : "default"} />
-          <Info label="Fitness ต่ำกว่าเกณฑ์สูงสุด" value={fitnessBelowRows[0] ? `${fitnessBelowRows[0].nameTh}: ${fitnessBelowRows[0].count} คน` : "ไม่มี"} tone={fitnessBelowRows[0]?.count ? "fat" : "default"} />
+          <Info
+            label="ต้องติดตามเร่งด่วน"
+            value={`${urgentRows.length} คน`}
+            tone={urgentRows.length ? "fat" : "default"}
+          />
+
+          <Info
+            label="ตัวชี้วัดดีขึ้นสูงสุด"
+            value={improvedRows[0] ? `${improvedRows[0].name}: ${improvedRows[0].count} คน` : "ไม่มี"}
+          />
+
+          <Info
+            label="ตัวชี้วัดแย่ลงสูงสุด"
+            value={issueRows[0] ? `${issueRows[0].name}: ${issueRows[0].count} คน` : "ไม่มี"}
+            tone={issueRows[0]?.count ? "fat" : "default"}
+          />
+
+          <Info
+            label="Fitness ต่ำกว่าเกณฑ์สูงสุด"
+            value={fitnessBelowRows[0] ? `${fitnessBelowRows[0].nameTh}: ${fitnessBelowRows[0].count} คน` : "ไม่มี"}
+            tone={fitnessBelowRows[0]?.count ? "fat" : "default"}
+          />
         </div>
+
         <div className="mt-5 grid gap-5 lg:grid-cols-4">
-          <InsightListPanel title="ตัวชี้วัดที่ดีขึ้นบ่อย" tone="good" rows={improvedRows.map((row) => ({ label: row.name, count: row.count }))} />
-          <InsightListPanel title="ตัวชี้วัดที่แย่ลงบ่อย" tone="bad" rows={issueRows.map((row) => ({ label: row.name, count: row.count }))} />
-          <InsightListPanel title="Fitness ต่ำกว่าเกณฑ์" tone="bad" rows={fitnessBelowRows.map((row) => ({ label: row.nameTh, sub: row.nameEn, count: row.count }))} />
-          <InsightListPanel title="ข้อมูลไม่ครบ" rows={incompleteSummary.map((row) => ({ label: row.label, count: row.value }))} />
+          <InsightListPanel
+            title="ตัวชี้วัดที่ดีขึ้นบ่อย"
+            tone="good"
+            rows={improvedRows.map((row) => ({ label: row.name, count: row.count }))}
+          />
+
+          <InsightListPanel
+            title="ตัวชี้วัดที่แย่ลงบ่อย"
+            tone="bad"
+            rows={issueRows.map((row) => ({ label: row.name, count: row.count }))}
+          />
+
+          <InsightListPanel
+            title="Fitness ต่ำกว่าเกณฑ์"
+            tone="bad"
+            rows={fitnessBelowRows.map((row) => ({
+              label: row.nameTh,
+              sub: row.nameEn,
+              count: row.count,
+            }))}
+          />
+
+          <InsightListPanel
+            title="ข้อมูลไม่ครบ"
+            rows={incompleteSummary.map((row) => ({
+              label: row.label,
+              count: row.value,
+            }))}
+          />
         </div>
       </Card>
 
-      <Card title="สรุปตามเพศ" icon={UserIcon}>
-        <div className="overflow-x-auto rounded-xl border border-slate-200">
-          <table className="w-full min-w-[620px] text-left text-base">
-            <thead className="bg-slate-50 text-sm text-slate-500">
-              <tr><th className="p-3">เพศ</th><th className="p-3">ทั้งหมด</th><th className="p-3">เทียบได้</th><th className="p-3">ดีขึ้น</th><th className="p-3">แย่ลง</th><th className="p-3">ข้อมูลไม่พอ</th></tr>
-            </thead>
-            <tbody>
-              {sexSummaryRows.map((row) => (
-                <tr key={row.sex} className="border-t border-slate-100">
-                  <td className="p-3 font-semibold text-slate-900">{row.sex}</td>
-                  <td className="p-3">{row.total}</td>
-                  <td className="p-3">{row.comparable}</td>
-                  <td className="p-3"><Pill tone="good">{row.improved}</Pill></td>
-                  <td className="p-3"><Pill tone="bad">{row.worsened}</Pill></td>
-                  <td className="p-3"><Pill>{row.incomplete}</Pill></td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </Card>
-
-      <Card title="สรุปตามช่วงอายุ" icon={UserIcon}>
-        <div className="grid gap-6 lg:grid-cols-[1fr_1.1fr]">
-          <div className="h-80">
-            <ResponsiveContainer>
-              <BarChart data={ageSummaryRows}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="age" tick={{ fontSize: 12 }} />
-                <YAxis allowDecimals={false} tick={{ fontSize: 14 }} />
-                <Tooltip />
-                <Bar dataKey="ดีขึ้น" fill="#059669" radius={[6, 6, 0, 0]} />
-                <Bar dataKey="แย่ลง" fill="#e11d48" radius={[6, 6, 0, 0]} />
-                <Bar dataKey="คงเดิม" fill="#64748b" radius={[6, 6, 0, 0]} />
-                <Bar dataKey="ข้อมูลไม่พอ" fill="#cbd5e1" radius={[6, 6, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
+      <div className="grid gap-5 lg:grid-cols-2">
+        <Card title="สรุปตามเพศ" icon={UserIcon}>
           <div className="overflow-x-auto rounded-xl border border-slate-200">
             <table className="w-full min-w-[560px] text-left text-base">
               <thead className="bg-slate-50 text-sm text-slate-500">
-                <tr><th className="p-3">ช่วงอายุ</th><th className="p-3">ทั้งหมด</th><th className="p-3">เทียบได้</th><th className="p-3">ดีขึ้น</th><th className="p-3">แย่ลง</th><th className="p-3">ข้อมูลไม่พอ</th></tr>
+                <tr>
+                  <th className="p-3">เพศ</th>
+                  <th className="p-3">ทั้งหมด</th>
+                  <th className="p-3">เทียบได้</th>
+                  <th className="p-3">ดีขึ้น</th>
+                  <th className="p-3">แย่ลง</th>
+                  <th className="p-3">ข้อมูลไม่พอ</th>
+                </tr>
               </thead>
+
               <tbody>
-                {ageSummaryRows.map((row) => (
-                  <tr key={row.age} className="border-t border-slate-100">
-                    <td className="p-3 font-semibold text-slate-900">{row.age}</td>
+                {sexSummaryRows.map((row) => (
+                  <tr key={row.sex} className="border-t border-slate-100">
+                    <td className="p-3 font-bold text-slate-900">{row.sex}</td>
                     <td className="p-3">{row.total}</td>
                     <td className="p-3">{row.comparable}</td>
-                    <td className="p-3"><Pill tone="good">{row.ดีขึ้น}</Pill></td>
-                    <td className="p-3"><Pill tone="bad">{row.แย่ลง}</Pill></td>
-                    <td className="p-3"><Pill>{row.ข้อมูลไม่พอ}</Pill></td>
+                    <td className="p-3">
+                      <Pill tone="good">{row.improved}</Pill>
+                    </td>
+                    <td className="p-3">
+                      <Pill tone={row.worsened ? "bad" : "gray"}>{row.worsened}</Pill>
+                    </td>
+                    <td className="p-3">{row.incomplete}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
-        </div>
-      </Card>
+        </Card>
 
-      <AuditLogPanel auditLogs={auditLogs} />
+        <Card title="สรุปตามช่วงอายุ" icon={UserIcon}>
+          <div className="overflow-x-auto rounded-xl border border-slate-200">
+            <table className="w-full min-w-[640px] text-left text-base">
+              <thead className="bg-slate-50 text-sm text-slate-500">
+                <tr>
+                  <th className="p-3">ช่วงอายุ</th>
+                  <th className="p-3">ทั้งหมด</th>
+                  <th className="p-3">เทียบได้</th>
+                  <th className="p-3">ดีขึ้น</th>
+                  <th className="p-3">แย่ลง</th>
+                  <th className="p-3">ข้อมูลไม่พอ</th>
+                </tr>
+              </thead>
 
-      <Card title="ตารางสรุปทุกคน สำหรับแอดมิน" icon={ClipboardIcon} right={<div className="flex flex-wrap gap-2"><button onClick={() => exportRecordsCSV(records)} className="rounded-full border border-slate-200 bg-white px-3 py-1 text-sm font-semibold text-slate-700 hover:bg-slate-50">Export Excel/CSV</button><button onClick={onFullBackup} className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-sm font-semibold text-emerald-700 hover:bg-emerald-100">Backup JSON</button><button onClick={() => restoreInputRef.current?.click()} className="rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-sm font-semibold text-amber-700 hover:bg-amber-100">Restore JSON</button><button onClick={printPage} className="rounded-full border border-slate-200 bg-white px-3 py-1 text-sm font-semibold text-slate-700 hover:bg-slate-50">พิมพ์ / PDF</button><Pill tone="dark">{periodLabel}</Pill></div>}>
+              <tbody>
+                {ageSummaryRows.map((row) => (
+                  <tr key={row.age} className="border-t border-slate-100">
+                    <td className="p-3 font-bold text-slate-900">{row.age}</td>
+                    <td className="p-3">{row.total}</td>
+                    <td className="p-3">{row.comparable}</td>
+                    <td className="p-3">
+                      <Pill tone="good">{row.ดีขึ้น}</Pill>
+                    </td>
+                    <td className="p-3">
+                      <Pill tone={row.แย่ลง ? "bad" : "gray"}>{row.แย่ลง}</Pill>
+                    </td>
+                    <td className="p-3">{row.ข้อมูลไม่พอ}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </Card>
+      </div>
+
+      <Card title="ตารางสรุปทุกคน สำหรับแอดมิน" icon={ClipboardIcon}>
         <div className="overflow-x-auto rounded-xl border border-slate-200">
-          <table className="w-full min-w-[1180px] text-left text-base">
+          <table className="w-full min-w-[1420px] text-left text-base">
             <thead className="bg-slate-50 text-sm text-slate-500">
               <tr>
                 <th className="p-3">HN / ชื่อ</th>
@@ -1573,52 +1917,135 @@ function AdminSummary({ records, auditLogs, onFullBackup, onRestoreBackup }) {
                 <th className="p-3">ช่วงที่เทียบ</th>
                 <th className="p-3">น้ำหนัก</th>
                 <th className="p-3">Body Fat</th>
+                <th className="p-3">Fat Mass</th>
                 <th className="p-3">Muscle</th>
                 <th className="p-3">รอบเอว</th>
                 <th className="p-3">Step Test</th>
                 <th className="p-3">Grip</th>
+                <th className="p-3">Sit to Stand</th>
+                <th className="p-3">Sit and Reach</th>
                 <th className="p-3">TUG</th>
                 <th className="p-3">OHS</th>
                 <th className="p-3">สรุป</th>
               </tr>
             </thead>
+
             <tbody>
               {pagedComparable.map((r) => (
-                <tr key={r.record.hn} className={`border-t border-slate-100 ${r.badCount > 0 ? "bg-rose-50/60" : ""}`}>
-                  <td className="p-3"><div className="font-bold text-slate-900">HN {r.record.hn}</div><div className="text-sm text-slate-500">{r.record.name || "ไม่ระบุชื่อ"}</div></td>
-                  <td className="p-3"><Pill>{r.sessions.length} ครั้ง</Pill></td>
-                  <td className="p-3 text-sm text-slate-600">ครั้งที่ {r.first.no} → {r.last.no}<br />{r.first.date || "-"} → {r.last.date || "-"}</td>
-                  <td className="p-3"><Pill tone={r.weight.tone}>{r.weight.text}</Pill></td>
-                  <td className="p-3"><Pill tone={r.bodyFat.tone}>{r.bodyFat.text}</Pill></td>
-                  <td className="p-3"><Pill tone={r.muscle.tone}>{r.muscle.text}</Pill></td>
-                  <td className="p-3"><Pill tone={r.waist.tone}>{r.waist.text}</Pill></td>
-                  <td className="p-3"><Pill tone={r.step.tone}>{r.step.text}</Pill></td>
-                  <td className="p-3"><Pill tone={r.grip.tone}>{r.grip.text}</Pill></td>
-                  <td className="p-3"><Pill tone={r.tug.tone}>{r.tug.text}</Pill></td>
-                  <td className="p-3"><Pill tone={r.ohsDelta.tone}>{r.ohsDelta.text}</Pill></td>
-                  <td className="p-3"><Pill tone={r.badCount > 0 ? "bad" : r.goodCount > 0 ? "good" : "gray"}>{r.badCount > 0 ? `แย่ลง ${r.badCount} ตัวชี้วัด` : r.goodCount > 0 ? "แนวโน้มดี" : "คงเดิม"}</Pill></td>
+                <tr
+                  key={r.record.hn}
+                  className={`border-t border-slate-100 ${
+                    r.badCount > 0 ? "bg-rose-50/45" : ""
+                  }`}
+                >
+                  <td className="p-3">
+                    <div className="font-bold text-slate-900">HN {r.record.hn}</div>
+                    <div className="text-sm text-slate-500">{r.record.name || "-"}</div>
+                  </td>
+
+                  <td className="p-3">
+                    <Pill>{r.sessions.length} ครั้ง</Pill>
+                  </td>
+
+                  <td className="p-3 text-sm text-slate-600">
+                    ครั้งที่ {r.first?.no || "-"} → {r.last?.no || "-"}
+                    <br />
+                    {r.first?.date || "-"} → {r.last?.date || "-"}
+                  </td>
+
+                  <td className="p-3">
+                    <Pill tone={r.weight.tone}>{r.weight.text}</Pill>
+                  </td>
+
+                  <td className="p-3">
+                    <Pill tone={r.bodyFat.tone}>{r.bodyFat.text}</Pill>
+                  </td>
+
+                  <td className="p-3">
+                    <Pill tone={r.fatMass.tone}>{r.fatMass.text}</Pill>
+                  </td>
+
+                  <td className="p-3">
+                    <Pill tone={r.muscle.tone}>{r.muscle.text}</Pill>
+                  </td>
+
+                  <td className="p-3">
+                    <Pill tone={r.waist.tone}>{r.waist.text}</Pill>
+                  </td>
+
+                  <td className="p-3">
+                    <Pill tone={r.step.tone}>{r.step.text}</Pill>
+                  </td>
+
+                  <td className="p-3">
+                    <Pill tone={r.grip.tone}>{r.grip.text}</Pill>
+                  </td>
+
+                  <td className="p-3">
+                    <Pill tone={r.sitstand.tone}>{r.sitstand.text}</Pill>
+                  </td>
+
+                  <td className="p-3">
+                    <Pill tone={r.sitreach.tone}>{r.sitreach.text}</Pill>
+                  </td>
+
+                  <td className="p-3">
+                    <Pill tone={r.tug.tone}>{r.tug.text}</Pill>
+                  </td>
+
+                  <td className="p-3">
+                    <Pill tone={r.ohsDelta.tone}>{r.ohsDelta.text}</Pill>
+                  </td>
+
+                  <td className="p-3">
+                    <Pill tone={r.badCount > 0 ? "bad" : r.goodCount > 0 ? "good" : "gray"}>
+                      {r.badCount > 0
+                        ? `แย่ลง ${r.badCount} ตัวชี้วัด`
+                        : r.goodCount > 0
+                          ? `ดีขึ้น ${r.goodCount} ตัวชี้วัด`
+                          : "คงเดิม"}
+                    </Pill>
+                  </td>
                 </tr>
               ))}
-              {filteredComparable.length === 0 && <tr><td className="p-4 text-center text-slate-500" colSpan="12">ยังไม่มีผู้รับบริการที่มีข้อมูลมากกว่า 1 ครั้งในช่วงที่เลือก หรือไม่พบตามคำค้นหา</td></tr>}
+
+              {pagedComparable.length === 0 && (
+                <tr>
+                  <td colSpan="15" className="p-4 text-center text-slate-500">
+                    ไม่มีข้อมูลที่เทียบได้ในช่วงที่เลือก
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
-        <div className="mt-4 flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
-          <p className="text-sm text-slate-500">แสดง {pagedComparable.length} รายการต่อหน้า จากทั้งหมด {filteredComparable.length} รายการ • หน้า {safePage}/{pageCount}</p>
+
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-3 text-sm text-slate-500">
+          <div>
+            แสดง {pagedComparable.length} รายการต่อหน้า จากทั้งหมด {filteredComparable.length} รายการ • หน้า {safePage}/{pageCount}
+          </div>
+
           <div className="flex gap-2">
-            <button onClick={() => setPage(Math.max(1, safePage - 1))} disabled={safePage <= 1} className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 disabled:opacity-40">ก่อนหน้า</button>
-            <button onClick={() => setPage(Math.min(pageCount, safePage + 1))} disabled={safePage >= pageCount} className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 disabled:opacity-40">ถัดไป</button>
+            <button
+              disabled={safePage <= 1}
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              className="rounded-xl border border-slate-200 bg-white px-4 py-2 font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-40"
+            >
+              ก่อนหน้า
+            </button>
+
+            <button
+              disabled={safePage >= pageCount}
+              onClick={() => setPage((p) => Math.min(pageCount, p + 1))}
+              className="rounded-xl border border-slate-200 bg-white px-4 py-2 font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-40"
+            >
+              ถัดไป
+            </button>
           </div>
         </div>
       </Card>
 
-      {notEnough.length > 0 && (
-        <Card title="รายชื่อที่ยังเปรียบเทียบไม่ได้ในช่วงที่เลือก" icon={UserIcon} right={<Pill>ต้องมีมากกว่า 1 ครั้ง</Pill>}>
-          <div className="grid gap-3 md:grid-cols-3">
-            {notEnough.map((r) => <div key={r.record.hn} className="rounded-xl border border-slate-200 bg-slate-50 p-3"><div className="font-bold text-slate-900">HN {r.record.hn}</div><div className="text-base text-slate-500">{r.record.name || "ไม่ระบุชื่อ"}</div><div className="mt-2"><Pill>{r.sessions.length} ครั้งในช่วงที่เลือก</Pill></div></div>)}
-          </div>
-        </Card>
-      )}
+      <AuditLogPanel auditLogs={auditLogs} />
     </main>
   );
 }
