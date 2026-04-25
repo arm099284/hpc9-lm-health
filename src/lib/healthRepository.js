@@ -18,7 +18,7 @@ function toIsoDate(dateText) {
     y = parts[2];
   }
 
-  // ยังรองรับรูปแบบเดิม ปี-เดือน-วัน เช่น 2569-04-25
+  // รองรับรูปแบบเดิม ปี-เดือน-วัน เช่น 2569-04-25 หรือ 2026-04-25
   else if (text.includes("-")) {
     const parts = text.split("-");
     if (parts.length !== 3) return null;
@@ -47,7 +47,7 @@ function toThaiDateText(dateText) {
 
   const text = String(dateText).trim();
 
-  // ถ้าเป็นรูปแบบไทยอยู่แล้ว ให้ใช้เลย
+  // ถ้าเป็นรูปแบบ วัน/เดือน/ปี พ.ศ. อยู่แล้ว ให้ใช้เลย
   if (/^[0-9]{2}\/[0-9]{2}\/[0-9]{4}$/.test(text)) return text;
 
   // แปลงจาก ค.ศ. ใน Supabase เช่น 2026-04-25 → 25/04/2569
@@ -61,19 +61,6 @@ function toThaiDateText(dateText) {
   if (y < 2400) y += 543;
 
   return `${d}/${m}/${y}`;
-}
-  if (!dateText) return "";
-  const parts = String(dateText).split("-");
-  if (parts.length !== 3) return "";
-
-  let y = Number(parts[0]);
-  const m = parts[1];
-  const d = parts[2];
-
-  // ถ้าฐานข้อมูลเป็น ค.ศ. ให้แสดงกลับเป็น พ.ศ.
-  if (y < 2400) y += 543;
-
-  return `${y}-${m}-${d}`;
 }
 
 function focusToArray(focusText) {
@@ -133,7 +120,7 @@ export async function loadAllRecords() {
 
   const hns = patients.map((p) => p.hn);
 
-  const [{ data: parq }, { data: programs }, { data: sessions }] =
+  const [{ data: parq, error: parqError }, { data: programs, error: programError }, { data: sessions, error: sessionError }] =
     await Promise.all([
       supabase.from("parq_answers").select("*").in("hn", hns),
       supabase.from("exercise_programs").select("*").in("hn", hns),
@@ -143,6 +130,10 @@ export async function loadAllRecords() {
         .in("hn", hns)
         .order("session_no", { ascending: true }),
     ]);
+
+  if (parqError) throw parqError;
+  if (programError) throw programError;
+  if (sessionError) throw sessionError;
 
   const parqMap = Object.fromEntries((parq || []).map((x) => [x.hn, x]));
   const programMap = Object.fromEntries((programs || []).map((x) => [x.hn, x]));
@@ -200,6 +191,7 @@ export async function loadAllRecords() {
         },
         sessions: [1, 2, 3, 4].map((no) => {
           const s = pSessions.find((x) => x.session_no === no);
+
           return {
             no,
             date: toThaiDateText(s?.assessment_date),
@@ -331,7 +323,10 @@ export async function saveRecord(record, adminUser) {
 export async function deleteRecord(hn, adminUser) {
   const { error } = await supabase
     .from("patients")
-    .update({ deleted_at: new Date().toISOString(), updated_by: adminUser?.dbId || null })
+    .update({
+      deleted_at: new Date().toISOString(),
+      updated_by: adminUser?.dbId || null,
+    })
     .eq("hn", hn);
 
   if (error) throw error;
