@@ -2881,7 +2881,7 @@ export default function App() {
 
   useEffect(() => {
       refreshData();
-  }, [isAdmin]);
+  }, []);
 
   function restoreFullBackup(nextRecords, nextAuditLogs = []) {
     setRecords(nextRecords);
