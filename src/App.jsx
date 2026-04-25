@@ -504,6 +504,11 @@ function completedSessions(record) {
   return (record.sessions || []).filter((s) => sessionHasAnyData(s));
 }
 
+function latestCompletedSession(record) {
+  const sessions = completedSessions(record);
+  return sessions.length ? sessions[sessions.length - 1] : null;
+}
+
 function deltaFromSessions(sessions, item) {
   const [key, , unit, better] = item;
   if (!sessions || sessions.length < 2) return { text: "ข้อมูลไม่พอ", tone: "gray", raw: 0, valid: false };
@@ -949,7 +954,7 @@ function CompareTable({ record, title, icon, list, withFitnessInterpretation = f
             <tr>
               <th className="p-3">รายการ</th>
               {record.sessions.map((s) => <th key={s.no} className="p-3">ครั้งที่ {s.no}<br /><span className="font-normal">{s.date || "-"}</span></th>)}
-              <th className="p-3">สรุป 1→4</th>
+              <th className="p-3">สรุป 1→ล่าสุด</th>
               {withFitnessInterpretation && <th className="p-3">แปลผลล่าสุด</th>}
             </tr>
           </thead>
