@@ -501,11 +501,7 @@ function closeYAxisDomain(values) {
 }
 
 function completedSessions(record) {
-  return record.sessions.filter((s) => {
-    const inbodyFilled = Object.values(s.inbody).some((v) => v !== "" && v !== null && v !== undefined);
-    const fitnessFilled = Object.values(s.fitness).some((v) => v !== "" && v !== null && v !== undefined);
-    return Boolean(s.date || inbodyFilled || fitnessFilled || s.note || s.attachment);
-  });
+  return (record.sessions || []).filter((s) => sessionHasAnyData(s));
 }
 
 function deltaFromSessions(sessions, item) {
@@ -1799,14 +1795,11 @@ function SessionForm({ draft, update, idx }) {
   const s = draft.sessions[idx];
   const base = ["sessions", idx];
 
-  useEffect(() => {
-    if (!s?.date) update([...base, "date"], todayThaiDateText());
-  }, [idx]);
   return <div className="space-y-5"><Card title={`ข้อมูลครั้งที่ ${idx + 1}`} icon={ClipboardIcon} right={<div className="flex flex-wrap items-center gap-2"><button type="button" onClick={() => { const ok = window.confirm(`ยืนยันการลบข้อมูลครั้งที่ ${idx + 1}
 
 ข้อมูล InBody, Fitness Test, OHS, วันที่ประเมิน และหมายเหตุของครั้งนี้จะถูกล้างออก
 
-ต้องการลบจริงหรือไม่?`); if (ok) update(["sessions", idx], session(idx + 1)); }} className="rounded-full border border-rose-200 bg-rose-50 px-3 py-1 text-sm font-semibold text-rose-700 hover:bg-rose-100">ลบครั้งนี้</button><Pill tone="dark">ครั้งที่ {idx + 1}/4</Pill></div>}><div className="grid gap-4 md:grid-cols-2"><Field label="วันที่ประเมินอัตโนมัติ (พ.ศ. YYYY-MM-DD)" value={s.date || todayThaiDateText()} onChange={(v) => update([...base, "date"], v)} /><Field label="หมายเหตุสั้น ๆ" value={s.note} onChange={(v) => update([...base, "note"], v)} /></div></Card><Card title="InBody / Body Composition" icon={HeartIcon}><div className="grid items-stretch gap-4 md:grid-cols-4"><Info label="BMI คำนวณอัตโนมัติ" value={s.inbody.bmi || "กรอกน้ำหนักและส่วนสูง"} />{metrics.inbody.filter(([key]) => key !== "bmi").map(([key, label, unit]) => <Field key={key} label={`${label} (${unit})`} value={s.inbody[key]} onChange={(v) => update([...base, "inbody", key], v)} type="number" tone={metricTone(key)} />)}</div></Card><Card title="Fitness Test 5 ด้าน" icon={ActivityIcon}><div className="grid gap-4 md:grid-cols-5">{metrics.fitness.map(([key, label, unit]) => <Field key={key} label={`${label} (${unit})`} value={s.fitness[key]} onChange={(v) => update([...base, "fitness", key], v)} type="number" />)}</div></Card><Card title="Overhead Deep Squat" icon={ClipboardIcon}><div className="grid gap-3 md:grid-cols-2">{ohsItems.map((x, i) => <Select key={x} label={x} value={s.ohs[i]} onChange={(v) => update([...base, "ohs", i], v)} options={["ปกติ", "ต้องระวัง", "ควรปรับแก้"]} />)}</div></Card></div>;
+ต้องการลบจริงหรือไม่?`); if (ok) update(["sessions", idx], session(idx + 1)); }} className="rounded-full border border-rose-200 bg-rose-50 px-3 py-1 text-sm font-semibold text-rose-700 hover:bg-rose-100">ลบครั้งนี้</button><Pill tone="dark">ครั้งที่ {idx + 1}/4</Pill></div>}><div className="grid gap-4 md:grid-cols-2"><Field label="วันที่ประเมินอัตโนมัติ (วัน/เดือน/ปี พ.ศ.)" value={formatDateOnlyThai(s.date || todayThaiDateText())} onChange={(v) => update([...base, "date"], v)} /><Field label="หมายเหตุสั้น ๆ" value={s.note} onChange={(v) => update([...base, "note"], v)} /></div></Card><Card title="InBody / Body Composition" icon={HeartIcon}><div className="grid items-stretch gap-4 md:grid-cols-4"><Info label="BMI คำนวณอัตโนมัติ" value={s.inbody.bmi || "กรอกน้ำหนักและส่วนสูง"} />{metrics.inbody.filter(([key]) => key !== "bmi").map(([key, label, unit]) => <Field key={key} label={`${label} (${unit})`} value={s.inbody[key]} onChange={(v) => update([...base, "inbody", key], v)} type="number" tone={metricTone(key)} />)}</div></Card><Card title="Fitness Test 5 ด้าน" icon={ActivityIcon}><div className="grid gap-4 md:grid-cols-5">{metrics.fitness.map(([key, label, unit]) => <Field key={key} label={`${label} (${unit})`} value={s.fitness[key]} onChange={(v) => update([...base, "fitness", key], v)} type="number" />)}</div></Card><Card title="Overhead Deep Squat" icon={ClipboardIcon}><div className="grid gap-3 md:grid-cols-2">{ohsItems.map((x, i) => <Select key={x} label={x} value={s.ohs[i]} onChange={(v) => update([...base, "ohs", i], v)} options={["ปกติ", "ต้องระวัง", "ควรปรับแก้"]} />)}</div></Card></div>;
 }
 
 export default function App() {
