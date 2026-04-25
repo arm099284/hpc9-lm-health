@@ -12,6 +12,10 @@ import {
   Line,
   BarChart,
   Bar,
+  PieChart,
+  Pie,
+  Cell,
+  Legend,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -1059,7 +1063,338 @@ function OhsTable({ record }) {
   );
 }
 
-function Dashboard({ record, back }) {
+function parseFrequencyNumber(value) {
+  const text = String(value || "").replace(/[–—]/g, "-");
+  const nums = text.match(/\d+(\.\d+)?/g)?.map(Number) || [];
+
+  if (nums.length >= 2) return (nums[0] + nums[1]) / 2;
+  if (nums.length === 1) return nums[0];
+
+  return 0;
+}
+
+function latestWeightKg(record) {
+  const sessions = completedSessions(record);
+
+  for (let i = sessions.length - 1; i >= 0; i -= 1) {
+    const weight = valueOf(sessions[i], "weight");
+
+    if (Number.isFinite(Number(weight)) && Number(weight) > 0) {
+      return Number(weight);
+    }
+  }
+
+  return null;
+}
+
+function activityFactorFromProgram(program = {}) {
+  const cardioDays = parseFrequencyNumber(program.cardioFrequency);
+  const strengthDays = parseFrequencyNumber(program.strengthFrequency);
+  const weeklyDays = Math.min(7, cardioDays + strengthDays);
+
+  if (weeklyDays <= 1) {
+    return { factor: 1.2, label: "กิจกรรมน้อย" };
+  }
+
+  if (weeklyDays <= 3) {
+    return { factor: 1.375, label: "เบาถึงปานกลาง" };
+  }
+
+  if (weeklyDays <= 5) {
+    return { factor: 1.55, label: "ปานกลาง" };
+  }
+
+  return { factor: 1.725, label: "ค่อนข้างมาก" };
+}
+
+function bmrMifflin(record) {
+  const weight = latestWeightKg(record);
+  const height = num(record.height);
+  const age = num(record.age);
+
+  if (!weight || !height || !age) return null;
+
+  const female = sexKey(record.sex) === "female";
+
+  const bmr =
+    10 * weight +
+    6.25 * height -
+    5 * age +
+    (female ? -161 : 5);
+
+  return Math.round(bmr);
+}
+
+function tdeeEstimate(record) {
+  const bmr = bmrMifflin(record);
+  if (!bmr) return null;
+
+  const activity = activityFactorFromProgram(record.program);
+  const tdee = Math.round(bmr * activity.factor);
+
+  return {
+    bmr,
+    tdee,
+    factor: activity.factor,
+    activityLabel: activity.label,
+    weight: latestWeightKg(record),
+  };
+}
+
+function goalNutritionConfig(goal) {
+  switch (goal) {
+    case "ลดไขมัน / ควบคุมน้ำหนัก":
+      return {
+        goalLabel: "ลดไขมัน / ควบคุมน้ำหนัก",
+        calorieAdjust: -500,
+        macro: { carb: 40, protein: 35, fat: 25 },
+      };
+
+    case "เพิ่มกล้ามเนื้อ":
+      return {
+        goalLabel: "เพิ่มกล้ามเนื้อ",
+        calorieAdjust: 250,
+        macro: { carb: 45, protein: 30, fat: 25 },
+      };
+
+    case "เพิ่มความแข็งแรง":
+      return {
+        goalLabel: "เพิ่มความแข็งแรง",
+        calorieAdjust: 0,
+        macro: { carb: 45, protein: 30, fat: 25 },
+      };
+
+    case "เพิ่มความทนทานของหัวใจและปอด":
+      return {
+        goalLabel: "เพิ่มความทนทานของหัวใจและปอด",
+        calorieAdjust: 0,
+        macro: { carb: 50, protein: 25, fat: 25 },
+      };
+
+    case "ลดปวด / ฟื้นฟูการเคลื่อนไหว":
+      return {
+        goalLabel: "ลดปวด / ฟื้นฟูการเคลื่อนไหว",
+        calorieAdjust: 0,
+        macro: { carb: 45, protein: 25, fat: 30 },
+      };
+
+    case "สุขภาพทั่วไป":
+    default:
+      return {
+        goalLabel: "สุขภาพทั่วไป",
+        calorieAdjust: 0,
+        macro: { carb: 45, protein: 25, fat: 30 },
+      };
+  }
+}
+
+function nutritionGoalPlan(record) {
+  const estimate = tdeeEstimate(record);
+  if (!estimate) return null;
+
+  const config = goalNutritionConfig(record.goal);
+  const targetCalories = Math.max(
+    1200,
+    Math.round(estimate.tdee + config.calorieAdjust)
+  );
+
+  const carbKcal = Math.round((targetCalories * config.macro.carb) / 100);
+  const proteinKcal = Math.round((targetCalories * config.macro.protein) / 100);
+  const fatKcal = Math.round((targetCalories * config.macro.fat) / 100);
+
+  const carbGram = Math.round(carbKcal / 4);
+  const proteinGram = Math.round(proteinKcal / 4);
+  const fatGram = Math.round(fatKcal / 9);
+
+  const pieData = [
+    {
+      name: "คาร์โบไฮเดรต",
+      shortName: "Carb",
+      percent: config.macro.carb,
+      kcal: carbKcal,
+      grams: carbGram,
+      color: "#E8C1A0",
+    },
+    {
+      name: "ไขมัน",
+      shortName: "Fat",
+      percent: config.macro.fat,
+      kcal: fatKcal,
+      grams: fatGram,
+      color: "#F5D76E",
+    },
+    {
+      name: "โปรตีน",
+      shortName: "Protein",
+      percent: config.macro.protein,
+      kcal: proteinKcal,
+      grams: proteinGram,
+      color: "#F4A6A6",
+    },
+  ];
+
+  return {
+    bmr: estimate.bmr,
+    tdee: estimate.tdee,
+    factor: estimate.factor,
+    activityLabel: estimate.activityLabel,
+    targetCalories,
+    calorieAdjust: config.calorieAdjust,
+    goalLabel: config.goalLabel,
+    pieData,
+  };
+}
+
+function calorieAdjustText(value) {
+  if (!Number.isFinite(Number(value))) return "-";
+  if (value > 0) return `+${value} kcal/day`;
+  if (value < 0) return `${value} kcal/day`;
+  return "±0 kcal/day";
+}
+
+function NutritionPlanCard({ record }) {
+  const plan = nutritionGoalPlan(record);
+
+  if (!plan) {
+    return (
+      <Card title="พลังงานและสารอาหารที่แนะนำ" icon={HeartIcon}>
+        <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-base font-semibold leading-7 text-amber-800">
+          ยังแสดงผลไม่ได้ กรุณากรอกข้อมูลให้ครบก่อน:
+          อายุ + เพศ + ส่วนสูง + น้ำหนักล่าสุดจาก InBody
+        </div>
+      </Card>
+    );
+  }
+
+  return (
+    <Card title="พลังงานและสารอาหารที่แนะนำ" icon={HeartIcon}>
+      <div className="grid gap-5 lg:grid-cols-[0.9fr_1.1fr]">
+        <div className="rounded-2xl border border-slate-200 bg-white p-3">
+          <div className="h-[320px]">
+            <ResponsiveContainer>
+              <PieChart>
+                <Pie
+                  data={plan.pieData}
+                  dataKey="kcal"
+                  nameKey="name"
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={60}
+                  outerRadius={100}
+                  paddingAngle={2}
+                  label={(props) => `${props.payload?.shortName || ""} ${props.payload?.grams || 0}g`}
+                >
+                  {plan.pieData.map((entry) => (
+                    <Cell key={entry.name} fill={entry.color} />
+                  ))}
+                </Pie>
+
+                <Tooltip
+                  formatter={(value, name, props) => [
+                    `${props.payload.grams} g • ${props.payload.kcal} kcal • ${props.payload.percent}%`,
+                    name,
+                  ]}
+                />
+
+                <Legend />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        <div>
+          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+            <Info
+              label="HRmax"
+              value={record.age ? `${220 - num(record.age)} bpm` : "กรอกอายุก่อน"}
+            />
+
+            <Info
+              label="Target HR"
+              value={targetHrText(record.age, record.program?.intensity || "Moderate")}
+            />
+
+            <Info
+              label="BMR"
+              value={`${plan.bmr.toLocaleString()} kcal/day`}
+            />
+
+            <Info
+              label="TDEE"
+              value={`${plan.tdee.toLocaleString()} kcal/day`}
+            />
+
+            <Info
+              label="เป้าหมาย"
+              value={plan.goalLabel}
+            />
+
+            <Info
+              label="แคลอรีที่ควรกิน"
+              value={`${plan.targetCalories.toLocaleString()} kcal/day`}
+              tone="good"
+            />
+          </div>
+
+          <div className="mt-3 grid gap-3 sm:grid-cols-2">
+            <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+              <div className="text-sm font-semibold text-slate-500">
+                ปรับจาก TDEE
+              </div>
+
+              <div className="mt-1 text-xl font-bold text-slate-900">
+                {calorieAdjustText(plan.calorieAdjust)}
+              </div>
+            </div>
+
+            <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+              <div className="text-sm font-semibold text-slate-500">
+                วิธีคำนวณ
+              </div>
+
+              <div className="mt-1 text-sm leading-6 text-slate-700">
+                BMR ใช้สูตร Mifflin-St Jeor
+                <br />
+                TDEE = BMR × Activity Factor ({plan.factor})
+                <br />
+                กราฟแบ่งสารอาหารตามเป้าหมายการออกกำลังกาย
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-4 grid gap-3 md:grid-cols-3">
+            {plan.pieData.map((item) => (
+              <div
+                key={item.name}
+                className="rounded-xl border p-4"
+                style={{
+                  backgroundColor: `${item.color}33`,
+                  borderColor: item.color,
+                }}
+              >
+                <div className="font-bold text-slate-900">{item.name}</div>
+
+                <div className="mt-2 text-sm text-slate-600">
+                  {item.percent}% ของพลังงานทั้งหมด
+                </div>
+
+                <div className="mt-1 text-lg font-bold text-slate-900">
+                  {item.grams.toLocaleString()} g/day
+                </div>
+
+                <div className="text-sm text-slate-500">
+                  {item.kcal.toLocaleString()} kcal
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </Card>
+  );
+}
+
+ffunction Dashboard({ record, back }) {
   const risk = record.parq.some(Boolean);
 
   return (
@@ -1133,6 +1468,8 @@ function Dashboard({ record, back }) {
           </div>
         </Card>
       </div>
+
+      <NutritionPlanCard record={record} />
 
       <CompareTable record={record} title="ตารางเปรียบเทียบ InBody / Body Composition" icon={HeartIcon} list={metrics.inbody} />
       <CompareTable record={record} title="ตารางเปรียบเทียบ Fitness Test 5 ด้าน" icon={ActivityIcon} list={metrics.fitness} withFitnessInterpretation />
