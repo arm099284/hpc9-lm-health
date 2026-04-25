@@ -1258,7 +1258,7 @@ function NutritionPlanCard({ record }) {
   if (!plan) {
     return (
       <Card title="พลังงานและสารอาหารที่แนะนำ" icon={HeartIcon}>
-        <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-base font-semibold leading-7 text-amber-800">
+        <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm font-semibold leading-7 text-amber-800">
           ยังแสดงผลไม่ได้ กรุณากรอกข้อมูลให้ครบก่อน:
           อายุ + เพศ + ส่วนสูง + น้ำหนักล่าสุดจาก InBody
         </div>
@@ -1266,127 +1266,199 @@ function NutritionPlanCard({ record }) {
     );
   }
 
+  const macroColors = {
+    Carb: "#E7C29A",
+    Protein: "#E8A2A2",
+    Fat: "#E8C95F",
+  };
+
+  const chartData = plan.pieData.map((item) => ({
+    ...item,
+    color: macroColors[item.shortName] || item.color,
+  }));
+
+  const adjustText = calorieAdjustText(plan.calorieAdjust);
+  const shouldShowAdjust = plan.calorieAdjust !== 0;
+
   return (
     <Card title="พลังงานและสารอาหารที่แนะนำ" icon={HeartIcon}>
-      <div className="grid gap-5 lg:grid-cols-[0.9fr_1.1fr]">
-        <div className="rounded-2xl border border-slate-200 bg-white p-3">
-          <div className="h-[320px]">
+      <div className="grid gap-5 lg:grid-cols-[0.95fr_1.05fr]">
+        <div className="rounded-3xl border border-slate-200 bg-slate-50/70 p-4">
+          <div className="mb-3">
+            <div className="text-sm font-bold text-slate-900">สัดส่วนสารอาหาร</div>
+            <div className="text-xs text-slate-500">
+              คำนวณจากแคลอรีเป้าหมายต่อวัน
+            </div>
+          </div>
+
+          <div className="h-[280px]">
             <ResponsiveContainer>
               <PieChart>
                 <Pie
-                  data={plan.pieData}
+                  data={chartData}
                   dataKey="kcal"
                   nameKey="name"
                   cx="50%"
                   cy="50%"
-                  innerRadius={60}
-                  outerRadius={100}
-                  paddingAngle={2}
-                  label={(props) => `${props.payload?.shortName || ""} ${props.payload?.grams || 0}g`}
+                  innerRadius={72}
+                  outerRadius={108}
+                  paddingAngle={3}
+                  cornerRadius={8}
+                  stroke="#ffffff"
+                  strokeWidth={3}
+                  label={false}
+                  labelLine={false}
                 >
-                  {plan.pieData.map((entry) => (
+                  {chartData.map((entry) => (
                     <Cell key={entry.name} fill={entry.color} />
                   ))}
                 </Pie>
 
+                <text
+                  x="50%"
+                  y="46%"
+                  textAnchor="middle"
+                  dominantBaseline="middle"
+                  fill="#0F172A"
+                  fontSize="24"
+                  fontWeight="800"
+                >
+                  {plan.targetCalories.toLocaleString()}
+                </text>
+
+                <text
+                  x="50%"
+                  y="57%"
+                  textAnchor="middle"
+                  dominantBaseline="middle"
+                  fill="#64748B"
+                  fontSize="12"
+                  fontWeight="600"
+                >
+                  kcal/day
+                </text>
+
                 <Tooltip
                   formatter={(value, name, props) => [
-                    `${props.payload.grams} g • ${props.payload.kcal} kcal • ${props.payload.percent}%`,
+                    `${props.payload.grams} g/day • ${props.payload.kcal} kcal • ${props.payload.percent}%`,
                     name,
                   ]}
                 />
-
-                <Legend />
               </PieChart>
             </ResponsiveContainer>
           </div>
-        </div>
 
-        <div>
-          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-            <Info
-              label="HRmax"
-              value={record.age ? `${220 - num(record.age)} bpm` : "กรอกอายุก่อน"}
-            />
-
-            <Info
-              label="Target HR"
-              value={targetHrText(record.age, record.program?.intensity || "Moderate")}
-            />
-
-            <Info
-              label="BMR"
-              value={`${plan.bmr.toLocaleString()} kcal/day`}
-            />
-
-            <Info
-              label="TDEE"
-              value={`${plan.tdee.toLocaleString()} kcal/day`}
-            />
-
-            <Info
-              label="เป้าหมาย"
-              value={plan.goalLabel}
-            />
-
-            <Info
-              label="แคลอรีที่ควรกิน"
-              value={`${plan.targetCalories.toLocaleString()} kcal/day`}
-              tone="good"
-            />
-          </div>
-
-          <div className="mt-3 grid gap-3 sm:grid-cols-2">
-            <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
-              <div className="text-sm font-semibold text-slate-500">
-                ปรับจาก TDEE
-              </div>
-
-              <div className="mt-1 text-xl font-bold text-slate-900">
-                {calorieAdjustText(plan.calorieAdjust)}
-              </div>
-            </div>
-
-            <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
-              <div className="text-sm font-semibold text-slate-500">
-                วิธีคำนวณ
-              </div>
-
-              <div className="mt-1 text-sm leading-6 text-slate-700">
-                BMR ใช้สูตร Mifflin-St Jeor
-                <br />
-                TDEE = BMR × Activity Factor ({plan.factor})
-                <br />
-                กราฟแบ่งสารอาหารตามเป้าหมายการออกกำลังกาย
-              </div>
-            </div>
-          </div>
-
-          <div className="mt-4 grid gap-3 md:grid-cols-3">
-            {plan.pieData.map((item) => (
+          <div className="mt-2 grid gap-2">
+            {chartData.map((item) => (
               <div
                 key={item.name}
-                className="rounded-xl border p-4"
-                style={{
-                  backgroundColor: `${item.color}33`,
-                  borderColor: item.color,
-                }}
+                className="flex items-center justify-between rounded-2xl border border-white bg-white px-3 py-2 shadow-sm"
               >
-                <div className="font-bold text-slate-900">{item.name}</div>
-
-                <div className="mt-2 text-sm text-slate-600">
-                  {item.percent}% ของพลังงานทั้งหมด
+                <div className="flex min-w-0 items-center gap-2">
+                  <span
+                    className="h-3 w-3 rounded-full"
+                    style={{ backgroundColor: item.color }}
+                  />
+                  <div className="min-w-0">
+                    <div className="text-sm font-bold text-slate-900">
+                      {item.name}
+                    </div>
+                    <div className="text-xs text-slate-500">
+                      {item.percent}% • {item.kcal.toLocaleString()} kcal
+                    </div>
+                  </div>
                 </div>
 
-                <div className="mt-1 text-lg font-bold text-slate-900">
-                  {item.grams.toLocaleString()} g/day
-                </div>
-
-                <div className="text-sm text-slate-500">
-                  {item.kcal.toLocaleString()} kcal
+                <div className="text-sm font-extrabold text-slate-900">
+                  {item.grams.toLocaleString()} g
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+
+        <div className="space-y-4">
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div className="rounded-3xl border border-emerald-200 bg-emerald-50 p-4">
+              <div className="text-xs font-bold uppercase tracking-wide text-emerald-700">
+                Recommended Calories
+              </div>
+              <div className="mt-2 text-2xl font-extrabold text-slate-900">
+                {plan.targetCalories.toLocaleString()} kcal/day
+              </div>
+              <div className="mt-1 text-xs font-semibold text-emerald-700">
+                แคลอรีที่ควรกินตามเป้าหมาย
+              </div>
+            </div>
+
+            <div className="rounded-3xl border border-slate-200 bg-white p-4">
+              <div className="text-xs font-bold uppercase tracking-wide text-slate-500">
+                Goal
+              </div>
+              <div className="mt-2 text-lg font-extrabold leading-7 text-slate-900">
+                {plan.goalLabel}
+              </div>
+              {shouldShowAdjust && (
+                <div className="mt-1 text-xs font-semibold text-slate-500">
+                  ปรับจาก TDEE {adjustText}
+                </div>
+              )}
+            </div>
+
+            <div className="rounded-3xl border border-slate-200 bg-white p-4">
+              <div className="text-xs font-bold uppercase tracking-wide text-slate-500">
+                TDEE
+              </div>
+              <div className="mt-2 text-xl font-extrabold text-slate-900">
+                {plan.tdee.toLocaleString()} kcal/day
+              </div>
+              <div className="mt-1 text-xs font-semibold text-slate-500">
+                Activity Factor {plan.factor}
+              </div>
+            </div>
+
+            <div className="rounded-3xl border border-slate-200 bg-white p-4">
+              <div className="text-xs font-bold uppercase tracking-wide text-slate-500">
+                BMR
+              </div>
+              <div className="mt-2 text-xl font-extrabold text-slate-900">
+                {plan.bmr.toLocaleString()} kcal/day
+              </div>
+              <div className="mt-1 text-xs font-semibold text-slate-500">
+                Mifflin-St Jeor
+              </div>
+            </div>
+          </div>
+
+          <div className="grid gap-3 md:grid-cols-3">
+            {chartData.map((item) => (
+              <div
+                key={item.shortName}
+                className="rounded-3xl border bg-white p-4 shadow-sm"
+                style={{
+                  borderColor: item.color,
+                  backgroundColor: `${item.color}26`,
+                }}
+              >
+                <div className="text-xs font-bold uppercase tracking-wide text-slate-500">
+                  {item.shortName}
+                </div>
+                <div className="mt-1 text-base font-bold text-slate-900">
+                  {item.name}
+                </div>
+                <div className="mt-3 text-2xl font-extrabold text-slate-900">
+                  {item.grams.toLocaleString()} g
+                </div>
+                <div className="mt-1 text-xs font-semibold text-slate-600">
+                  {item.percent}% • {item.kcal.toLocaleString()} kcal/day
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-xs leading-6 text-slate-600">
+            <b>วิธีคำนวณ:</b> BMR ใช้สูตร Mifflin-St Jeor แล้วคูณ Activity Factor
+            เพื่อหา TDEE จากนั้นปรับแคลอรีตามเป้าหมาย และแบ่งคาร์บ/โปรตีน/ไขมันเป็นกรัมต่อวัน
           </div>
         </div>
       </div>
