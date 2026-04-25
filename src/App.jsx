@@ -2880,7 +2880,7 @@ export default function App() {
   }
 
   useEffect(() => {
-    if (isAdmin) refreshData();
+      refreshData();
   }, [isAdmin]);
 
   function restoreFullBackup(nextRecords, nextAuditLogs = []) {
