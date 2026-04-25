@@ -122,7 +122,7 @@ function csvCell(value) {
 }
 
 function exportRecordsCSV(records) {
-  const header = ["HN", "ชื่อ", "เพศ", "อายุ", "เป้าหมาย", "จำนวนครั้ง", "วันที่ล่าสุด", "น้ำหนักล่าสุด", "Body Fat ล่าสุด", "Muscle ล่าสุด", "รอบเอวล่าสุด", "แก้ไขล่าสุดโดย", "แก้ไขล่าสุดเมื่อ"];
+  const header = ["HN", "ชื่อ", "เพศ", "อายุ", "เป้าหมาย", "จำนวนครั้ง", "วันที่ล่าสุด", "น้ำหนักล่าสุด", "Fat Mass ล่าสุด", "Muscle ล่าสุด", "รอบเอวล่าสุด", "แก้ไขล่าสุดโดย", "แก้ไขล่าสุดเมื่อ"];
   const rows = Object.values(records).map((record) => {
     const sessions = completedSessions(record);
     const latest = sessions[sessions.length - 1] || session(1);
@@ -135,7 +135,7 @@ function exportRecordsCSV(records) {
       sessions.length,
       latest.date,
       latest.inbody.weight,
-      latest.inbody.bodyFat,
+      latest.inbody.fatMass,
       latest.inbody.muscle,
       latest.inbody.waist,
       record.updatedBy || "-",
@@ -252,7 +252,7 @@ function recordQuality(record) {
   const latest = completedSessions(record).slice(-1)[0];
   const missingLatest = [];
   if (latest) {
-    if (!latest.inbody.weight || !latest.inbody.bodyFat || !latest.inbody.muscle) missingLatest.push("InBody สำคัญยังไม่ครบ");
+    if (!latest.inbody.weight || !latest.inbody.fatMass || !latest.inbody.muscle) missingLatest.push("InBody สำคัญยังไม่ครบ");
     if (metrics.fitness.some(([key]) => !latest.fitness[key])) missingLatest.push("Fitness Test ยังไม่ครบ");
   }
   return { issues, filled, missingLatest, complete: issues.length === 0 && missingLatest.length === 0 };
@@ -993,7 +993,7 @@ function CompareTable({ record, title, icon, list, withFitnessInterpretation = f
             <tr>
               <th className="p-3">รายการ</th>
               {record.sessions.map((s) => <th key={s.no} className="p-3">ครั้งที่ {s.no}<br /><span className="font-normal">{s.date || "-"}</span></th>)}
-              <th className="p-3">สรุป 1→4</th>
+              <th className="p-3">สรุป 1→ล่าสุด</th>
               {withFitnessInterpretation && <th className="p-3">แปลผลล่าสุด</th>}
             </tr>
           </thead>
@@ -1339,7 +1339,7 @@ function AdminSummary({ records, auditLogs, onFullBackup, onRestoreBackup }) {
     { label: "ไม่มีอายุ/เพศ", value: rows.filter((r) => !r.record.age || !r.record.sex).length },
     { label: "InBody ไม่ครบ", value: rows.filter((r) => {
       const latest = r.sessions.slice(-1)[0];
-      return !latest || !latest.inbody.weight || !latest.inbody.bodyFat || !latest.inbody.muscle;
+      return !latest || !latest.inbody.weight || !latest.inbody.fatMass || !latest.inbody.muscle;
     }).length },
     { label: "Fitness ไม่ครบ", value: rows.filter((r) => {
       const latest = r.sessions.slice(-1)[0];
