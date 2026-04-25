@@ -1318,14 +1318,12 @@ function AdminSummary({ records, auditLogs, onFullBackup, onRestoreBackup }) {
   function summaryTone(goodCount, badCount) {
     if (goodCount > badCount) return "good";
     if (badCount > goodCount) return "bad";
-    if (goodCount > 0 && badCount > 0) return "warn";
     return "gray";
   }
 
   function summaryText(goodCount, badCount) {
     if (goodCount > badCount) return `ดีขึ้น ${goodCount} ตัวชี้วัด`;
     if (badCount > goodCount) return `แย่ลง ${badCount} ตัวชี้วัด`;
-    if (goodCount > 0 && badCount > 0) return `ผสม ดีขึ้น ${goodCount} / แย่ลง ${badCount}`;
     return "คงเดิม";
   }
 
@@ -1373,7 +1371,6 @@ function AdminSummary({ records, auditLogs, onFullBackup, onRestoreBackup }) {
     const fatMass = deltaFromSessions(sessions, metrics.inbody[4]);
     const weight = deltaFromSessions(sessions, metrics.inbody[0]);
     const muscle = deltaFromSessions(sessions, metrics.inbody[3]);
-    const waist = deltaFromSessions(sessions, metrics.inbody[6]);
 
     const step = deltaFromSessions(sessions, metrics.fitness[0]);
     const grip = deltaFromSessions(sessions, metrics.fitness[1]);
@@ -1432,7 +1429,6 @@ function AdminSummary({ records, auditLogs, onFullBackup, onRestoreBackup }) {
       fatMass,
       weight,
       muscle,
-      waist,
       step,
       grip,
       sitstand,
@@ -1449,8 +1445,7 @@ function AdminSummary({ records, auditLogs, onFullBackup, onRestoreBackup }) {
 
   const improved = comparable.filter((r) => r.goodCount > r.badCount).length;
   const needFollow = comparable.filter((r) => r.badCount > r.goodCount).length;
-  const mixed = comparable.filter((r) => r.goodCount === r.badCount && r.goodCount > 0).length;
-  const noChange = comparable.filter((r) => r.goodCount === 0 && r.badCount === 0).length;
+  const noChange = comparable.filter((r) => r.goodCount === r.badCount).length;
 
   const ageLabel = ageOptions.find((x) => x.value === ageFilter)?.label || "ทุกช่วงอายุ";
 
@@ -1552,8 +1547,7 @@ function AdminSummary({ records, auditLogs, onFullBackup, onRestoreBackup }) {
         comparable: groupComparable.length,
         ดีขึ้น: groupComparable.filter((r) => r.goodCount > r.badCount).length,
         แย่ลง: groupComparable.filter((r) => r.badCount > r.goodCount).length,
-        ผสม: groupComparable.filter((r) => r.goodCount === r.badCount && r.goodCount > 0).length,
-        คงเดิม: groupComparable.filter((r) => r.goodCount === 0 && r.badCount === 0).length,
+        คงเดิม: groupComparable.filter((r) => r.goodCount === r.badCount).length,
         ข้อมูลไม่พอ: groupRows.filter((r) => r.sessions.length < 2).length,
       };
     });
@@ -1568,7 +1562,7 @@ function AdminSummary({ records, auditLogs, onFullBackup, onRestoreBackup }) {
     );
 
     return (
-      r.badCount >= 2 ||
+      r.badCount > r.goodCount ||
       r.record.parq.some(Boolean) ||
       r.bodyFat.tone === "bad" ||
       r.fatMass.tone === "bad" ||
@@ -1643,7 +1637,7 @@ function AdminSummary({ records, auditLogs, onFullBackup, onRestoreBackup }) {
         comparable: groupComparable.length,
         improved: groupComparable.filter((r) => r.goodCount > r.badCount).length,
         worsened: groupComparable.filter((r) => r.badCount > r.goodCount).length,
-        mixed: groupComparable.filter((r) => r.goodCount === r.badCount && r.goodCount > 0).length,
+        unchanged: groupComparable.filter((r) => r.goodCount === r.badCount).length,
         incomplete: groupRows.filter((r) => r.sessions.length < 2).length,
       };
     })
@@ -1674,7 +1668,6 @@ function AdminSummary({ records, auditLogs, onFullBackup, onRestoreBackup }) {
   const summaryChartRows = [
     { name: "ดีขึ้น", value: improved },
     { name: "ต้องติดตาม", value: needFollow },
-    { name: "ผสม", value: mixed },
     { name: "คงเดิม", value: noChange },
     { name: "ข้อมูลไม่พอ", value: notEnough.length },
   ];
@@ -1778,7 +1771,7 @@ function AdminSummary({ records, auditLogs, onFullBackup, onRestoreBackup }) {
           <Info label="เทียบได้ ≥2 ครั้ง" value={`${comparable.length} คน`} tone="admin" />
           <Info label="ดีขึ้น" value={`${improved} คน`} tone="good" />
           <Info label="ต้องติดตาม" value={`${needFollow} คน`} tone={needFollow ? "fat" : "default"} />
-          <Info label="ผสม" value={`${mixed} คน`} tone={mixed ? "admin" : "default"} />
+          <Info label="คงเดิม" value={`${noChange} คน`} />
         </div>
       </Card>
 
@@ -1866,7 +1859,7 @@ function AdminSummary({ records, auditLogs, onFullBackup, onRestoreBackup }) {
                   <th className="p-3">เทียบได้</th>
                   <th className="p-3">ดีขึ้น</th>
                   <th className="p-3">แย่ลง</th>
-                  <th className="p-3">ผสม</th>
+                  <th className="p-3">คงเดิม</th>
                   <th className="p-3">ข้อมูลไม่พอ</th>
                 </tr>
               </thead>
@@ -1884,7 +1877,7 @@ function AdminSummary({ records, auditLogs, onFullBackup, onRestoreBackup }) {
                       <Pill tone={row.worsened ? "bad" : "gray"}>{row.worsened}</Pill>
                     </td>
                     <td className="p-3">
-                      <Pill tone={row.mixed ? "warn" : "gray"}>{row.mixed}</Pill>
+                      <Pill tone="gray">{row.unchanged}</Pill>
                     </td>
                     <td className="p-3">{row.incomplete}</td>
                   </tr>
@@ -1904,7 +1897,7 @@ function AdminSummary({ records, auditLogs, onFullBackup, onRestoreBackup }) {
                   <th className="p-3">เทียบได้</th>
                   <th className="p-3">ดีขึ้น</th>
                   <th className="p-3">แย่ลง</th>
-                  <th className="p-3">ผสม</th>
+                  <th className="p-3">คงเดิม</th>
                   <th className="p-3">ข้อมูลไม่พอ</th>
                 </tr>
               </thead>
@@ -1922,7 +1915,7 @@ function AdminSummary({ records, auditLogs, onFullBackup, onRestoreBackup }) {
                       <Pill tone={row.แย่ลง ? "bad" : "gray"}>{row.แย่ลง}</Pill>
                     </td>
                     <td className="p-3">
-                      <Pill tone={row.ผสม ? "warn" : "gray"}>{row.ผสม}</Pill>
+                      <Pill tone="gray">{row.คงเดิม}</Pill>
                     </td>
                     <td className="p-3">{row.ข้อมูลไม่พอ}</td>
                   </tr>
