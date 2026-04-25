@@ -46,7 +46,56 @@ const AUDIT_STORAGE_KEY = "hpc9_lm_audit_logs_v1";
 const clone = (x) => JSON.parse(JSON.stringify(x));
 const num = (v) => (Number.isFinite(Number(v)) ? Number(v) : 0);
 const show = (v) => (v === "" || v === null || v === undefined ? "-" : v);
-const todayThai = () => new Date().toLocaleString("th-TH", { dateStyle: "medium", timeStyle: "short" });
+const todayThai = () => new Date().toISOString();
+
+function todayThaiDateText() {
+  const now = new Date();
+  const yyyy = now.getFullYear() + 543;
+  const mm = String(now.getMonth() + 1).padStart(2, "0");
+  const dd = String(now.getDate()).padStart(2, "0");
+  return `${dd}/${mm}/${yyyy}`;
+}
+
+function formatDateTimeThai(value) {
+  if (!value) return "-";
+
+  const date = new Date(value);
+  if (!Number.isNaN(date.getTime())) {
+    const dd = String(date.getDate()).padStart(2, "0");
+    const mm = String(date.getMonth() + 1).padStart(2, "0");
+    const yyyy = date.getFullYear() + 543;
+    const hh = String(date.getHours()).padStart(2, "0");
+    const min = String(date.getMinutes()).padStart(2, "0");
+
+    return `${dd}/${mm}/${yyyy} ${hh}.${min} น.`;
+  }
+
+  return String(value)
+    .replace("T", " ")
+    .split("+")[0]
+    .replace(/([0-9]{1,2}):([0-9]{2})/, "$1.$2");
+}
+
+function formatDateOnlyThai(value) {
+  if (!value) return "";
+
+  const text = String(value);
+
+  if (/^[0-9]{2}\/[0-9]{2}\/[0-9]{4}$/.test(text)) return text;
+
+  const parts = text.split("-");
+  if (parts.length === 3) {
+    let y = Number(parts[0]);
+    const m = parts[1];
+    const d = parts[2].slice(0, 2);
+
+    if (y < 2400) y += 543;
+
+    return `${d}/${m}/${y}`;
+  }
+
+  return text;
+}
 const createAuditEntry = ({ adminUser, action, hn, detail = "" }) => ({
   id: `${Date.now()}-${Math.random().toString(36).slice(2)}`,
   at: todayThai(),
