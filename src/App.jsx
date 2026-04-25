@@ -1839,7 +1839,6 @@ export default function App() {
   }
 
   async function refreshData() {
-    if (!isAdmin) return;
     setSyncStatus("loading");
     try {
       const [dbRecords, dbAuditLogs] = await Promise.all([
