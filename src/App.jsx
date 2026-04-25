@@ -1101,7 +1101,7 @@ function AuditLogPanel({ auditLogs }) {
             <tr><th className="p-3">เวลา</th><th className="p-3">ผู้ดำเนินการ</th><th className="p-3">Action</th><th className="p-3">HN</th><th className="p-3">รายละเอียด</th></tr>
           </thead>
           <tbody>
-            {auditLogs.slice(0, 20).map((log) => (
+            {auditLogs.slice(0, 10).map((log) => (
               <tr key={log.id} className="border-t border-slate-100">
                 <td className="p-3 text-sm text-slate-600">{formatDateTimeThai(log.at)}</td>
                 <td className="p-3"><div className="font-bold text-slate-900">{log.adminName}</div><div className="text-sm text-slate-500">{log.adminId} • {log.role}</div></td>
