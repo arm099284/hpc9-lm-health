@@ -357,7 +357,7 @@ export async function loadAuditLogs() {
     .from("audit_logs")
     .select("*")
     .order("created_at", { ascending: false })
-    .limit(100);
+    .limit(50);
 
   if (error) throw error;
 
