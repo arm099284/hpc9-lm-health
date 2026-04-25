@@ -637,11 +637,9 @@ function sitReachThreshold(age, sex) {
 }
 
 function tugThreshold(age) {
-  const a = num(age);
-  if (a < 60) return { good: 7, standard: 10 };
-  if (a < 70) return { good: 8, standard: 9.5 };
-  if (a < 80) return { good: 9, standard: 10.5 };
-  return { good: 10, standard: 12.6 };
+  // TUG: เวลายิ่งน้อยยิ่งดี
+  // ใช้เกณฑ์คัดกรองแบบใช้งานง่ายในคลินิก: ≤10 วินาที = ดีมาก, >10–12 วินาที = ตามเกณฑ์/เฝ้าระวัง, >12 วินาที = ต่ำกว่าเกณฑ์
+  return { good: 10, standard: 12 };
 }
 
 function classifyHigher(value, expected, detail) {
@@ -684,9 +682,9 @@ function classifyFitness(record, key, value, sessionData) {
 
   if (key === "tug") {
     const t = tugThreshold(age);
-    if (v <= t.good) return makeInterpret("ดีมาก", `TUG ตามช่วงอายุ`);
-    if (v <= t.standard) return makeInterpret("ตามเกณฑ์", `TUG ตามช่วงอายุ`);
-    return makeInterpret("ต่ำกว่าเกณฑ์", `TUG ตามช่วงอายุ`);
+    if (v <= t.good) return makeInterpret("ดีมาก", `TUG ≤10 วินาที`);
+    if (v <= t.standard) return makeInterpret("ตามเกณฑ์", `TUG >10–12 วินาที`);
+    return makeInterpret("ต่ำกว่าเกณฑ์", `TUG >12 วินาที ควรติดตามความเสี่ยงการล้ม/การทรงตัว`);
   }
 
   return makeInterpret("รอข้อมูล", "");
@@ -954,7 +952,7 @@ function CompareTable({ record, title, icon, list, withFitnessInterpretation = f
             <tr>
               <th className="p-3">รายการ</th>
               {record.sessions.map((s) => <th key={s.no} className="p-3">ครั้งที่ {s.no}<br /><span className="font-normal">{s.date || "-"}</span></th>)}
-              <th className="p-3">สรุป 1→ล่าสุด</th>
+              <th className="p-3">สรุป 1→4</th>
               {withFitnessInterpretation && <th className="p-3">แปลผลล่าสุด</th>}
             </tr>
           </thead>
