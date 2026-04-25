@@ -47,7 +47,6 @@ const clone = (x) => JSON.parse(JSON.stringify(x));
 const num = (v) => (Number.isFinite(Number(v)) ? Number(v) : 0);
 const show = (v) => (v === "" || v === null || v === undefined ? "-" : v);
 const todayThai = () => new Date().toISOString();
-
 function todayThaiDateText() {
   const now = new Date();
   const yyyy = now.getFullYear() + 543;
@@ -58,7 +57,6 @@ function todayThaiDateText() {
 
 function formatDateTimeThai(value) {
   if (!value) return "-";
-
   const date = new Date(value);
   if (!Number.isNaN(date.getTime())) {
     const dd = String(date.getDate()).padStart(2, "0");
@@ -66,35 +64,37 @@ function formatDateTimeThai(value) {
     const yyyy = date.getFullYear() + 543;
     const hh = String(date.getHours()).padStart(2, "0");
     const min = String(date.getMinutes()).padStart(2, "0");
-
     return `${dd}/${mm}/${yyyy} ${hh}.${min} น.`;
   }
-
-  return String(value)
-    .replace("T", " ")
-    .split("+")[0]
-    .replace(/([0-9]{1,2}):([0-9]{2})/, "$1.$2");
+  return String(value).replace("T", " ").split("+")[0].replace(/([0-9]{1,2}):([0-9]{2})/, "$1.$2");
 }
 
 function formatDateOnlyThai(value) {
   if (!value) return "";
-
   const text = String(value);
-
   if (/^[0-9]{2}\/[0-9]{2}\/[0-9]{4}$/.test(text)) return text;
-
   const parts = text.split("-");
   if (parts.length === 3) {
     let y = Number(parts[0]);
     const m = parts[1];
     const d = parts[2].slice(0, 2);
-
     if (y < 2400) y += 543;
-
     return `${d}/${m}/${y}`;
   }
-
   return text;
+}
+
+function sessionHasAnyData(s) {
+  if (!s) return false;
+  const inbodyValues = Object.values(s.inbody || {});
+  const fitnessValues = Object.values(s.fitness || {});
+  const ohsValues = Array.isArray(s.ohs) ? s.ohs : [];
+  return Boolean(
+    s.note ||
+    inbodyValues.some((v) => v !== "" && v !== null && v !== undefined) ||
+    fitnessValues.some((v) => v !== "" && v !== null && v !== undefined) ||
+    ohsValues.some((v) => v && v !== "ปกติ")
+  );
 }
 const createAuditEntry = ({ adminUser, action, hn, detail = "" }) => ({
   id: `${Date.now()}-${Math.random().toString(36).slice(2)}`,
@@ -233,7 +233,8 @@ function recordQuality(record) {
 
   completedSessions(record).forEach((s) => {
     const prefix = `ครั้งที่ ${s.no}`;
-    if (!s.date) issues.push(`${prefix}: ยังไม่มีวันที่ประเมิน`);
+    const sessionDate = formatDateOnlyThai(s.date || (sessionHasAnyData(s) ? todayThaiDateText() : ""));
+    if (sessionHasAnyData(s) && !sessionDate) issues.push(`${prefix}: ยังไม่มีวันที่ประเมิน`);
     checkRange(`${prefix}: น้ำหนัก`, s.inbody.weight, 20, 250, issues);
     checkRange(`${prefix}: Body Fat %`, s.inbody.bodyFat, 3, 70, issues);
     checkRange(`${prefix}: Muscle Mass`, s.inbody.muscle, 5, 80, issues);
@@ -1568,7 +1569,14 @@ ${quality.issues.slice(0, 8).join("\n")}
       if (!ok) return;
     }
     const existed = Boolean(records[draft.hn]);
-    const saved = { ...clone(draft), updatedBy: adminUser?.name || "admin", updatedById: adminUser?.id || "admin", updatedAt: todayThai() };
+    const preparedDraft = {
+      ...clone(draft),
+      sessions: draft.sessions.map((s) => ({
+        ...s,
+        date: s.date || (sessionHasAnyData(s) ? todayThaiDateText() : ""),
+      })),
+    };
+    const saved = { ...preparedDraft, updatedBy: adminUser?.name || "admin", updatedById: adminUser?.id || "admin", updatedAt: todayThai() };
     try {
       await saveRecordToSupabase(saved, adminUser);
       setRecords((old) => ({ ...old, [saved.hn]: saved }));
@@ -1685,7 +1693,8 @@ ${quality.issues.slice(0, 8).join("\n")}
 }
 
 function DataQualityPanel({ record }) {
-  const quality = recordQuality(record);
+  const normalizedRecord = { ...record, sessions: record.sessions.map((s) => ({ ...s, date: s.date || (sessionHasAnyData(s) ? todayThaiDateText() : "") })) };
+  const quality = recordQuality(normalizedRecord);
   return (
     <Card title="สถานะข้อมูล" icon={ClipboardIcon} right={<Pill tone={quality.complete ? "good" : quality.issues.length ? "bad" : "warn"}>{quality.complete ? "ครบพร้อมใช้" : "ควรตรวจสอบ"}</Pill>}>
       <div className="grid gap-3 md:grid-cols-3">
@@ -1789,11 +1798,15 @@ function ProgramForm({ draft, update }) {
 function SessionForm({ draft, update, idx }) {
   const s = draft.sessions[idx];
   const base = ["sessions", idx];
+
+  useEffect(() => {
+    if (!s?.date) update([...base, "date"], todayThaiDateText());
+  }, [idx]);
   return <div className="space-y-5"><Card title={`ข้อมูลครั้งที่ ${idx + 1}`} icon={ClipboardIcon} right={<div className="flex flex-wrap items-center gap-2"><button type="button" onClick={() => { const ok = window.confirm(`ยืนยันการลบข้อมูลครั้งที่ ${idx + 1}
 
 ข้อมูล InBody, Fitness Test, OHS, วันที่ประเมิน และหมายเหตุของครั้งนี้จะถูกล้างออก
 
-ต้องการลบจริงหรือไม่?`); if (ok) update(["sessions", idx], session(idx + 1)); }} className="rounded-full border border-rose-200 bg-rose-50 px-3 py-1 text-sm font-semibold text-rose-700 hover:bg-rose-100">ลบครั้งนี้</button><Pill tone="dark">ครั้งที่ {idx + 1}/4</Pill></div>}><div className="grid gap-4 md:grid-cols-2"><Field label="วันที่ประเมินอัตโนมัติ (วัน/เดือน/ปี พ.ศ.)" value={formatDateOnlyThai(s.date || todayThaiDateText())} onChange={(v) => update([...base, "date"], v)} /><Field label="หมายเหตุสั้น ๆ" value={s.note} onChange={(v) => update([...base, "note"], v)} /></div></Card><Card title="InBody / Body Composition" icon={HeartIcon}><div className="grid items-stretch gap-4 md:grid-cols-4"><Info label="BMI คำนวณอัตโนมัติ" value={s.inbody.bmi || "กรอกน้ำหนักและส่วนสูง"} />{metrics.inbody.filter(([key]) => key !== "bmi").map(([key, label, unit]) => <Field key={key} label={`${label} (${unit})`} value={s.inbody[key]} onChange={(v) => update([...base, "inbody", key], v)} type="number" tone={metricTone(key)} />)}</div></Card><Card title="Fitness Test 5 ด้าน" icon={ActivityIcon}><div className="grid gap-4 md:grid-cols-5">{metrics.fitness.map(([key, label, unit]) => <Field key={key} label={`${label} (${unit})`} value={s.fitness[key]} onChange={(v) => update([...base, "fitness", key], v)} type="number" />)}</div></Card><Card title="Overhead Deep Squat" icon={ClipboardIcon}><div className="grid gap-3 md:grid-cols-2">{ohsItems.map((x, i) => <Select key={x} label={x} value={s.ohs[i]} onChange={(v) => update([...base, "ohs", i], v)} options={["ปกติ", "ต้องระวัง", "ควรปรับแก้"]} />)}</div></Card></div>;
+ต้องการลบจริงหรือไม่?`); if (ok) update(["sessions", idx], session(idx + 1)); }} className="rounded-full border border-rose-200 bg-rose-50 px-3 py-1 text-sm font-semibold text-rose-700 hover:bg-rose-100">ลบครั้งนี้</button><Pill tone="dark">ครั้งที่ {idx + 1}/4</Pill></div>}><div className="grid gap-4 md:grid-cols-2"><Field label="วันที่ประเมินอัตโนมัติ (พ.ศ. YYYY-MM-DD)" value={s.date || todayThaiDateText()} onChange={(v) => update([...base, "date"], v)} /><Field label="หมายเหตุสั้น ๆ" value={s.note} onChange={(v) => update([...base, "note"], v)} /></div></Card><Card title="InBody / Body Composition" icon={HeartIcon}><div className="grid items-stretch gap-4 md:grid-cols-4"><Info label="BMI คำนวณอัตโนมัติ" value={s.inbody.bmi || "กรอกน้ำหนักและส่วนสูง"} />{metrics.inbody.filter(([key]) => key !== "bmi").map(([key, label, unit]) => <Field key={key} label={`${label} (${unit})`} value={s.inbody[key]} onChange={(v) => update([...base, "inbody", key], v)} type="number" tone={metricTone(key)} />)}</div></Card><Card title="Fitness Test 5 ด้าน" icon={ActivityIcon}><div className="grid gap-4 md:grid-cols-5">{metrics.fitness.map(([key, label, unit]) => <Field key={key} label={`${label} (${unit})`} value={s.fitness[key]} onChange={(v) => update([...base, "fitness", key], v)} type="number" />)}</div></Card><Card title="Overhead Deep Squat" icon={ClipboardIcon}><div className="grid gap-3 md:grid-cols-2">{ohsItems.map((x, i) => <Select key={x} label={x} value={s.ohs[i]} onChange={(v) => update([...base, "ohs", i], v)} options={["ปกติ", "ต้องระวัง", "ควรปรับแก้"]} />)}</div></Card></div>;
 }
 
 export default function App() {
