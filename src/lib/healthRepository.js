@@ -2,20 +2,66 @@ import { supabase } from "./supabaseClient";
 
 function toIsoDate(dateText) {
   if (!dateText) return null;
-  const parts = String(dateText).split("-");
-  if (parts.length !== 3) return null;
 
-  let y = Number(parts[0]);
-  const m = parts[1];
-  const d = parts[2];
+  const text = String(dateText).trim();
+  let d = "";
+  let m = "";
+  let y = "";
 
-  // ถ้ากรอกเป็น พ.ศ. เช่น 2569-05-01 ให้แปลงเป็น ค.ศ. 2026-05-01 ก่อนบันทึกฐานข้อมูล
-  if (y > 2400) y -= 543;
+  // รับรูปแบบ วัน/เดือน/ปี พ.ศ. เช่น 25/04/2569
+  if (text.includes("/")) {
+    const parts = text.split("/");
+    if (parts.length !== 3) return null;
 
-  return `${y}-${m}-${d}`;
+    d = parts[0];
+    m = parts[1];
+    y = parts[2];
+  }
+
+  // ยังรองรับรูปแบบเดิม ปี-เดือน-วัน เช่น 2569-04-25
+  else if (text.includes("-")) {
+    const parts = text.split("-");
+    if (parts.length !== 3) return null;
+
+    y = parts[0];
+    m = parts[1];
+    d = parts[2];
+  } else {
+    return null;
+  }
+
+  let year = Number(y);
+  if (!year || !m || !d) return null;
+
+  // ถ้าเป็น พ.ศ. ให้แปลงเป็น ค.ศ. ก่อนบันทึกลง Supabase
+  if (year > 2400) year -= 543;
+
+  const mm = String(m).padStart(2, "0");
+  const dd = String(d).slice(0, 2).padStart(2, "0");
+
+  return `${year}-${mm}-${dd}`;
 }
 
 function toThaiDateText(dateText) {
+  if (!dateText) return "";
+
+  const text = String(dateText).trim();
+
+  // ถ้าเป็นรูปแบบไทยอยู่แล้ว ให้ใช้เลย
+  if (/^[0-9]{2}\/[0-9]{2}\/[0-9]{4}$/.test(text)) return text;
+
+  // แปลงจาก ค.ศ. ใน Supabase เช่น 2026-04-25 → 25/04/2569
+  const parts = text.split("-");
+  if (parts.length !== 3) return "";
+
+  let y = Number(parts[0]);
+  const m = parts[1];
+  const d = parts[2].slice(0, 2);
+
+  if (y < 2400) y += 543;
+
+  return `${d}/${m}/${y}`;
+}
   if (!dateText) return "";
   const parts = String(dateText).split("-");
   if (parts.length !== 3) return "";
