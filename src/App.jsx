@@ -1051,27 +1051,73 @@ function Dashboard({ record, back }) {
       <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
         <div className="flex flex-col justify-between gap-3 md:flex-row md:items-center">
           <div>
-            <div className="mb-2 flex flex-wrap gap-2"><Pill tone="dark">HN {record.hn}</Pill><Pill>บันทึก 4 ครั้ง</Pill><Pill tone={risk ? "bad" : "good"}>{risk ? "PAR-Q ควรประเมินเพิ่ม" : "PAR-Q ผ่าน"}</Pill></div>
-            <h2 className="text-3xl font-bold text-slate-900">{record.name || "ไม่ระบุชื่อ"}</h2>
-            <p className="mt-1 text-base text-slate-500">{record.sex} • อายุ {show(record.age)} ปี • ส่วนสูง {show(record.height)} ซม. • เป้าหมาย: {record.goal}</p>
+            <div className="mb-2 flex flex-wrap gap-2">
+              <Pill tone="dark">HN {record.hn}</Pill>
+              <Pill>บันทึก 4 ครั้ง</Pill>
+              <Pill tone={risk ? "bad" : "good"}>
+                {risk ? "PAR-Q ควรประเมินเพิ่ม" : "PAR-Q ผ่าน"}
+              </Pill>
+            </div>
+
+            <h2 className="text-3xl font-bold text-slate-900">
+              {record.name || "ไม่ระบุชื่อ"}
+            </h2>
+
+            <p className="mt-1 text-base text-slate-500">
+              {record.sex} • อายุ {show(record.age)} ปี • ส่วนสูง {show(record.height)} ซม. • เป้าหมาย: {record.goal}
+            </p>
           </div>
-          <div className="flex flex-wrap gap-2"><button onClick={printPage} className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-base font-semibold text-slate-700 hover:bg-slate-50">พิมพ์ / PDF รายบุคคล</button><button onClick={back} className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-base font-semibold text-slate-700 hover:bg-slate-100">กลับไปกรอก HN</button></div>
+
+          <div className="flex flex-wrap gap-2">
+            <button
+              onClick={printPage}
+              className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-base font-semibold text-slate-700 hover:bg-slate-50"
+            >
+              พิมพ์ / PDF รายบุคคล
+            </button>
+
+            <button
+              onClick={back}
+              className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-base font-semibold text-slate-700 hover:bg-slate-100"
+            >
+              กลับไปกรอก HN
+            </button>
+          </div>
         </div>
       </section>
+
       <Summary record={record} />
+
       <div className="grid gap-5 lg:grid-cols-[1.2fr_.8fr]">
         <Trend record={record} />
+
         <Card title="โปรแกรมที่ได้รับ" icon={FileIcon}>
           <div className="grid gap-3 sm:grid-cols-2">
-            <Info label="Program Type" value={record.program.type || record.program.split} /><Info label="Cardio" value={`${show(record.program.cardioType)} • ${show(record.program.cardioFrequency)} วัน/สัปดาห์ • ${show(record.program.cardioDuration)} นาที`} /><Info label="Strength" value={`${show(record.program.strengthFrequency)} วัน/สัปดาห์ • ${show(record.program.strengthDose)}`} /><Info label="Intensity" value={`${show(record.program.intensity)} • RPE ${show(record.program.rpe)}`} /><Info label="Talk Test" value={record.program.talk} /><Info label="Target HR" value={targetHrText(record.age, record.program.intensity)} /><Info label="Focus" value={record.program.focus} />
+            <Info label="Program Type" value={record.program.type || record.program.split} />
+            <Info label="Cardio" value={`${show(record.program.cardioType)} • ${show(record.program.cardioFrequency)} วัน/สัปดาห์ • ${show(record.program.cardioDuration)} นาที`} />
+            <Info label="Strength" value={`${show(record.program.strengthFrequency)} วัน/สัปดาห์ • ${show(record.program.strengthDose)}`} />
+            <Info label="Intensity" value={`${show(record.program.intensity)} • RPE ${show(record.program.rpe)}`} />
+            <Info label="Talk Test" value={record.program.talk} />
+            <Info label="Target HR" value={targetHrText(record.age, record.program.intensity)} />
+            <Info label="Focus" value={record.program.focus} />
           </div>
+
           <div className="mt-3 grid gap-3">
-            {record.program.precaution && <div className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-base leading-6 text-amber-800"><b>ข้อควรระวัง:</b> {record.program.precaution}</div>}
-            {record.program.followUp && <div className="rounded-xl border border-slate-200 bg-slate-50 p-3 text-base leading-6 text-slate-700"><b>ติดตาม:</b> {record.program.followUp}</div>}
-            <div className="rounded-xl border border-slate-200 bg-slate-50 p-3 text-base leading-6 text-slate-700"><b>คำแนะนำ:</b> {show(record.program.note)}</div>
+            {record.program.precaution && (
+              <div className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-base leading-6 text-amber-800">
+                <b>ข้อควรระวัง:</b> {record.program.precaution}
+              </div>
+            )}
+
+            {record.program.followUp && (
+              <div className="rounded-xl border border-slate-200 bg-slate-50 p-3 text-base leading-6 text-slate-700">
+                <b>คำแนะนำเพิ่มเติม:</b> {record.program.followUp}
+              </div>
+            )}
           </div>
         </Card>
       </div>
+
       <CompareTable record={record} title="ตารางเปรียบเทียบ InBody / Body Composition" icon={HeartIcon} list={metrics.inbody} />
       <CompareTable record={record} title="ตารางเปรียบเทียบ Fitness Test 5 ด้าน" icon={ActivityIcon} list={metrics.fitness} withFitnessInterpretation />
       <OhsTable record={record} />
