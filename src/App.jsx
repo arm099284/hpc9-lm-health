@@ -480,10 +480,24 @@ const initialRecords = {
 };
 
 function valueOf(s, key) {
-  if (s.inbody[key] !== undefined) return num(s.inbody[key]);
-  if (s.fitness[key] !== undefined) return num(s.fitness[key]);
-  if (key === "ohs") return s.ohs.filter((x) => x === "ปกติ").length;
-  return 0;
+  if (!s) return null;
+
+  // OHS: นับจำนวนข้อที่เป็น "ปกติ" จาก array ของ OHS
+  // เช่น ปกติ 5 ข้อ = 5/6
+  if (key === "ohs") {
+    if (!Array.isArray(s.ohs)) return null;
+    return s.ohs.filter((x) => x === "ปกติ").length;
+  }
+
+  const raw = s.inbody?.[key] ?? s.fitness?.[key];
+
+  // ค่าว่างต้องเป็น null ไม่ใช่ 0
+  // เพื่อไม่ให้กราฟเข้าใจผิดว่ายังไม่ได้กรอก = 0
+  if (raw === "" || raw === null || raw === undefined) return null;
+
+  const n = Number(raw);
+
+  return Number.isFinite(n) ? n : null;
 }
 
 function closeYAxisDomain(values) {
