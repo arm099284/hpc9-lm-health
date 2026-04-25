@@ -1805,26 +1805,66 @@ function ParqForm({ draft, update }) {
 
 function ProgramForm({ draft, update }) {
   const program = draft.program || {};
+
   return (
     <div className="space-y-5">
       <Card title="Exercise Prescription" icon={FileIcon}>
         <div className="grid gap-4 md:grid-cols-2">
-          <Select label="Program Type" value={program.type || program.split || "Full Body"} onChange={(v) => update(["program", "type"], v)} options={["Full Body", "Upper/Lower", "PPL", "Bro Split", "Mobility/Corrective", "Home Program"]} />
-          <Select label="Intensity" value={program.intensity || "Moderate"} onChange={(v) => update(["program", "intensity"], v)} options={["Light", "Moderate", "Vigorous", "Individualized"]} />
+          <Select
+            label="Program Type"
+            value={program.type || program.split || "Full Body"}
+            onChange={(v) => update(["program", "type"], v)}
+            options={["Full Body", "Upper/Lower", "PPL", "Bro Split", "Mobility/Corrective", "Home Program"]}
+          />
+
+          <Select
+            label="Intensity"
+            value={program.intensity || "Moderate"}
+            onChange={(v) => update(["program", "intensity"], v)}
+            options={["Light", "Moderate", "Vigorous", "Individualized"]}
+          />
         </div>
       </Card>
 
       <div className="grid items-stretch gap-5 lg:grid-cols-2">
         <Card title="Cardio Plan" icon={ActivityIcon}>
           <div className="grid gap-4 md:grid-cols-3">
-            <Select label="ประเภท" value={program.cardioType || "เดินเร็ว"} onChange={(v) => update(["program", "cardioType"], v)} options={["เดินเร็ว", "เดินสะสม", "ปั่นจักรยาน", "วิ่งเบา", "ว่ายน้ำ", "อื่น ๆ"]} />
-            <Field label="วัน/สัปดาห์" value={program.cardioFrequency || ""} onChange={(v) => update(["program", "cardioFrequency"], v)} />
-            <Field label="นาที/ครั้ง" value={program.cardioDuration || ""} onChange={(v) => update(["program", "cardioDuration"], v)} />
+            <Select
+              label="ประเภท"
+              value={program.cardioType || "เดินเร็ว"}
+              onChange={(v) => update(["program", "cardioType"], v)}
+              options={["เดินเร็ว", "เดินสะสม", "ปั่นจักรยาน", "วิ่งเบา", "ว่ายน้ำ", "อื่น ๆ"]}
+            />
+
+            <Field
+              label="วัน/สัปดาห์"
+              value={program.cardioFrequency || ""}
+              onChange={(v) => update(["program", "cardioFrequency"], v)}
+            />
+
+            <Field
+              label="นาที/ครั้ง"
+              value={program.cardioDuration || ""}
+              onChange={(v) => update(["program", "cardioDuration"], v)}
+            />
           </div>
+
           <div className="mt-4 grid gap-4 md:grid-cols-2">
-            <Select label="RPE" value={program.rpe || "4–6"} onChange={(v) => update(["program", "rpe"], v)} options={["2–3", "4–6", "7–8"]} />
-            <Select label="Talk Test" value={program.talk || "พูดเป็นประโยค"} onChange={(v) => update(["program", "talk"], v)} options={["พูดสบาย", "พูดเป็นประโยค", "พูดเป็นคำ ๆ"]} />
+            <Select
+              label="RPE"
+              value={program.rpe || "4–6"}
+              onChange={(v) => update(["program", "rpe"], v)}
+              options={["2–3", "4–6", "7–8"]}
+            />
+
+            <Select
+              label="Talk Test"
+              value={program.talk || "พูดเป็นประโยค"}
+              onChange={(v) => update(["program", "talk"], v)}
+              options={["พูดสบาย", "พูดเป็นประโยค", "พูดเป็นคำ ๆ"]}
+            />
           </div>
+
           <div className="mt-4 grid gap-4 md:grid-cols-2">
             <Info label="HRmax" value={draft.age ? `${220 - num(draft.age)} bpm` : "กรอกอายุก่อน"} />
             <Info label="Target HR" value={targetHrText(draft.age, program.intensity || "Moderate")} />
@@ -1833,29 +1873,48 @@ function ProgramForm({ draft, update }) {
 
         <Card title="Strength Plan" icon={ActivityIcon}>
           <div className="grid gap-4 md:grid-cols-2">
-            <Field label="วันฝึกกล้ามเนื้อ/สัปดาห์" value={program.strengthFrequency || ""} onChange={(v) => update(["program", "strengthFrequency"], v)} />
-            <Select label="Sets × Reps" value={program.strengthDose || "สุขภาพทั่วไป: 2–3 เซต × 8–12 ครั้ง"} onChange={(v) => update(["program", "strengthDose"], v)} options={[
-              "เริ่มต้น/ผู้สูงอายุ: 1–2 เซต × 10–15 ครั้ง",
-              "สุขภาพทั่วไป: 2–3 เซต × 10–15 ครั้ง",
-              "สุขภาพทั่วไป: 2–3 เซต × 8–12 ครั้ง",
-              "เพิ่มกล้ามเนื้อ: 3–4 เซต × 8–12 ครั้ง",
-              "ความทนทานกล้ามเนื้อ: 2–3 เซต × 12–20 ครั้ง",
-              "เพิ่มความแข็งแรง: 3–5 เซต × 3–6 ครั้ง",
-              "Corrective/Mobility: 1–2 เซต × 8–12 ครั้ง/ข้าง",
-              "ตามรายบุคคล",
-            ]} />
+            <Field
+              label="วันฝึกกล้ามเนื้อ/สัปดาห์"
+              value={program.strengthFrequency || ""}
+              onChange={(v) => update(["program", "strengthFrequency"], v)}
+            />
+
+            <Select
+              label="Sets × Reps"
+              value={program.strengthDose || "สุขภาพทั่วไป: 2–3 เซต × 8–12 ครั้ง"}
+              onChange={(v) => update(["program", "strengthDose"], v)}
+              options={[
+                "เริ่มต้น/ผู้สูงอายุ: 1–2 เซต × 10–15 ครั้ง",
+                "สุขภาพทั่วไป: 2–3 เซต × 10–15 ครั้ง",
+                "สุขภาพทั่วไป: 2–3 เซต × 8–12 ครั้ง",
+                "เพิ่มกล้ามเนื้อ: 3–4 เซต × 8–12 ครั้ง",
+                "ความทนทานกล้ามเนื้อ: 2–3 เซต × 12–20 ครั้ง",
+                "เพิ่มความแข็งแรง: 3–5 เซต × 3–6 ครั้ง",
+                "Corrective/Mobility: 1–2 เซต × 8–12 ครั้ง/ข้าง",
+                "ตามรายบุคคล",
+              ]}
+            />
           </div>
+
           <div className="mt-4">
-            <span className="mb-2 block text-sm font-semibold text-slate-500">Focus / จุดเน้น</span>
+            <span className="mb-2 block text-sm font-semibold text-slate-500">
+              Focus / จุดเน้น
+            </span>
+
             <div className="flex flex-wrap gap-2">
               {focusOptions.map((option) => {
                 const selected = focusStringToArray(program.focus).includes(option);
+
                 return (
                   <button
                     key={option}
                     type="button"
                     onClick={() => update(["program", "focus"], toggleFocusValue(program.focus, option))}
-                    className={`rounded-full border px-4 py-2 text-sm font-semibold ${selected ? "border-slate-900 bg-slate-900 text-white" : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"}`}
+                    className={`rounded-full border px-4 py-2 text-sm font-semibold ${
+                      selected
+                        ? "border-slate-900 bg-slate-900 text-white"
+                        : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
+                    }`}
                   >
                     {option}
                   </button>
@@ -1866,15 +1925,32 @@ function ProgramForm({ draft, update }) {
         </Card>
       </div>
 
-      <Card title="ข้อควรระวังและการติดตาม" icon={ClipboardIcon}>
+      <Card title="ข้อควรระวังและคำแนะนำเพิ่มเติม" icon={ClipboardIcon}>
         <div className="grid gap-4 md:grid-cols-2">
           <label className="block">
-            <span className="mb-1 block text-sm font-semibold text-slate-500">Precaution / ข้อควรระวัง</span>
-            <textarea value={program.precaution || ""} onChange={(e) => update(["program", "precaution"], e.target.value)} placeholder="เช่น หลีกเลี่ยงแรงกระแทก / ปวดเข่า / ความดันสูง / ไม่กลั้นหายใจ" className="min-h-24 w-full rounded-xl border border-slate-200 p-3 text-base outline-none focus:border-slate-700" />
+            <span className="mb-1 block text-sm font-semibold text-slate-500">
+              Precaution / ข้อควรระวัง
+            </span>
+
+            <textarea
+              value={program.precaution || ""}
+              onChange={(e) => update(["program", "precaution"], e.target.value)}
+              placeholder="เช่น หลีกเลี่ยงแรงกระแทก / ปวดเข่า / ความดันสูง / ไม่กลั้นหายใจ"
+              className="min-h-24 w-full rounded-xl border border-slate-200 p-3 text-base outline-none focus:border-slate-700"
+            />
           </label>
+
           <label className="block">
-            <span className="mb-1 block text-sm font-semibold text-slate-500">Follow-up / นัดติดตาม</span>
-            <textarea value={program.followUp || ""} onChange={(e) => update(["program", "followUp"], e.target.value)} placeholder="เช่น ติดตามภายใน 2–4 สัปดาห์ / ประเมินครั้งถัดไป" className="min-h-24 w-full rounded-xl border border-slate-200 p-3 text-base outline-none focus:border-slate-700" />
+            <span className="mb-1 block text-sm font-semibold text-slate-500">
+              คำแนะนำเพิ่มเติม
+            </span>
+
+            <textarea
+              value={program.followUp || ""}
+              onChange={(e) => update(["program", "followUp"], e.target.value)}
+              placeholder="เช่น เพิ่มกิจกรรมทางกายในชีวิตประจำวัน / ติดตามอาการ / ประเมินครั้งถัดไป"
+              className="min-h-24 w-full rounded-xl border border-slate-200 p-3 text-base outline-none focus:border-slate-700"
+            />
           </label>
         </div>
       </Card>
