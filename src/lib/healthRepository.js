@@ -120,23 +120,40 @@ export async function loadAllRecords() {
 
   const hns = patients.map((p) => p.hn);
 
-  const [{ data: parq, error: parqError }, { data: programs, error: programError }, { data: sessions, error: sessionError }] =
-    await Promise.all([
-      supabase.from("parq_answers").select("*").in("hn", hns),
-      supabase.from("exercise_programs").select("*").in("hn", hns),
-      supabase
-        .from("assessment_sessions")
-        .select("*")
-        .in("hn", hns)
-        .order("session_no", { ascending: true }),
-    ]);
+  const [
+    { data: parq, error: parqError },
+    { data: programs, error: programError },
+    { data: sessions, error: sessionError },
+    { data: auditLogs, error: auditError },
+  ] = await Promise.all([
+    supabase.from("parq_answers").select("*").in("hn", hns),
+    supabase.from("exercise_programs").select("*").in("hn", hns),
+    supabase
+      .from("assessment_sessions")
+      .select("*")
+      .in("hn", hns)
+      .order("session_no", { ascending: true }),
+    supabase
+      .from("audit_logs")
+      .select("hn, admin_code, admin_name, created_at, action")
+      .in("hn", hns)
+      .order("created_at", { ascending: false }),
+  ]);
 
   if (parqError) throw parqError;
   if (programError) throw programError;
   if (sessionError) throw sessionError;
+  if (auditError) throw auditError;
 
   const parqMap = Object.fromEntries((parq || []).map((x) => [x.hn, x]));
   const programMap = Object.fromEntries((programs || []).map((x) => [x.hn, x]));
+
+  const latestAuditMap = {};
+  (auditLogs || []).forEach((log) => {
+    if (!latestAuditMap[log.hn]) {
+      latestAuditMap[log.hn] = log;
+    }
+  });
 
   const sessionMap = {};
   (sessions || []).forEach((s) => {
@@ -149,6 +166,7 @@ export async function loadAllRecords() {
       const pParq = parqMap[p.hn];
       const pProgram = programMap[p.hn];
       const pSessions = sessionMap[p.hn] || [];
+      const latestAudit = latestAuditMap[p.hn];
 
       const record = {
         hn: p.hn,
@@ -160,9 +178,11 @@ export async function loadAllRecords() {
         disease: p.disease || "",
         medication: p.medication || "",
         injury: p.injury || "",
-        updatedBy: "",
-        updatedById: "",
-        updatedAt: p.updated_at || "",
+
+        updatedBy: latestAudit?.admin_name || "",
+        updatedById: latestAudit?.admin_code || "",
+        updatedAt: latestAudit?.created_at || p.updated_at || "",
+
         parq: pParq
           ? [
               pParq.q1,
@@ -174,6 +194,7 @@ export async function loadAllRecords() {
               pParq.q7,
             ]
           : [false, false, false, false, false, false, false],
+
         program: {
           type: pProgram?.program_type || "Full Body",
           cardioType: pProgram?.cardio_type || "เดินเร็ว",
@@ -189,6 +210,7 @@ export async function loadAllRecords() {
           followUp: pProgram?.follow_up || "",
           note: pProgram?.note || "",
         },
+
         sessions: [1, 2, 3, 4].map((no) => {
           const s = pSessions.find((x) => x.session_no === no);
 
