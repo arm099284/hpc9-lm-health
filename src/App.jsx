@@ -1359,6 +1359,7 @@ function NutritionPlanCard({ record }) {
                     className="h-3 w-3 rounded-full"
                     style={{ backgroundColor: item.color }}
                   />
+
                   <div className="min-w-0">
                     <div className="text-sm font-bold text-slate-900">
                       {item.name}
@@ -1383,9 +1384,11 @@ function NutritionPlanCard({ record }) {
               <div className="text-xs font-bold uppercase tracking-wide text-emerald-700">
                 Recommended Calories
               </div>
+
               <div className="mt-2 text-2xl font-extrabold text-slate-900">
                 {plan.targetCalories.toLocaleString()} kcal/day
               </div>
+
               <div className="mt-1 text-xs font-semibold text-emerald-700">
                 แคลอรีที่ควรกินตามเป้าหมาย
               </div>
@@ -1395,9 +1398,11 @@ function NutritionPlanCard({ record }) {
               <div className="text-xs font-bold uppercase tracking-wide text-slate-500">
                 Goal
               </div>
+
               <div className="mt-2 text-lg font-extrabold leading-7 text-slate-900">
                 {plan.goalLabel}
               </div>
+
               {shouldShowAdjust && (
                 <div className="mt-1 text-xs font-semibold text-slate-500">
                   ปรับจาก TDEE {adjustText}
@@ -1409,9 +1414,11 @@ function NutritionPlanCard({ record }) {
               <div className="text-xs font-bold uppercase tracking-wide text-slate-500">
                 TDEE
               </div>
+
               <div className="mt-2 text-xl font-extrabold text-slate-900">
                 {plan.tdee.toLocaleString()} kcal/day
               </div>
+
               <div className="mt-1 text-xs font-semibold text-slate-500">
                 Activity Factor {plan.factor}
               </div>
@@ -1421,9 +1428,11 @@ function NutritionPlanCard({ record }) {
               <div className="text-xs font-bold uppercase tracking-wide text-slate-500">
                 BMR
               </div>
+
               <div className="mt-2 text-xl font-extrabold text-slate-900">
                 {plan.bmr.toLocaleString()} kcal/day
               </div>
+
               <div className="mt-1 text-xs font-semibold text-slate-500">
                 Mifflin-St Jeor
               </div>
@@ -1443,12 +1452,15 @@ function NutritionPlanCard({ record }) {
                 <div className="text-xs font-bold uppercase tracking-wide text-slate-500">
                   {item.shortName}
                 </div>
+
                 <div className="mt-1 text-base font-bold text-slate-900">
                   {item.name}
                 </div>
+
                 <div className="mt-3 text-2xl font-extrabold text-slate-900">
                   {item.grams.toLocaleString()} g
                 </div>
+
                 <div className="mt-1 text-xs font-semibold text-slate-600">
                   {item.percent}% • {item.kcal.toLocaleString()} kcal/day
                 </div>
