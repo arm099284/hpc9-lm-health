@@ -1919,7 +1919,6 @@ function AdminSummary({ records, auditLogs, onFullBackup, onRestoreBackup }) {
                 <th className="p-3">Body Fat</th>
                 <th className="p-3">Fat Mass</th>
                 <th className="p-3">Muscle</th>
-                <th className="p-3">รอบเอว</th>
                 <th className="p-3">Step Test</th>
                 <th className="p-3">Grip</th>
                 <th className="p-3">Sit to Stand</th>
@@ -1970,10 +1969,6 @@ function AdminSummary({ records, auditLogs, onFullBackup, onRestoreBackup }) {
                   </td>
 
                   <td className="p-3">
-                    <Pill tone={r.waist.tone}>{r.waist.text}</Pill>
-                  </td>
-
-                  <td className="p-3">
                     <Pill tone={r.step.tone}>{r.step.text}</Pill>
                   </td>
 
@@ -2011,7 +2006,7 @@ function AdminSummary({ records, auditLogs, onFullBackup, onRestoreBackup }) {
 
               {pagedComparable.length === 0 && (
                 <tr>
-                  <td colSpan="15" className="p-4 text-center text-slate-500">
+                  <td colSpan="14" className="p-4 text-center text-slate-500">
                     ไม่มีข้อมูลที่เทียบได้ในช่วงที่เลือก
                   </td>
                 </tr>
