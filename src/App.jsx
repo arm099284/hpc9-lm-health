@@ -2112,7 +2112,7 @@ function Dashboard({ record, back }) {
         <Card title="โปรแกรมที่ได้รับ" icon={FileIcon}>
           <div className="grid gap-3 sm:grid-cols-2">
             <Info label="Program Type" value={record.program.type || record.program.split} />
-            <Info label="Cardio" value={`${show(record.program.cardioType)} • ${show(record.program.cardioFrequency)} วัน/สัปดาห์ • ${show(record.program.cardioDuration)} นาที`} />
+            <Info label="Cardio" value={`${record.program.cardioType || "-"} • ${record.program.cardioDuration || "-"} นาที/ครั้ง`}
             <Info label="Strength" value={`${show(record.program.strengthFrequency)} วัน/สัปดาห์ • ${show(record.program.strengthDose)}`} />
             <Info label="Intensity" value={`${show(record.program.intensity)} • RPE ${show(record.program.rpe)}`} />
             <Info label="Talk Test" value={record.program.talk} />
