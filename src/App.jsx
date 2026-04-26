@@ -2214,10 +2214,11 @@ function Dashboard({ record, back }) {
 
       <div className="grid gap-5 lg:grid-cols-[1.2fr_.8fr]">
         <Trend record={record} />
-
-      </div>
       
-      <ProgramReceivedCard record={record} />
+        <div className="self-start">
+          <ProgramReceivedCard record={record} />
+        </div>
+      </div>
       
       <NutritionPlanCard record={record} />
 
