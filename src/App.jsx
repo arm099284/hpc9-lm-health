@@ -2071,14 +2071,14 @@ function ProgramReceivedCard({ record }) {
         .map((x) => x.trim())
         .filter(Boolean);
 
-    const defaultSetsRepsByGoal = (goal) => {
+  const defaultSetsRepsByGoal = (goal) => {
     if (goal === "เพิ่มกล้ามเนื้อ") return "เพิ่มกล้ามเนื้อ: 3–4 เซต × 8–12 ครั้ง";
     if (goal === "ลดไขมัน") return "ลดไขมัน: 2–4 เซต × 10–15 ครั้ง";
     if (goal === "เพิ่มความแข็งแรง") return "เพิ่มความแข็งแรง: 3–5 เซต × 3–6 ครั้ง";
     if (goal === "ฟื้นฟู/แก้ไขท่าทาง") return "ฟื้นฟู/แก้ไข: 1–3 เซต × 10–15 ครั้ง";
     return "สุขภาพทั่วไป: 2–3 เซต × 8–12 ครั้ง";
   };
-  
+
   const setsReps =
     program.setsReps ||
     program.strengthSetsReps ||
@@ -2091,17 +2091,12 @@ function ProgramReceivedCard({ record }) {
     program.strengthPlan ||
     defaultSetsRepsByGoal(record.goal);
 
-  const hasPrecaution = Boolean(program.precaution);
-  const hasFollowUp = Boolean(program.followUp);
-
   return (
     <Card title="โปรแกรมที่ได้รับ" icon={ClipboardIcon}>
       <div className="space-y-4">
         <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-          <div className="text-sm font-bold text-slate-500">
-            โปรแกรมหลัก
-          </div>
-        
+          <div className="text-sm font-bold text-slate-500">โปรแกรมหลัก</div>
+
           <div className="mt-1 text-2xl font-black text-slate-900">
             {show(program.type)}
             {program.strengthFrequency && (
@@ -2111,17 +2106,16 @@ function ProgramReceivedCard({ record }) {
             )}
           </div>
 
-  <div className="mt-3 flex flex-wrap gap-2">
-    <span className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-700">
-      เป้าหมาย: {show(record.goal)}
-    </span>
-  </div>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <span className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-700">
+              เป้าหมาย: {show(record.goal)}
+            </span>
+          </div>
+        </div>
 
         <div className="grid gap-4 md:grid-cols-2">
           <div className="rounded-2xl border border-blue-200 bg-blue-50 p-4">
-            <div className="text-sm font-bold text-blue-700">
-              Strength Plan
-            </div>
+            <div className="text-sm font-bold text-blue-700">Strength Plan</div>
 
             <div className="mt-2 space-y-2">
               <div className="text-base font-black text-slate-900">
@@ -2129,7 +2123,7 @@ function ProgramReceivedCard({ record }) {
                   ? `${program.strengthFrequency} วัน/สัปดาห์`
                   : "ยังไม่กำหนดวันฝึก"}
               </div>
-            
+
               <div className="rounded-xl bg-white px-3 py-2 text-sm font-bold text-slate-800">
                 {setsReps}
               </div>
@@ -2143,9 +2137,7 @@ function ProgramReceivedCard({ record }) {
           </div>
 
           <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
-            <div className="text-sm font-bold text-emerald-700">
-              Cardio Plan
-            </div>
+            <div className="text-sm font-bold text-emerald-700">Cardio Plan</div>
 
             <div className="mt-2 text-lg font-black text-slate-900">
               {show(program.cardioType)}
@@ -2160,11 +2152,11 @@ function ProgramReceivedCard({ record }) {
               <div className="rounded-xl bg-white px-3 py-2">
                 RPE: {show(program.rpe)}
               </div>
-            
+
               <div className="rounded-xl bg-white px-3 py-2">
                 Talk Test: {show(program.talk)}
               </div>
-            
+
               <div className="rounded-xl bg-white px-3 py-2">
                 Target HR: {targetHrText(record.age, program.intensity)}
               </div>
@@ -2173,9 +2165,7 @@ function ProgramReceivedCard({ record }) {
         </div>
 
         <div className="rounded-2xl border border-slate-200 bg-white p-4">
-          <div className="text-sm font-bold text-slate-500">
-            Focus / จุดเน้น
-          </div>
+          <div className="text-sm font-bold text-slate-500">Focus / จุดเน้น</div>
 
           <div className="mt-3 flex flex-wrap gap-2">
             {focusItems.length ? (
@@ -2188,16 +2178,14 @@ function ProgramReceivedCard({ record }) {
                 </span>
               ))
             ) : (
-              <span className="text-sm font-semibold text-slate-500">
-                -
-              </span>
+              <span className="text-sm font-semibold text-slate-500">-</span>
             )}
           </div>
         </div>
 
-        {(hasPrecaution || hasFollowUp) && (
+        {(program.precaution || program.followUp) && (
           <div className="grid gap-3 md:grid-cols-2">
-            {hasPrecaution && (
+            {program.precaution && (
               <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4">
                 <div className="text-sm font-bold text-amber-700">
                   ข้อควรระวัง
@@ -2208,7 +2196,7 @@ function ProgramReceivedCard({ record }) {
               </div>
             )}
 
-            {hasFollowUp && (
+            {program.followUp && (
               <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
                 <div className="text-sm font-bold text-slate-500">
                   คำแนะนำเพิ่มเติม
