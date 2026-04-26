@@ -1599,8 +1599,21 @@ function ExercisePlanCard({ record }) {
     legs: "Legs Day",
   };
 
+  const allowedDaysBySplit = {
+    "Full Body": ["fullBody"],
+    "Upper / Lower": ["upper", "lower"],
+    PPL: ["push", "pull", "legs"],
+    "Hybrid / Mixed": ["fullBody", "upper", "lower", "push", "pull", "legs"],
+  };
+  
+  const allowedDays =
+    allowedDaysBySplit[log.split] || ["fullBody"];
+  
   const activeDays = Object.entries(days).filter(
-    ([, list]) => Array.isArray(list) && list.length > 0
+    ([dayKey, list]) =>
+      allowedDays.includes(dayKey) &&
+      Array.isArray(list) &&
+      list.length > 0
   );
 
   return (
