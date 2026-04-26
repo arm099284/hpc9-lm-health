@@ -3060,7 +3060,35 @@ function Staff({ records, setRecords, adminUser, addAuditLog, refreshData }) {
     }
     setDraft(next);
   }
-
+  
+  function updateProgramAndExerciseLog(path, value) {
+    setDraft((old) => {
+      const next = clone(old);
+  
+      let target = next;
+      for (let i = 0; i < path.length - 1; i += 1) {
+        target = target[path[i]];
+      }
+      target[path[path.length - 1]] = value;
+  
+      if (path.join(".") === "program.type") {
+        next.exerciseLog = {
+          ...(next.exerciseLog || {}),
+          split: value,
+        };
+      }
+  
+      if (path.join(".") === "program.strengthFrequency") {
+        next.exerciseLog = {
+          ...(next.exerciseLog || {}),
+          daysPerWeek: value,
+        };
+      }
+  
+      return next;
+    });
+  }
+  
   async function save() {
     if (!draft.hn) return alert("กรุณากรอก HN");
     const quality = recordQuality(draft);
@@ -3201,7 +3229,9 @@ ${quality.issues.slice(0, 8).join("\n")}
         <DataQualityPanel record={draft} />
         {tab === "general" && <GeneralForm draft={draft} update={update} />}
         {tab === "parq" && <ParqForm draft={draft} update={update} />}
-        {tab === "program" && <ProgramForm draft={draft} update={update} />}
+        {tab === "program" && (
+          <ProgramForm draft={draft} update={updateProgramAndExerciseLog} />
+        )}
         
         {tab === "exerciseLog" && (
           <Card title="Trainer Exercise Log" icon={ActivityIcon}>
