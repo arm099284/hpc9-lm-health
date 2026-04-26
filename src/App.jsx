@@ -2544,6 +2544,7 @@ function Staff({ records, setRecords, adminUser, addAuditLog, refreshData }) {
   const [draft, setDraft] = useState(clone(records[first] || blankRecord));
   const [tab, setTab] = useState("general");
   const [idx, setIdx] = useState(0);
+  const [exerciseDay, setExerciseDay] = useState("Full Body");
   const [staffSearch, setStaffSearch] = useState("");
   const [staffPage, setStaffPage] = useState(1);
   const [deletedBackup, setDeletedBackup] = useState(null);
@@ -2758,7 +2759,12 @@ ${quality.issues.slice(0, 8).join("\n")}
                   <button
                     key={day}
                     type="button"
-                    className="rounded-xl bg-white px-4 py-3 text-base font-bold text-slate-700 shadow-sm hover:bg-slate-100"
+                    onClick={() => setExerciseDay(day)}
+                    className={`rounded-xl px-4 py-3 text-base font-bold shadow-sm ${
+                      exerciseDay === day
+                        ? "bg-slate-900 text-white"
+                        : "bg-white text-slate-700 hover:bg-slate-100"
+                    }`}
                   >
                     {day}
                   </button>
