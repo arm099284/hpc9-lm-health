@@ -1730,7 +1730,7 @@ function ExercisePlanCard({ record }) {
 
           <div className="mt-3 flex flex-wrap gap-2">
             {exercisePlanPills(
-              log.description || exercisePlanDescription(log.split, log.daysPerWeek, log.days || {})
+              log.description || exercisePlanDescription(log.split, log.daysPerWeek, log.days)
             ).map((item, index) => (
               <span
                 key={`${item.text}-${index}`}
