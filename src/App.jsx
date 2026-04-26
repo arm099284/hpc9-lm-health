@@ -1819,7 +1819,42 @@ function ExercisePlanCard({ record }) {
           </div>
         </div>
 
-        <div className="rounded-3xl border border-sky-200 bg-sky-50 p-5">
+        <div className="rounded-3xl border border-sky-200 bg-sky-50 p-4">
+          <div className="text-sm font-bold text-sky-700">
+            อัปเดต 4 ครั้งล่าสุด
+          </div>
+        
+          {Array.isArray(log.history) && log.history.length ? (
+            <div className="mt-3 space-y-2">
+              {log.history.slice(0, 4).map((item, index) => (
+                <div
+                  key={`${item.at}-${index}`}
+                  className="rounded-2xl bg-white px-3 py-3 shadow-sm"
+                >
+                  <div className="text-xs font-semibold text-slate-500">
+                    {formatDateTimeThai(item.at)} • โดย {show(item.by)}
+                  </div>
+        
+                  <div className="mt-2 text-sm font-black text-slate-900">
+                    {show(item.from)}
+                    <span className="mx-2 text-sky-600">→</span>
+                    {show(item.to)}
+                  </div>
+        
+                  {item.reason && (
+                    <div className="mt-2 text-xs font-bold text-emerald-700">
+                      เหตุผล: {item.reason}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="mt-3 rounded-2xl bg-white p-3 text-sm font-semibold text-slate-600">
+              ยังไม่มีข้อมูลการอัปเดตโปรแกรม
+            </div>
+          )}
+        </div>
           <div className="text-sm font-bold text-sky-700">
             อัปเดต 4 ครั้งล่าสุด
           </div>
