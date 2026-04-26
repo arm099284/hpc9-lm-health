@@ -330,6 +330,22 @@ function groupsForExerciseDay(day) {
   return ["legs", "hip", "push", "pull", "core", "cardio"];
 }
 
+function dayKeyFromLabel(day) {
+  if (day === "Full Body") return "fullBody";
+  if (day === "Upper Day") return "upper";
+  if (day === "Lower Day") return "lower";
+  if (day === "Push Day") return "push";
+  if (day === "Pull Day") return "pull";
+  if (day === "Legs Day") return "legs";
+  return "fullBody";
+}
+
+function toggleExercise(list = [], exercise) {
+  return list.includes(exercise)
+    ? list.filter((x) => x !== exercise)
+    : [...list, exercise];
+}
+
 function session(no, v = {}) {
   return {
     no,
@@ -2803,15 +2819,31 @@ ${quality.issues.slice(0, 8).join("\n")}
                       </div>
               
                       <div className="flex flex-wrap gap-2">
-                        {exerciseOptions[group].map((exercise) => (
-                          <button
-                            key={exercise}
-                            type="button"
-                            className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100"
-                          >
-                            {exercise}
-                          </button>
-                        ))}
+                        {exerciseOptions[group].map((exercise) => {
+                          const dayKey = dayKeyFromLabel(exerciseDay);
+                          const selectedExercises = draft.exerciseLog?.days?.[dayKey] || [];
+                          const isSelected = selectedExercises.includes(exercise);
+                        
+                          return (
+                            <button
+                              key={exercise}
+                              type="button"
+                              onClick={() =>
+                                update(
+                                  ["exerciseLog", "days", dayKey],
+                                  toggleExercise(selectedExercises, exercise)
+                                )
+                              }
+                              className={`rounded-full border px-4 py-2 text-sm font-semibold ${
+                                isSelected
+                                  ? "border-slate-900 bg-slate-900 text-white"
+                                  : "border-slate-200 bg-white text-slate-700 hover:bg-slate-100"
+                              }`}
+                            >
+                              {exercise}
+                            </button>
+                          );
+                        })}
                       </div>
                     </div>
                   ))}
