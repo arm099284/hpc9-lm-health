@@ -322,10 +322,10 @@ const exerciseOptions = {
 
 function groupsForExerciseDay(day) {
   if (day === "Full Body") return ["legs", "hip", "push", "pull", "core", "cardio"];
-  if (day === "Upper Day") return ["push", "pull", "core"];
+  if (day === "Upper Day") return ["push", "pull"];
   if (day === "Lower Day") return ["legs", "hip", "core"];
-  if (day === "Push Day") return ["push", "core"];
-  if (day === "Pull Day") return ["pull", "core"];
+  if (day === "Push Day") return ["push"];
+  if (day === "Pull Day") return ["pull"];
   if (day === "Legs Day") return ["legs", "hip", "core"];
   return ["legs", "hip", "push", "pull", "core", "cardio"];
 }
