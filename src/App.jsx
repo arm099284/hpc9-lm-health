@@ -346,6 +346,22 @@ function toggleExercise(list = [], exercise) {
     : [...list, exercise];
 }
 
+function sortExercisesByDay(day, list = []) {
+  const order = groupsForExerciseDay(day);
+
+  return [...list].sort((a, b) => {
+    const groupA = order.findIndex((group) =>
+      exerciseOptions[group]?.includes(a)
+    );
+
+    const groupB = order.findIndex((group) =>
+      exerciseOptions[group]?.includes(b)
+    );
+
+    return groupA - groupB;
+  });
+}
+
 function session(no, v = {}) {
   return {
     no,
