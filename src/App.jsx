@@ -3039,10 +3039,10 @@ ${quality.issues.slice(0, 8).join("\n")}
                 </div>
               
                 <div className="mt-1 text-lg font-black text-slate-900">
-                  exercisePlanDescription(
+                  {exercisePlanDescription(
                     draft.exerciseLog?.split || "Full Body",
                     draft.exerciseLog?.daysPerWeek || "3",
-                    draft.exerciseLog?.days || {}
+                    draft.exerciseLog?.days
                   )}
                 </div>
               
