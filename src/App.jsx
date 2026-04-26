@@ -469,7 +469,16 @@ function dayPillClass(dayKey) {
 }
 
 function exercisePlanPills(description = "") {
-  const labels = ["Full Body", "Upper Day", "Lower Day", "Push Day", "Pull Day", "Legs Day"];
+  const labels = [
+    "Full Body",
+    "Upper Day",
+    "Lower Day",
+    "Push Day",
+    "Pull Day",
+    "Legs Day",
+  ];
+
+  const dayOrder = ["fullBody", "upper", "lower", "push", "pull", "legs"];
 
   return String(description)
     .split("+")
@@ -486,7 +495,11 @@ function exercisePlanPills(description = "") {
         text,
         dayKey,
       };
-    });
+    })
+    .sort(
+      (a, b) =>
+        dayOrder.indexOf(a.dayKey) - dayOrder.indexOf(b.dayKey)
+    );
 }
 
 function session(no, v = {}) {
