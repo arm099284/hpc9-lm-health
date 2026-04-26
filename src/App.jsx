@@ -1860,9 +1860,39 @@ function NutritionPlanCard({ record }) {
   );
 }
 
+function defaultSetsRepsSummaryByGoal(goal) {
+  if (goal === "เพิ่มกล้ามเนื้อ") return "เพิ่มกล้ามเนื้อ: 3–4 เซต × 8–12 ครั้ง";
+  if (goal === "ลดไขมัน") return "ลดไขมัน: 2–4 เซต × 10–15 ครั้ง";
+  if (goal === "เพิ่มความแข็งแรง") return "เพิ่มความแข็งแรง: 3–5 เซต × 3–6 ครั้ง";
+  if (goal === "ฟื้นฟู/แก้ไขท่าทาง") return "ฟื้นฟู/แก้ไข: 1–3 เซต × 10–15 ครั้ง";
+  return "สุขภาพทั่วไป: 2–3 เซต × 8–12 ครั้ง";
+}
+
+function getSetsRepsText(program = {}, goal = "") {
+  return (
+    program.setsReps ||
+    program.strengthSetsReps ||
+    program.strengthSets ||
+    program.strengthReps ||
+    program.sets ||
+    program.reps ||
+    program.volume ||
+    program.strengthVolume ||
+    program.strengthPlan ||
+    defaultSetsRepsSummaryByGoal(goal)
+  );
+}
+
+function shortSetsRepsText(text) {
+  const value = String(text || "").trim();
+  if (!value) return "";
+  return value.includes(":") ? value.split(":").slice(1).join(":").trim() : value;
+}
+
 function ExercisePlanCard({ record }) {
   const log = record.exerciseLog || {};
   const days = log.days || {};
+  const program = record.program || {};
   const latestUpdate =
     Array.isArray(log.history) && log.history.length ? log.history[0] : null;
 
@@ -1900,7 +1930,13 @@ function ExercisePlanCard({ record }) {
   const planText =
     log.description ||
     exercisePlanDescription(log.split, log.daysPerWeek, log.days);
-
+  const setsRepsSummary = shortSetsRepsText(
+    getSetsRepsText(program, record.goal)
+  );
+  
+  const cardioSummary = program.cardioDuration
+    ? `Cardio ${program.cardioDuration} นาที/ครั้ง`
+    : "";
   return (
     <Card title="โปรแกรมออกกำลังกายของฉัน" icon={ActivityIcon}>
       <div className="rounded-3xl border border-blue-200 bg-blue-50 p-4 md:p-5">
@@ -1918,7 +1954,19 @@ function ExercisePlanCard({ record }) {
             <div className="mt-2 text-base font-semibold text-slate-500">
               เป้าหมาย: {show(record.goal)}
             </div>
-
+            <div className="mt-3 flex flex-wrap gap-2">
+              {setsRepsSummary && (
+                <span className="inline-flex rounded-full border border-blue-200 bg-blue-50 px-3 py-1.5 text-sm font-bold text-blue-700">
+                  {setsRepsSummary}
+                </span>
+              )}
+            
+              {cardioSummary && (
+                <span className="inline-flex rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-sm font-bold text-emerald-700">
+                  {cardioSummary}
+                </span>
+              )}
+            </div>
             <div className="mt-3 flex flex-wrap gap-2">
               {exercisePlanPills(planText).map((item, index) => (
                 <span
