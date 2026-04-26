@@ -1784,6 +1784,8 @@ function NutritionPlanCard({ record }) {
 function ExercisePlanCard({ record }) {
   const log = record.exerciseLog || {};
   const days = log.days || {};
+  const latestUpdate =
+    Array.isArray(log.history) && log.history.length ? log.history[0] : null;
 
   const dayNames = {
     fullBody: "Full Body",
@@ -1822,105 +1824,110 @@ function ExercisePlanCard({ record }) {
 
   return (
     <Card title="โปรแกรมออกกำลังกายของฉัน" icon={ActivityIcon}>
-      <div className="grid gap-4 xl:grid-cols-[1.45fr_.65fr]">
-        <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4 md:p-5">
-          <div className="text-sm font-bold text-slate-500">
-            My Exercise Plan
-          </div>
+      <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4 md:p-5">
+        <div className="grid gap-4 lg:grid-cols-[1fr_320px]">
+          <div>
+            <div className="text-sm font-bold text-slate-500">
+              My Exercise Plan
+            </div>
 
-          <div className="mt-1 text-2xl font-black text-slate-900 md:text-3xl">
-            {log.split || "ยังไม่ได้กำหนดโปรแกรม"}{" "}
-            {log.daysPerWeek ? `${log.daysPerWeek} วัน/สัปดาห์` : ""}
-          </div>
+            <div className="mt-1 text-2xl font-black text-slate-900 md:text-3xl">
+              {log.split || "ยังไม่ได้กำหนดโปรแกรม"}{" "}
+              {log.daysPerWeek ? `${log.daysPerWeek} วัน/สัปดาห์` : ""}
+            </div>
 
-          <div className="mt-2 text-base font-semibold text-slate-500">
-            เป้าหมาย: {show(record.goal)}
-          </div>
+            <div className="mt-2 text-base font-semibold text-slate-500">
+              เป้าหมาย: {show(record.goal)}
+            </div>
 
-          <div className="mt-3 flex flex-wrap gap-2">
-            {exercisePlanPills(planText).map((item, index) => (
-              <span
-                key={`${item.text}-${index}`}
-                className={`inline-flex rounded-full border px-3 py-1.5 text-sm font-bold ${dayPillClass(item.dayKey)}`}
-              >
-                {item.text}
-              </span>
-            ))}
-          </div>
-
-          <div className="mt-2 text-sm font-semibold text-slate-500">
-            ให้ทำตามลำดับท่าที่แสดงจากบนลงล่าง
-          </div>
-
-          <div className="mt-5 grid gap-3 lg:grid-cols-2">
-            {activeDays.length ? (
-              activeDays.map(([dayKey, list]) => (
-                <div
-                  key={dayKey}
-                  className="rounded-2xl border border-white bg-white p-4 shadow-sm"
+            <div className="mt-3 flex flex-wrap gap-2">
+              {exercisePlanPills(planText).map((item, index) => (
+                <span
+                  key={`${item.text}-${index}`}
+                  className={`inline-flex rounded-full border px-3 py-1.5 text-sm font-bold ${dayPillClass(item.dayKey)}`}
                 >
-                  <div className="mb-3 text-lg font-black text-slate-900">
-                    {dayNames[dayKey] || dayKey}
-                  </div>
+                  {item.text}
+                </span>
+              ))}
+            </div>
 
-                  <ol className="space-y-2">
-                    {sortExercisesByDay(dayNames[dayKey], list).map(
-                      (exercise, index) => (
-                        <li
-                          key={exercise}
-                          className="flex items-center gap-2 rounded-xl bg-slate-50 px-3 py-2 text-sm font-semibold text-slate-700 md:gap-3 md:font-bold"
-                        >
-                          <span className="flex h-7 w-7 items-center justify-center rounded-full bg-slate-900 text-xs text-white">
-                            {String(index + 1).padStart(2, "0")}
-                          </span>
-                          {exercise}
-                        </li>
-                      )
-                    )}
-                  </ol>
+            <div className="mt-2 text-sm font-semibold text-slate-500">
+              ให้ทำตามลำดับท่าที่แสดงจากบนลงล่าง
+            </div>
+          </div>
+
+          <div className="rounded-2xl border border-sky-200 bg-white p-4 shadow-sm">
+            <div className="text-sm font-bold text-sky-700">
+              อัปเดตล่าสุด
+            </div>
+
+            {latestUpdate ? (
+              <>
+                <div className="mt-2 text-xs font-semibold text-slate-500">
+                  {formatDateTimeThai(latestUpdate.at)}
                 </div>
-              ))
+
+                <div className="mt-1 text-sm font-bold text-slate-900">
+                  โดย {show(latestUpdate.by)}
+                </div>
+
+                <div className="mt-3 rounded-xl bg-slate-50 px-3 py-2 text-sm font-black text-slate-900">
+                  {show(latestUpdate.from)}
+                  <span className="mx-2 text-sky-600">→</span>
+                  {show(latestUpdate.to)}
+                </div>
+
+                {latestUpdate.reason && (
+                  <div className="mt-2 text-xs font-bold text-emerald-700">
+                    เหตุผล: {latestUpdate.reason}
+                  </div>
+                )}
+
+                {Array.isArray(log.history) && log.history.length > 1 && (
+                  <div className="mt-2 text-xs font-semibold text-slate-400">
+                    มีประวัติการแก้ไข {log.history.length} รายการล่าสุด
+                  </div>
+                )}
+              </>
             ) : (
-              <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-base font-semibold text-amber-800">
-                ยังไม่มีโปรแกรมออกกำลังกาย
+              <div className="mt-3 rounded-xl bg-slate-50 p-3 text-sm font-semibold text-slate-600">
+                ยังไม่มีข้อมูลการอัปเดตโปรแกรม
               </div>
             )}
           </div>
         </div>
 
-        <div className="rounded-3xl border border-sky-200 bg-sky-50 p-3 md:p-4">
-          <div className="text-sm font-bold text-sky-700">
-            อัปเดต 4 ครั้งล่าสุด
-          </div>
-
-          {Array.isArray(log.history) && log.history.length ? (
-            <div className="mt-3 space-y-2">
-              {log.history.slice(0, 4).map((item, index) => (
-                <div
-                  key={`${item.at}-${index}`}
-                  className="rounded-2xl bg-white px-3 py-3 shadow-sm"
-                >
-                  <div className="text-xs font-semibold text-slate-500">
-                    {formatDateTimeThai(item.at)} • โดย {show(item.by)}
-                  </div>
-
-                  <div className="mt-2 text-sm font-black text-slate-900">
-                    {show(item.from)}
-                    <span className="mx-2 text-sky-600">→</span>
-                    {show(item.to)}
-                  </div>
-
-                  {item.reason && (
-                    <div className="mt-2 text-xs font-bold text-emerald-700">
-                      เหตุผล: {item.reason}
-                    </div>
-                  )}
+        <div className="mt-5 grid gap-3 lg:grid-cols-2">
+          {activeDays.length ? (
+            activeDays.map(([dayKey, list]) => (
+              <div
+                key={dayKey}
+                className="rounded-2xl border border-white bg-white p-4 shadow-sm"
+              >
+                <div className="mb-3 text-lg font-black text-slate-900">
+                  {dayNames[dayKey] || dayKey}
                 </div>
-              ))}
-            </div>
+
+                <ol className="space-y-2">
+                  {sortExercisesByDay(dayNames[dayKey], list).map(
+                    (exercise, index) => (
+                      <li
+                        key={exercise}
+                        className="flex items-center gap-2 rounded-xl bg-slate-50 px-3 py-2 text-sm font-semibold text-slate-700 md:gap-3 md:font-bold"
+                      >
+                        <span className="flex h-7 w-7 items-center justify-center rounded-full bg-slate-900 text-xs text-white">
+                          {String(index + 1).padStart(2, "0")}
+                        </span>
+                        {exercise}
+                      </li>
+                    )
+                  )}
+                </ol>
+              </div>
+            ))
           ) : (
-            <div className="mt-3 rounded-2xl bg-white p-3 text-sm font-semibold text-slate-600">
-              ยังไม่มีข้อมูลการอัปเดตโปรแกรม
+            <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-base font-semibold text-amber-800">
+              ยังไม่มีโปรแกรมออกกำลังกาย
             </div>
           )}
         </div>
