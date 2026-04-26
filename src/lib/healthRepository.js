@@ -168,6 +168,24 @@ export async function loadAllRecords() {
       const pSessions = sessionMap[p.hn] || [];
       const latestAudit = latestAuditMap[p.hn];
 
+      const defaultExerciseLog = {
+        split: pProgram?.program_type || "Full Body",
+        daysPerWeek: pProgram?.strength_frequency || "3",
+        updateReason: pProgram?.trainer_reason || "",
+        updatedFrom: "",
+        updatedTo: `${pProgram?.program_type || "Full Body"} ${pProgram?.strength_frequency || "3"} วัน/สัปดาห์`,
+        updatedBy: pProgram?.trainer_updated_by || "",
+        updatedAt: pProgram?.trainer_updated_at || "",
+        days: {
+          fullBody: [],
+          upper: [],
+          lower: [],
+          push: [],
+          pull: [],
+          legs: [],
+        },
+      };
+
       const record = {
         hn: p.hn,
         name: p.full_name || "",
@@ -210,6 +228,8 @@ export async function loadAllRecords() {
           followUp: pProgram?.follow_up || "",
           note: pProgram?.note || "",
         },
+
+        exerciseLog: pProgram?.trainer_log || defaultExerciseLog,
 
         sessions: [1, 2, 3, 4].map((no) => {
           const s = pSessions.find((x) => x.session_no === no);
@@ -285,6 +305,7 @@ export async function saveRecord(record, adminUser) {
   if (parqError) throw parqError;
 
   const program = record.program || {};
+  const exerciseLog = record.exerciseLog || {};
 
   const { error: programError } = await supabase.from("exercise_programs").upsert({
     hn,
@@ -301,6 +322,11 @@ export async function saveRecord(record, adminUser) {
     precaution: program.precaution || "",
     follow_up: program.followUp || "",
     note: program.note || "",
+
+    trainer_log: exerciseLog,
+    trainer_updated_at: exerciseLog.updatedAt || null,
+    trainer_updated_by: exerciseLog.updatedBy || "",
+    trainer_reason: exerciseLog.updateReason || "",
   });
 
   if (programError) throw programError;
