@@ -1855,8 +1855,6 @@ function ExercisePlanCard({ record }) {
             </div>
           )}
         </div>
-        </div>
-      </div>
     </Card>
   );
 }
