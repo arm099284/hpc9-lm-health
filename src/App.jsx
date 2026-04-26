@@ -3442,7 +3442,6 @@ function ProgramForm({ draft, update }) {
             value={draft.program.type}
             onChange={(v) => {
               update(["program", "type"], v);
-              update(["exerciseLog", "split"], v);
             }}
             options={["Full Body", "Upper / Lower", "PPL", "Hybrid / Mixed"]}
           />
@@ -3508,7 +3507,6 @@ function ProgramForm({ draft, update }) {
               value={draft.program.strengthFrequency}
               onChange={(v) => {
                 update(["program", "strengthFrequency"], v);
-                update(["exerciseLog", "daysPerWeek"], v);
               }}
             />
 
