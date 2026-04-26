@@ -135,28 +135,214 @@ function csvCell(value) {
 }
 
 function exportRecordsCSV(records) {
-  const header = ["HN", "ชื่อ", "เพศ", "อายุ", "เป้าหมาย", "จำนวนครั้ง", "วันที่ล่าสุด", "น้ำหนักล่าสุด", "Fat Mass ล่าสุด", "Muscle ล่าสุด", "รอบเอวล่าสุด", "แก้ไขล่าสุดโดย", "แก้ไขล่าสุดเมื่อ"];
+  function listText(value) {
+    if (Array.isArray(value)) return value.join(" / ");
+    return String(value || "");
+  }
+
+  function jsonText(value) {
+    if (value === null || value === undefined) return "";
+    try {
+      return JSON.stringify(value);
+    } catch {
+      return String(value);
+    }
+  }
+
+  function exerciseDaysText(days = {}) {
+    const labels = {
+      fullBody: "Full Body",
+      upper: "Upper Day",
+      lower: "Lower Day",
+      push: "Push Day",
+      pull: "Pull Day",
+      legs: "Legs Day",
+    };
+
+    return Object.entries(days || {})
+      .filter(([, list]) => Array.isArray(list) && list.length > 0)
+      .map(([key, list]) => `${labels[key] || key}: ${list.join(", ")}`)
+      .join(" | ");
+  }
+
+  function nutritionExport(record) {
+    const plan = nutritionGoalPlan(record);
+
+    if (!plan) {
+      return {
+        calories: "",
+        tdee: "",
+        bmr: "",
+        carbG: "",
+        fatG: "",
+        proteinG: "",
+        macroText: "",
+      };
+    }
+
+    const carb = plan.pieData.find((x) => x.shortName === "Carb");
+    const fat = plan.pieData.find((x) => x.shortName === "Fat");
+    const protein = plan.pieData.find((x) => x.shortName === "Protein");
+
+    return {
+      calories: plan.targetCalories,
+      tdee: plan.tdee,
+      bmr: plan.bmr,
+      carbG: carb?.grams || "",
+      fatG: fat?.grams || "",
+      proteinG: protein?.grams || "",
+      macroText: plan.pieData
+        .map((x) => `${x.name} ${x.percent}% ${x.grams}g`)
+        .join(" / "),
+    };
+  }
+
+  const header = [
+    "HN",
+    "ชื่อ",
+    "เพศ",
+    "อายุ",
+    "ส่วนสูง",
+    "เป้าหมาย",
+    "โรคประจำตัว",
+    "ยา",
+    "การบาดเจ็บ",
+    "PAR-Q",
+    "จำนวนครั้งที่บันทึก",
+    "วันที่ล่าสุด",
+
+    "น้ำหนักล่าสุด",
+    "BMI ล่าสุด",
+    "Body Fat ล่าสุด",
+    "Fat Mass ล่าสุด",
+    "Muscle ล่าสุด",
+    "Visceral Fat ล่าสุด",
+    "รอบเอวล่าสุด",
+
+    "Program Type",
+    "Strength วัน/สัปดาห์",
+    "Sets × Reps",
+    "Intensity",
+    "Cardio Type",
+    "Cardio วัน/สัปดาห์",
+    "Cardio นาที/ครั้ง",
+    "RPE",
+    "Talk Test",
+    "Target HR",
+    "Focus",
+    "ข้อควรระวัง",
+    "คำแนะนำเพิ่มเติม",
+    "Program Note",
+
+    "Trainer Split",
+    "Trainer วัน/สัปดาห์",
+    "Trainer คำอธิบาย",
+    "Trainer รายการท่า",
+    "Trainer แก้ล่าสุดจาก",
+    "Trainer แก้ล่าสุดเป็น",
+    "Trainer แก้โดย",
+    "Trainer วันที่แก้",
+    "Trainer เหตุผล",
+
+    "Nutrition Calories",
+    "Nutrition TDEE",
+    "Nutrition BMR",
+    "Carb g/day",
+    "Fat g/day",
+    "Protein g/day",
+    "Macro Summary",
+
+    "Sessions JSON",
+    "Program JSON",
+    "ExerciseLog JSON",
+  ];
+
   const rows = Object.values(records).map((record) => {
     const sessions = completedSessions(record);
     const latest = sessions[sessions.length - 1] || session(1);
+    const program = record.program || {};
+    const exerciseLog = record.exerciseLog || {};
+    const latestHistory =
+      Array.isArray(exerciseLog.history) && exerciseLog.history.length
+        ? exerciseLog.history[0]
+        : {};
+    const nutrition = nutritionExport(record);
+
     return [
       record.hn,
       record.name,
       record.sex,
       record.age,
+      record.height,
       record.goal,
+      record.disease,
+      record.medication,
+      record.injury,
+      Array.isArray(record.parq) && record.parq.some(Boolean)
+        ? "ควรประเมินเพิ่ม"
+        : "ผ่าน",
       sessions.length,
       latest.date,
-      latest.inbody.weight,
-      latest.inbody.fatMass,
-      latest.inbody.muscle,
-      latest.inbody.waist,
-      record.updatedBy || "-",
-      record.updatedAt || "-",
+
+      latest.inbody?.weight,
+      latest.inbody?.bmi,
+      latest.inbody?.bodyFat,
+      latest.inbody?.fatMass,
+      latest.inbody?.muscle,
+      latest.inbody?.visceral,
+      latest.inbody?.waist,
+
+      program.type,
+      program.strengthFrequency,
+      program.strengthDose ||
+        program.setsReps ||
+        program.strengthSetsReps ||
+        program.strengthPlan,
+      program.intensity,
+      program.cardioType,
+      program.cardioFrequency,
+      program.cardioDuration,
+      program.rpe,
+      program.talk,
+      targetHrText(record.age, program.intensity),
+      listText(program.focus),
+      program.precaution,
+      program.followUp,
+      program.note,
+
+      exerciseLog.split,
+      exerciseLog.daysPerWeek,
+      exerciseLog.description,
+      exerciseDaysText(exerciseLog.days),
+      latestHistory.from || exerciseLog.updatedFrom || "",
+      latestHistory.to || exerciseLog.updatedTo || "",
+      latestHistory.by || exerciseLog.updatedBy || "",
+      latestHistory.at || exerciseLog.updatedAt || "",
+      latestHistory.reason || exerciseLog.updateReason || "",
+
+      nutrition.calories,
+      nutrition.tdee,
+      nutrition.bmr,
+      nutrition.carbG,
+      nutrition.fatG,
+      nutrition.proteinG,
+      nutrition.macroText,
+
+      jsonText(record.sessions),
+      jsonText(program),
+      jsonText(exerciseLog),
     ];
   });
-  const csv = [header, ...rows].map((row) => row.map(csvCell).join(",")).join("\n");
-  downloadTextFile("health-assessment-summary.csv", `﻿${csv}`, "text/csv;charset=utf-8");
+
+  const csv = [header, ...rows]
+    .map((row) => row.map(csvCell).join(","))
+    .join("\n");
+
+  downloadTextFile(
+    `health-assessment-detailed-${new Date().toISOString().slice(0, 10)}.csv`,
+    `\uFEFF${csv}`,
+    "text/csv;charset=utf-8"
+  );
 }
 
 function printPage() {
