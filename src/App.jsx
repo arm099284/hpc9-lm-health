@@ -311,6 +311,25 @@ const focusOptions = [
   "Knee Control",
 ];
 
+const exerciseOptions = {
+  push: ["Push-up", "Chest Press", "Shoulder Press", "Lateral Raise", "Triceps Pushdown"],
+  pull: ["Lat Pulldown", "Seated Row", "Dumbbell Row", "Face Pull", "Biceps Curl"],
+  legs: ["Goblet Squat", "Leg Press", "Lunge", "Leg Curl", "Calf Raise"],
+  hip: ["Romanian Deadlift", "Deadlift", "Hip Thrust", "Glute Bridge", "Step-up"],
+  core: ["Plank", "Side Plank", "Dead Bug", "Bird Dog", "Leg Raise"],
+  cardio: ["Walking", "Cycling", "Rowing", "HIIT"],
+};
+
+function groupsForExerciseDay(day) {
+  if (day === "Full Body") return ["legs", "hip", "push", "pull", "core", "cardio"];
+  if (day === "Upper Day") return ["push", "pull", "core"];
+  if (day === "Lower Day") return ["legs", "hip", "core"];
+  if (day === "Push Day") return ["push", "core"];
+  if (day === "Pull Day") return ["pull", "core"];
+  if (day === "Legs Day") return ["legs", "hip", "core"];
+  return ["legs", "hip", "push", "pull", "core", "cardio"];
+}
+
 function session(no, v = {}) {
   return {
     no,
