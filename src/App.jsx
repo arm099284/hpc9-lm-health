@@ -2071,6 +2071,14 @@ function ProgramReceivedCard({ record }) {
         .map((x) => x.trim())
         .filter(Boolean);
 
+    const defaultSetsRepsByGoal = (goal) => {
+    if (goal === "เพิ่มกล้ามเนื้อ") return "เพิ่มกล้ามเนื้อ: 3–4 เซต × 8–12 ครั้ง";
+    if (goal === "ลดไขมัน") return "ลดไขมัน: 2–4 เซต × 10–15 ครั้ง";
+    if (goal === "เพิ่มความแข็งแรง") return "เพิ่มความแข็งแรง: 3–5 เซต × 3–6 ครั้ง";
+    if (goal === "ฟื้นฟู/แก้ไขท่าทาง") return "ฟื้นฟู/แก้ไข: 1–3 เซต × 10–15 ครั้ง";
+    return "สุขภาพทั่วไป: 2–3 เซต × 8–12 ครั้ง";
+  };
+  
   const setsReps =
     program.setsReps ||
     program.strengthSetsReps ||
@@ -2078,8 +2086,10 @@ function ProgramReceivedCard({ record }) {
     program.strengthReps ||
     program.sets ||
     program.reps ||
+    program.volume ||
+    program.strengthVolume ||
     program.strengthPlan ||
-    "";
+    defaultSetsRepsByGoal(record.goal);
 
   const hasPrecaution = Boolean(program.precaution);
   const hasFollowUp = Boolean(program.followUp);
@@ -2101,10 +2111,11 @@ function ProgramReceivedCard({ record }) {
             )}
           </div>
 
-  <div className="mt-2 text-sm font-bold text-slate-600">
-    เป้าหมาย: {show(record.goal)}
+  <div className="mt-3 flex flex-wrap gap-2">
+    <span className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-700">
+      เป้าหมาย: {show(record.goal)}
+    </span>
   </div>
-</div>
 
         <div className="grid gap-4 md:grid-cols-2">
           <div className="rounded-2xl border border-blue-200 bg-blue-50 p-4">
@@ -2119,15 +2130,9 @@ function ProgramReceivedCard({ record }) {
                   : "ยังไม่กำหนดวันฝึก"}
               </div>
             
-              {setsReps ? (
-                <div className="rounded-xl bg-white px-3 py-2 text-sm font-bold text-slate-800">
-                  {setsReps}
-                </div>
-              ) : (
-                <div className="rounded-xl bg-white px-3 py-2 text-sm font-semibold text-slate-500">
-                  ยังไม่มีรายละเอียด Sets × Reps
-                </div>
-              )}
+              <div className="rounded-xl bg-white px-3 py-2 text-sm font-bold text-slate-800">
+                {setsReps}
+              </div>
             </div>
 
             <div className="mt-3 flex flex-wrap gap-2">
