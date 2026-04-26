@@ -417,6 +417,40 @@ function exercisePlanDescription(split, daysPerWeek) {
   return "";
 }
 
+function dayPillClass(dayKey) {
+  const styles = {
+    fullBody: "border-sky-200 bg-sky-50 text-sky-800",
+    upper: "border-violet-200 bg-violet-50 text-violet-800",
+    lower: "border-emerald-200 bg-emerald-50 text-emerald-800",
+    push: "border-orange-200 bg-orange-50 text-orange-800",
+    pull: "border-blue-200 bg-blue-50 text-blue-800",
+    legs: "border-lime-200 bg-lime-50 text-lime-800",
+  };
+
+  return styles[dayKey] || "border-slate-200 bg-slate-50 text-slate-700";
+}
+
+function exercisePlanPills(description = "") {
+  const labels = ["Full Body", "Upper Day", "Lower Day", "Push Day", "Pull Day", "Legs Day"];
+
+  return String(description)
+    .split("+")
+    .map((text) => text.trim())
+    .filter(Boolean)
+    .map((text) => {
+      const matchedLabel = labels.find((label) => text.includes(label));
+
+      const dayKey = matchedLabel
+        ? dayKeyFromLabel(matchedLabel)
+        : "fullBody";
+
+      return {
+        text,
+        dayKey,
+      };
+    });
+}
+
 function session(no, v = {}) {
   return {
     no,
@@ -1694,6 +1728,23 @@ function ExercisePlanCard({ record }) {
             เป้าหมาย: {show(record.goal)}
           </div>
 
+          <div className="mt-3 flex flex-wrap gap-2">
+            {exercisePlanPills(
+              log.description || exercisePlanDescription(log.split, log.daysPerWeek, log.days || {})
+            ).map((item, index) => (
+              <span
+                key={`${item.text}-${index}`}
+                className={`inline-flex rounded-full border px-3 py-1.5 text-sm font-bold ${dayPillClass(item.dayKey)}`}
+              >
+                {item.text}
+              </span>
+            ))}
+          </div>
+          
+          <div className="mt-2 text-sm font-semibold text-slate-500">
+            ให้ทำตามลำดับท่าที่แสดงจากบนลงล่าง
+          </div>
+          
           <div className="mt-5 grid gap-3 md:grid-cols-2">
             {activeDays.length ? (
               activeDays.map(([dayKey, list]) => (
@@ -2988,9 +3039,10 @@ ${quality.issues.slice(0, 8).join("\n")}
                 </div>
               
                 <div className="mt-1 text-lg font-black text-slate-900">
-                  {exercisePlanDescription(
+                  exercisePlanDescription(
                     draft.exerciseLog?.split || "Full Body",
-                    draft.exerciseLog?.daysPerWeek || "3"
+                    draft.exerciseLog?.daysPerWeek || "3",
+                    draft.exerciseLog?.days || {}
                   )}
                 </div>
               
@@ -3097,7 +3149,8 @@ ${quality.issues.slice(0, 8).join("\n")}
 
                   const planDescription = exercisePlanDescription(
                     currentLog.split || "Full Body",
-                    currentLog.daysPerWeek || "3"
+                    currentLog.daysPerWeek || "3",
+                    currentLog.days || {}
                   );
                   
                   const newProgram =
