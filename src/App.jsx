@@ -1935,7 +1935,7 @@ function ExercisePlanCard({ record }) {
   );
   
   const cardioSummary = program.cardioDuration
-    ? `Cardio ${program.cardioDuration} นาที/ครั้ง`
+    ? `${program.cardioDuration} นาที/ครั้ง`
     : "";
   return (
     <Card title="โปรแกรมออกกำลังกายของฉัน" icon={ActivityIcon}>
@@ -1955,29 +1955,29 @@ function ExercisePlanCard({ record }) {
               เป้าหมาย: {show(record.goal)}
             </div>
             {(setsRepsSummary || cardioSummary) && (
-              <div className="mt-4 rounded-2xl border border-slate-200 bg-white/80 p-3 shadow-sm">
-                <div className="mb-2 text-xs font-bold uppercase tracking-wide text-slate-400">
+              <div className="mt-3 rounded-xl border border-slate-200 bg-white/70 px-3 py-2 shadow-sm">
+                <div className="mb-1.5 text-[10px] font-bold uppercase tracking-wide text-slate-400">
                   สรุปแผน / Plan Summary
                 </div>
             
                 <div className="grid gap-2 sm:grid-cols-2">
                   {setsRepsSummary && (
-                    <div className="rounded-xl border border-blue-100 bg-blue-50 px-3 py-2">
-                      <div className="text-[11px] font-bold text-blue-500">
+                    <div className="rounded-lg border border-blue-100 bg-blue-50 px-2.5 py-1.5">
+                      <div className="text-[10px] font-bold text-blue-500">
                         Strength
                       </div>
-                      <div className="mt-0.5 text-sm font-black text-slate-900">
+                      <div className="text-xs font-black text-slate-900">
                         {setsRepsSummary}
                       </div>
                     </div>
                   )}
             
                   {cardioSummary && (
-                    <div className="rounded-xl border border-emerald-100 bg-emerald-50 px-3 py-2">
-                      <div className="text-[11px] font-bold text-emerald-600">
+                    <div className="rounded-lg border border-emerald-100 bg-emerald-50 px-2.5 py-1.5">
+                      <div className="text-[10px] font-bold text-emerald-600">
                         Cardio
                       </div>
-                      <div className="mt-0.5 text-sm font-black text-slate-900">
+                      <div className="text-xs font-black text-slate-900">
                         {cardioSummary}
                       </div>
                     </div>
