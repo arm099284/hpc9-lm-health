@@ -3020,7 +3020,7 @@ ${quality.issues.slice(0, 8).join("\n")}
             
                   update(["exerciseLog", "updatedFrom"], oldProgram);
                   update(["exerciseLog", "updatedTo"], newProgram);
-                  update(["exerciseLog", "updatedBy"], adminUser?.name || "");
+                  update(["exerciseLog", "updatedBy"], adminUser?.name || draft.updatedBy || "Trainer");
                   update(["exerciseLog", "updatedAt"], new Date().toISOString());
             
                   alert("บันทึกโปรแกรมแล้ว");
