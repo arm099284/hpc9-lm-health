@@ -2848,6 +2848,21 @@ ${quality.issues.slice(0, 8).join("\n")}
                     </div>
                   ))}
                 </div>
+                <div className="mt-5 rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
+                  <div className="mb-3 text-base font-bold text-emerald-800">
+                    ลำดับท่าที่เลือก
+                  </div>
+                
+                  <ol className="list-decimal space-y-1 pl-5 text-base font-semibold text-slate-800">
+                    {(draft.exerciseLog?.days?.[dayKeyFromLabel(exerciseDay)] || []).length ? (
+                      (draft.exerciseLog?.days?.[dayKeyFromLabel(exerciseDay)] || []).map((exercise) => (
+                        <li key={exercise}>{exercise}</li>
+                      ))
+                    ) : (
+                      <li>ยังไม่ได้เลือกท่า</li>
+                    )}
+                  </ol>
+                </div>
               </div>            
           </Card>
         )}
