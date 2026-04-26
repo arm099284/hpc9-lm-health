@@ -390,6 +390,33 @@ function sortExercisesByDay(day, list = []) {
   });
 }
 
+function exercisePlanDescription(split, daysPerWeek) {
+  const days = Number(daysPerWeek);
+
+  if (split === "Full Body") {
+    return `ฝึกทั้งตัว ${days || "-"} วัน/สัปดาห์`;
+  }
+
+  if (split === "Upper / Lower") {
+    if (days === 4) return "Upper 2 วัน + Lower 2 วัน";
+    if (days === 3) return "สลับ Upper / Lower รวม 3 วัน/สัปดาห์";
+    if (days === 2) return "Upper 1 วัน + Lower 1 วัน";
+    return `สลับ Upper / Lower รวม ${days || "-"} วัน/สัปดาห์`;
+  }
+
+  if (split === "PPL") {
+    if (days === 6) return "Push 2 วัน + Pull 2 วัน + Legs 2 วัน";
+    if (days === 3) return "Push 1 วัน + Pull 1 วัน + Legs 1 วัน";
+    return `วน Push / Pull / Legs รวม ${days || "-"} วัน/สัปดาห์`;
+  }
+
+  if (split === "Hybrid / Mixed") {
+    return `ผสมหลายรูปแบบ รวม ${days || "-"} วัน/สัปดาห์ ตามที่เทรนเนอร์กำหนด`;
+  }
+
+  return "";
+}
+
 function session(no, v = {}) {
   return {
     no,
@@ -2955,7 +2982,22 @@ ${quality.issues.slice(0, 8).join("\n")}
                 options={["", "เพิ่มระดับการฝึก", "ลดระดับการฝึก", "เปลี่ยนตามเวลา", "มีอาการเจ็บ", "เปลี่ยนเป้าหมาย"]}
               />
             </div>
-        
+              <div className="mt-5 rounded-2xl border border-sky-200 bg-sky-50 p-4">
+                <div className="text-sm font-bold text-sky-700">
+                  คำอธิบายโปรแกรมอัตโนมัติ
+                </div>
+              
+                <div className="mt-1 text-lg font-black text-slate-900">
+                  {exercisePlanDescription(
+                    draft.exerciseLog?.split || "Full Body",
+                    draft.exerciseLog?.daysPerWeek || "3"
+                  )}
+                </div>
+              
+                <div className="mt-2 text-sm font-semibold text-slate-500">
+                  ระบบจะนำข้อความนี้ไปแสดงในหน้า HN เพื่อให้ผู้รับบริการเข้าใจง่าย
+                </div>
+              </div>
             <div className="mt-5 rounded-2xl border border-slate-200 bg-slate-50 p-4">
               <div className="mb-3 text-base font-bold text-slate-700">
                 เลือกวันฝึก
@@ -3052,6 +3094,11 @@ ${quality.issues.slice(0, 8).join("\n")}
                   const oldProgram =
                     currentLog.updatedTo ||
                     `${currentLog.split || "Full Body"} ${currentLog.daysPerWeek || "3"} วัน/สัปดาห์`;
+
+                  const planDescription = exercisePlanDescription(
+                    currentLog.split || "Full Body",
+                    currentLog.daysPerWeek || "3"
+                  );
                   
                   const newProgram =
                     `${currentLog.split || "Full Body"} ${currentLog.daysPerWeek || "3"} วัน/สัปดาห์`;
@@ -3066,6 +3113,7 @@ ${quality.issues.slice(0, 8).join("\n")}
                   
                   update(["exerciseLog"], {
                     ...currentLog,
+                    description: planDescription,
                     updatedFrom: oldProgram,
                     updatedTo: newProgram,
                     updatedBy: historyItem.by,
