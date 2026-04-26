@@ -390,7 +390,7 @@ function sortExercisesByDay(day, list = []) {
   });
 }
 
-function exercisePlanDescription(split, daysPerWeek) {
+fufunction exercisePlanDescription(split, daysPerWeek, daysMap = {}) {
   const days = Number(daysPerWeek);
 
   if (split === "Full Body") {
