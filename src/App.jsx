@@ -2790,6 +2790,33 @@ ${quality.issues.slice(0, 8).join("\n")}
                 ))}
               </div>
             </div>
+              <div className="mt-5 rounded-2xl border border-slate-200 bg-white p-4">
+                <div className="mb-3 text-base font-bold text-slate-700">
+                  เลือกท่าออกกำลังกาย
+                </div>
+              
+                <div className="grid gap-4 md:grid-cols-2">
+                  {groupsForExerciseDay(exerciseDay).map((group) => (
+                    <div key={group} className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                      <div className="mb-3 text-sm font-black uppercase text-slate-500">
+                        {group}
+                      </div>
+              
+                      <div className="flex flex-wrap gap-2">
+                        {exerciseOptions[group].map((exercise) => (
+                          <button
+                            key={exercise}
+                            type="button"
+                            className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100"
+                          >
+                            {exercise}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>            
           </Card>
         )}
         
