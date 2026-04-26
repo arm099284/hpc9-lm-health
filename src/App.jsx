@@ -2723,7 +2723,7 @@ ${quality.issues.slice(0, 8).join("\n")}
                 label="Split"
                 value={draft.exerciseLog?.split || "Full Body"}
                 onChange={(v) => update(["exerciseLog", "split"], v)}
-                options={["Full Body", "Upper / Lower", "PPL"]}
+                options={["Full Body", "Upper / Lower", "PPL", "Hybrid / Mixed"]}
               />
         
               <Select
