@@ -1732,26 +1732,29 @@ function ExercisePlanCard({ record }) {
     PPL: ["push", "pull", "legs"],
     "Hybrid / Mixed": ["fullBody", "upper", "lower", "push", "pull", "legs"],
   };
-  
-  const allowedDays =
-    allowedDaysBySplit[log.split] || ["fullBody"];
-  
+
+  const allowedDays = allowedDaysBySplit[log.split] || ["fullBody"];
+
   const activeDays = Object.entries(days).filter(
     ([dayKey, list]) =>
       allowedDays.includes(dayKey) &&
       Array.isArray(list) &&
       list.length > 0
   );
-  
+
   const dayDisplayOrder = ["fullBody", "upper", "lower", "push", "pull", "legs"];
-  
+
   activeDays.sort(
     ([a], [b]) => dayDisplayOrder.indexOf(a) - dayDisplayOrder.indexOf(b)
   );
 
+  const planText =
+    log.description ||
+    exercisePlanDescription(log.split, log.daysPerWeek, log.days);
+
   return (
     <Card title="โปรแกรมออกกำลังกายของฉัน" icon={ActivityIcon}>
-      <div className="grid gap-4 lg:grid-cols-[1.2fr_.8fr]">
+      <div className="grid gap-4 lg:grid-cols-[1.45fr_.65fr]">
         <div className="rounded-3xl border border-slate-200 bg-slate-50 p-5">
           <div className="text-sm font-bold text-slate-500">
             My Exercise Plan
@@ -1767,9 +1770,7 @@ function ExercisePlanCard({ record }) {
           </div>
 
           <div className="mt-3 flex flex-wrap gap-2">
-            {exercisePlanPills(
-              log.description || exercisePlanDescription(log.split, log.daysPerWeek, log.days)
-            ).map((item, index) => (
+            {exercisePlanPills(planText).map((item, index) => (
               <span
                 key={`${item.text}-${index}`}
                 className={`inline-flex rounded-full border px-3 py-1.5 text-sm font-bold ${dayPillClass(item.dayKey)}`}
@@ -1778,11 +1779,11 @@ function ExercisePlanCard({ record }) {
               </span>
             ))}
           </div>
-          
+
           <div className="mt-2 text-sm font-semibold text-slate-500">
             ให้ทำตามลำดับท่าที่แสดงจากบนลงล่าง
           </div>
-          
+
           <div className="mt-5 grid gap-3 md:grid-cols-2">
             {activeDays.length ? (
               activeDays.map(([dayKey, list]) => (
@@ -1823,7 +1824,7 @@ function ExercisePlanCard({ record }) {
           <div className="text-sm font-bold text-sky-700">
             อัปเดต 4 ครั้งล่าสุด
           </div>
-        
+
           {Array.isArray(log.history) && log.history.length ? (
             <div className="mt-3 space-y-2">
               {log.history.slice(0, 4).map((item, index) => (
@@ -1834,13 +1835,13 @@ function ExercisePlanCard({ record }) {
                   <div className="text-xs font-semibold text-slate-500">
                     {formatDateTimeThai(item.at)} • โดย {show(item.by)}
                   </div>
-        
+
                   <div className="mt-2 text-sm font-black text-slate-900">
                     {show(item.from)}
                     <span className="mx-2 text-sky-600">→</span>
                     {show(item.to)}
                   </div>
-        
+
                   {item.reason && (
                     <div className="mt-2 text-xs font-bold text-emerald-700">
                       เหตุผล: {item.reason}
@@ -1855,6 +1856,7 @@ function ExercisePlanCard({ record }) {
             </div>
           )}
         </div>
+      </div>
     </Card>
   );
 }
