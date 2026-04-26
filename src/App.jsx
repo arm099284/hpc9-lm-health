@@ -1960,9 +1960,9 @@ function ExercisePlanCard({ record }) {
                   สรุปแผน / Plan Summary
                 </div>
             
-                <div className="grid gap-2 sm:grid-cols-2">
+                <div className="flex flex-wrap gap-2">
                   {setsRepsSummary && (
-                    <div className="rounded-lg border border-blue-100 bg-blue-50 px-2.5 py-1.5">
+                    <div className="inline-flex flex-col rounded-lg border border-blue-100 bg-blue-50 px-3 py-1.5">
                       <div className="text-[10px] font-bold text-blue-500">
                         Strength
                       </div>
@@ -1973,7 +1973,7 @@ function ExercisePlanCard({ record }) {
                   )}
             
                   {cardioSummary && (
-                    <div className="rounded-lg border border-emerald-100 bg-emerald-50 px-2.5 py-1.5">
+                    <div className="inline-flex flex-col rounded-lg border border-emerald-100 bg-emerald-50 px-3 py-1.5">
                       <div className="text-[10px] font-bold text-emerald-600">
                         Cardio
                       </div>
