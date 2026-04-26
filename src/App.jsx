@@ -1824,7 +1824,7 @@ function ExercisePlanCard({ record }) {
 
   return (
     <Card title="โปรแกรมออกกำลังกายของฉัน" icon={ActivityIcon}>
-      <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4 md:p-5">
+      <<div className="rounded-3xl border border-slate-200 bg-slate-100/80 p-4 md:p-5">
         <div className="grid gap-4 lg:grid-cols-[1fr_250px]">
           <div>
             <div className="text-sm font-bold text-slate-500">
@@ -1937,7 +1937,7 @@ function ExercisePlanCard({ record }) {
             activeDays.map(([dayKey, list]) => (
               <div
                 key={dayKey}
-                className="rounded-2xl border border-white bg-white p-3 shadow-sm md:p-4"
+                className="rounded-2xl border border-slate-200 bg-white p-3 shadow-md md:p-4"
               >
                 <div className="mb-3 text-lg font-black text-slate-900">
                   {dayNames[dayKey] || dayKey}
