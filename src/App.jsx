@@ -1642,11 +1642,12 @@ function ExercisePlanCard({ record }) {
       allowedDays.includes(dayKey) &&
       Array.isArray(list) &&
       list.length > 0
-
-    const dayDisplayOrder = ["fullBody", "upper", "lower", "push", "pull", "legs"];
-    activeDays.sort(
-      ([a], [b]) => dayDisplayOrder.indexOf(a) - dayDisplayOrder.indexOf(b)
-
+  );
+  
+  const dayDisplayOrder = ["fullBody", "upper", "lower", "push", "pull", "legs"];
+  
+  activeDays.sort(
+    ([a], [b]) => dayDisplayOrder.indexOf(a) - dayDisplayOrder.indexOf(b)
   );
 
   return (
