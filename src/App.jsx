@@ -331,11 +331,11 @@ const exerciseOptions = {
 
 function groupsForExerciseDay(day) {
   if (day === "Full Body") return ["legs", "hip", "push", "pull", "core", "cardio"];
-  if (day === "Upper Day") return ["push", "pull"];
-  if (day === "Lower Day") return ["legs", "hip", "core"];
-  if (day === "Push Day") return ["push"];
-  if (day === "Pull Day") return ["pull"];
-  if (day === "Legs Day") return ["legs", "hip", "core"];
+  if (day === "Upper Day") return ["push", "pull", "cardio"];
+  if (day === "Lower Day") return ["legs", "hip", "core", "cardio"];
+  if (day === "Push Day") return ["push", "cardio"];
+  if (day === "Pull Day") return ["pull", "cardio"];
+  if (day === "Legs Day") return ["legs", "hip", "core", "cardio"];
   return ["legs", "hip", "push", "pull", "core", "cardio"];
 }
 
@@ -3539,18 +3539,12 @@ function ProgramForm({ draft, update }) {
 
       <div className="grid items-stretch gap-5 lg:grid-cols-2">
         <Card title="Cardio Plan" icon={ActivityIcon}>
-          <div className="grid gap-4 md:grid-cols-3">
+          <div className="grid gap-4 md:grid-cols-2">
             <Select
               label="ประเภท"
               value={program.cardioType || "เดินเร็ว"}
               onChange={(v) => update(["program", "cardioType"], v)}
               options={["เดินเร็ว", "เดินสะสม", "ปั่นจักรยาน", "วิ่งเบา", "ว่ายน้ำ", "อื่น ๆ"]}
-            />
-
-            <Field
-              label="วัน/สัปดาห์"
-              value={program.cardioFrequency || ""}
-              onChange={(v) => update(["program", "cardioFrequency"], v)}
             />
 
             <Field
