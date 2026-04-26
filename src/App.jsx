@@ -2718,8 +2718,34 @@ ${quality.issues.slice(0, 8).join("\n")}
         
         {tab === "exerciseLog" && (
           <Card title="Trainer Exercise Log" icon={ActivityIcon}>
-            <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-base font-semibold text-amber-800">
-              เตรียมเพิ่มหน้าฟอร์มเลือก Split / วันฝึก / ท่าออกกำลังกาย
+            <div className="grid gap-4 md:grid-cols-3">
+              <Select
+                label="Split"
+                value={draft.exerciseLog?.split || "Full Body"}
+                onChange={(v) => update(["exerciseLog", "split"], v)}
+                options={["Full Body", "Upper / Lower", "PPL"]}
+              />
+        
+              <Select
+                label="วัน/สัปดาห์"
+                value={draft.exerciseLog?.daysPerWeek || "3"}
+                onChange={(v) => update(["exerciseLog", "daysPerWeek"], v)}
+                options={["2", "3", "4", "5", "6"]}
+              />
+        
+              <Select
+                label="เหตุผลการปรับ"
+                value={draft.exerciseLog?.updateReason || ""}
+                onChange={(v) => update(["exerciseLog", "updateReason"], v)}
+                options={[
+                  "",
+                  "เพิ่มระดับการฝึก",
+                  "ลดระดับการฝึก",
+                  "เปลี่ยนตามเวลา",
+                  "มีอาการเจ็บ",
+                  "เปลี่ยนเป้าหมาย",
+                ]}
+              />
             </div>
           </Card>
         )}
