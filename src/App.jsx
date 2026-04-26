@@ -1932,12 +1932,12 @@ function ExercisePlanCard({ record }) {
           </div>
         </div>
 
-        <div className="mt-5 grid gap-3 lg:grid-cols-2">
+        <div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
           {activeDays.length ? (
             activeDays.map(([dayKey, list]) => (
               <div
                 key={dayKey}
-                className="rounded-2xl border border-white bg-white p-4 shadow-sm"
+                className="rounded-2xl border border-white bg-white p-3 shadow-sm md:p-4"
               >
                 <div className="mb-3 text-lg font-black text-slate-900">
                   {dayNames[dayKey] || dayKey}
