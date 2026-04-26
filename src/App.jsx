@@ -1824,7 +1824,7 @@ function ExercisePlanCard({ record }) {
 
   return (
     <Card title="โปรแกรมออกกำลังกายของฉัน" icon={ActivityIcon}>
-      <<div className="rounded-3xl border border-slate-200 bg-slate-100/80 p-4 md:p-5">
+      <div className="rounded-3xl border border-slate-200 bg-slate-100/80 p-4 md:p-5">
         <div className="grid gap-4 lg:grid-cols-[1fr_250px]">
           <div>
             <div className="text-sm font-bold text-slate-500">
