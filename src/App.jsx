@@ -2737,15 +2737,33 @@ ${quality.issues.slice(0, 8).join("\n")}
                 label="เหตุผลการปรับ"
                 value={draft.exerciseLog?.updateReason || ""}
                 onChange={(v) => update(["exerciseLog", "updateReason"], v)}
-                options={[
-                  "",
-                  "เพิ่มระดับการฝึก",
-                  "ลดระดับการฝึก",
-                  "เปลี่ยนตามเวลา",
-                  "มีอาการเจ็บ",
-                  "เปลี่ยนเป้าหมาย",
-                ]}
+                options={["", "เพิ่มระดับการฝึก", "ลดระดับการฝึก", "เปลี่ยนตามเวลา", "มีอาการเจ็บ", "เปลี่ยนเป้าหมาย"]}
               />
+            </div>
+        
+            <div className="mt-5 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+              <div className="mb-3 text-base font-bold text-slate-700">
+                เลือกวันฝึก
+              </div>
+        
+              <div className="flex flex-wrap gap-2">
+                {(draft.exerciseLog?.split === "Full Body"
+                  ? ["Full Body"]
+                  : draft.exerciseLog?.split === "Upper / Lower"
+                  ? ["Upper Day", "Lower Day"]
+                  : draft.exerciseLog?.split === "PPL"
+                  ? ["Push Day", "Pull Day", "Legs Day"]
+                  : ["Full Body", "Upper Day", "Lower Day", "Push Day", "Pull Day", "Legs Day"]
+                ).map((day) => (
+                  <button
+                    key={day}
+                    type="button"
+                    className="rounded-xl bg-white px-4 py-3 text-base font-bold text-slate-700 shadow-sm hover:bg-slate-100"
+                  >
+                    {day}
+                  </button>
+                ))}
+              </div>
             </div>
           </Card>
         )}
