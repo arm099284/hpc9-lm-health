@@ -1954,28 +1954,53 @@ function ExercisePlanCard({ record }) {
             <div className="mt-2 text-base font-semibold text-slate-500">
               เป้าหมาย: {show(record.goal)}
             </div>
-            <div className="mt-3 flex flex-wrap gap-2">
-              {setsRepsSummary && (
-                <span className="inline-flex rounded-full border border-blue-200 bg-blue-50 px-3 py-1.5 text-sm font-bold text-blue-700">
-                  {setsRepsSummary}
-                </span>
-              )}
+            {(setsRepsSummary || cardioSummary) && (
+              <div className="mt-4 rounded-2xl border border-slate-200 bg-white/80 p-3 shadow-sm">
+                <div className="mb-2 text-xs font-bold uppercase tracking-wide text-slate-400">
+                  สรุปแผน / Plan Summary
+                </div>
             
-              {cardioSummary && (
-                <span className="inline-flex rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-sm font-bold text-emerald-700">
-                  {cardioSummary}
-                </span>
-              )}
-            </div>
-            <div className="mt-3 flex flex-wrap gap-2">
-              {exercisePlanPills(planText).map((item, index) => (
-                <span
-                  key={`${item.text}-${index}`}
-                  className={`inline-flex rounded-full border px-3 py-1.5 text-sm font-bold ${dayPillClass(item.dayKey)}`}
-                >
-                  {item.text}
-                </span>
-              ))}
+                <div className="grid gap-2 sm:grid-cols-2">
+                  {setsRepsSummary && (
+                    <div className="rounded-xl border border-blue-100 bg-blue-50 px-3 py-2">
+                      <div className="text-[11px] font-bold text-blue-500">
+                        Strength
+                      </div>
+                      <div className="mt-0.5 text-sm font-black text-slate-900">
+                        {setsRepsSummary}
+                      </div>
+                    </div>
+                  )}
+            
+                  {cardioSummary && (
+                    <div className="rounded-xl border border-emerald-100 bg-emerald-50 px-3 py-2">
+                      <div className="text-[11px] font-bold text-emerald-600">
+                        Cardio
+                      </div>
+                      <div className="mt-0.5 text-sm font-black text-slate-900">
+                        {cardioSummary}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+            
+            <div className="mt-4 border-t border-slate-200 pt-3">
+              <div className="mb-2 text-xs font-bold uppercase tracking-wide text-slate-400">
+                วันฝึก / Training Days
+              </div>
+            
+              <div className="flex flex-wrap gap-2">
+                {exercisePlanPills(planText).map((item, index) => (
+                  <span
+                    key={`${item.text}-${index}`}
+                    className={`inline-flex rounded-full border px-3 py-1.5 text-sm font-bold ${dayPillClass(item.dayKey)}`}
+                  >
+                    {item.text}
+                  </span>
+                ))}
+              </div>
             </div>
 
             <div className="mt-2 text-sm font-semibold text-slate-500">
