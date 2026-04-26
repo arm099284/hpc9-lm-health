@@ -1771,12 +1771,12 @@ function Dashboard({ record, back }) {
         </Card>
       </div>
 
-      <CompareTable record={record} title="ตารางเปรียบเทียบ InBody / Body Composition" icon={HeartIcon} list={metrics.inbody} />
-
       <NutritionPlanCard record={record} />
 
       <ExercisePlanCard record={record} />
-
+      
+      <CompareTable record={record} title="ตารางเปรียบเทียบ InBody / Body Composition" icon={HeartIcon} list={metrics.inbody} />
+      
       <CompareTable record={record} title="ตารางเปรียบเทียบ Fitness Test 5 ด้าน" icon={ActivityIcon} list={metrics.fitness} withFitnessInterpretation />
 
       <OhsTable record={record} />
