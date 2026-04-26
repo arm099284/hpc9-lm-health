@@ -2074,6 +2074,10 @@ function ProgramReceivedCard({ record }) {
   const setsReps =
     program.setsReps ||
     program.strengthSetsReps ||
+    program.strengthSets ||
+    program.strengthReps ||
+    program.sets ||
+    program.reps ||
     program.strengthPlan ||
     "";
 
@@ -2087,7 +2091,7 @@ function ProgramReceivedCard({ record }) {
           <div className="text-sm font-bold text-slate-500">
             โปรแกรมหลัก
           </div>
-
+        
           <div className="mt-1 text-2xl font-black text-slate-900">
             {show(program.type)}
             {program.strengthFrequency && (
@@ -2096,7 +2100,11 @@ function ProgramReceivedCard({ record }) {
               </span>
             )}
           </div>
-        </div>
+
+  <div className="mt-2 text-sm font-bold text-slate-600">
+    เป้าหมาย: {show(record.goal)}
+  </div>
+</div>
 
         <div className="grid gap-4 md:grid-cols-2">
           <div className="rounded-2xl border border-blue-200 bg-blue-50 p-4">
@@ -2110,11 +2118,7 @@ function ProgramReceivedCard({ record }) {
                   ? `${program.strengthFrequency} วัน/สัปดาห์`
                   : "ยังไม่กำหนดวันฝึก"}
               </div>
-
-              <div className="text-sm font-bold text-slate-700">
-                เป้าหมาย: {show(record.goal)}
-              </div>
-
+            
               {setsReps ? (
                 <div className="rounded-xl bg-white px-3 py-2 text-sm font-bold text-slate-800">
                   {setsReps}
@@ -2129,10 +2133,6 @@ function ProgramReceivedCard({ record }) {
             <div className="mt-3 flex flex-wrap gap-2">
               <span className="rounded-full border border-blue-200 bg-white px-3 py-1 text-xs font-bold text-blue-700">
                 {show(program.intensity)}
-              </span>
-
-              <span className="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-bold text-slate-700">
-                RPE {show(program.rpe)}
               </span>
             </div>
           </div>
@@ -2153,9 +2153,13 @@ function ProgramReceivedCard({ record }) {
 
             <div className="mt-3 grid gap-2 text-sm font-bold text-slate-700">
               <div className="rounded-xl bg-white px-3 py-2">
+                RPE: {show(program.rpe)}
+              </div>
+            
+              <div className="rounded-xl bg-white px-3 py-2">
                 Talk Test: {show(program.talk)}
               </div>
-
+            
               <div className="rounded-xl bg-white px-3 py-2">
                 Target HR: {targetHrText(record.age, program.intensity)}
               </div>
