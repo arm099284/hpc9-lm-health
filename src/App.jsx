@@ -1705,7 +1705,7 @@ function ExercisePlanCard({ record }) {
 
         <div className="rounded-3xl border border-sky-200 bg-sky-50 p-5">
           <div className="text-sm font-bold text-sky-700">
-            อัปเดตล่าสุด
+            อัปเดต 4 ครั้งล่าสุด
           </div>
 
           {log.updatedAt ? (
@@ -3054,12 +3054,21 @@ ${quality.issues.slice(0, 8).join("\n")}
                   const newProgram =
                     `${currentLog.split || "Full Body"} ${currentLog.daysPerWeek || "3"} วัน/สัปดาห์`;
                   
+                  const historyItem = {
+                    from: oldProgram,
+                    to: newProgram,
+                    by: adminUser?.name || draft.updatedBy || "Trainer",
+                    at: new Date().toISOString(),
+                    reason: currentLog.updateReason || "",
+                  };
+                  
                   update(["exerciseLog"], {
                     ...currentLog,
                     updatedFrom: oldProgram,
                     updatedTo: newProgram,
-                    updatedBy: adminUser?.name || draft.updatedBy || "Trainer",
-                    updatedAt: new Date().toISOString(),
+                    updatedBy: historyItem.by,
+                    updatedAt: historyItem.at,
+                    history: [historyItem, ...(currentLog.history || [])].slice(0, 4),
                   });
             
                   alert("บันทึกโปรแกรมแล้ว");
