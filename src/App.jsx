@@ -1861,18 +1861,18 @@ function ExercisePlanCard({ record }) {
               <div className="text-xs font-bold text-sky-700">
                 อัปเดตล่าสุด
               </div>
-          
+
               {Array.isArray(log.history) && log.history.length > 1 && (
                 <details className="relative">
                   <summary className="cursor-pointer list-none text-xs font-bold text-slate-400 hover:text-slate-700">
                     ดูประวัติ
                   </summary>
-          
+
                   <div className="absolute right-0 z-20 mt-2 w-80 rounded-2xl border border-slate-200 bg-white p-3 shadow-lg">
                     <div className="mb-2 text-xs font-bold text-slate-500">
                       ประวัติการเปลี่ยนโปรแกรม
                     </div>
-          
+
                     <div className="space-y-2">
                       {log.history.slice(1, 4).map((item, index) => (
                         <div
@@ -1882,13 +1882,13 @@ function ExercisePlanCard({ record }) {
                           <div className="text-[11px] font-semibold text-slate-500">
                             {formatDateTimeThai(item.at)} • โดย {show(item.by)}
                           </div>
-          
+
                           <div className="mt-1 text-xs font-bold text-slate-800">
                             {show(item.from)}
                             <span className="mx-1 text-sky-600">→</span>
                             {show(item.to)}
                           </div>
-          
+
                           {item.reason && (
                             <div className="mt-1 text-[11px] font-bold text-emerald-700">
                               เหตุผล: {item.reason}
@@ -1902,34 +1902,35 @@ function ExercisePlanCard({ record }) {
               )}
             </div>
 
-  {latestUpdate ? (
-    <div className="mt-2">
-      <div className="text-[11px] font-semibold text-slate-500">
-        {formatDateTimeThai(latestUpdate.at)}
-      </div>
+            {latestUpdate ? (
+              <div className="mt-2">
+                <div className="text-[11px] font-semibold text-slate-500">
+                  {formatDateTimeThai(latestUpdate.at)}
+                </div>
 
-      <div className="mt-0.5 text-[11px] font-bold text-slate-600">
-        โดย {show(latestUpdate.by)}
-      </div>
+                <div className="mt-0.5 text-[11px] font-bold text-slate-600">
+                  โดย {show(latestUpdate.by)}
+                </div>
 
-      <div className="mt-2 rounded-xl bg-slate-50 px-2 py-2 text-xs font-black leading-5 text-slate-900">
-        <div>{show(latestUpdate.from)}</div>
-        <div className="text-center text-sky-600">↓</div>
-        <div>{show(latestUpdate.to)}</div>
-      </div>
+                <div className="mt-2 rounded-xl bg-slate-50 px-2 py-2 text-xs font-black leading-5 text-slate-900">
+                  <div>{show(latestUpdate.from)}</div>
+                  <div className="text-center text-sky-600">↓</div>
+                  <div>{show(latestUpdate.to)}</div>
+                </div>
 
-      {latestUpdate.reason && (
-        <div className="mt-1 text-[11px] font-bold text-emerald-700">
-          เหตุผล: {latestUpdate.reason}
+                {latestUpdate.reason && (
+                  <div className="mt-1 text-[11px] font-bold text-emerald-700">
+                    เหตุผล: {latestUpdate.reason}
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="mt-2 rounded-xl bg-slate-50 p-2 text-xs font-semibold text-slate-600">
+                ยังไม่มีข้อมูลการอัปเดต
+              </div>
+            )}
+          </div>
         </div>
-      )}
-    </div>
-  ) : (
-    <div className="mt-2 rounded-xl bg-slate-50 p-2 text-xs font-semibold text-slate-600">
-      ยังไม่มีข้อมูลการอัปเดต
-    </div>
-  )}
-</div>
 
         <div className="mt-5 grid gap-3 lg:grid-cols-2">
           {activeDays.length ? (
