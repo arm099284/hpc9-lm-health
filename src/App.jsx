@@ -2071,6 +2071,15 @@ function ProgramReceivedCard({ record }) {
         .map((x) => x.trim())
         .filter(Boolean);
 
+  const setsReps =
+    program.setsReps ||
+    program.strengthSetsReps ||
+    program.strengthPlan ||
+    "";
+
+  const hasPrecaution = Boolean(program.precaution);
+  const hasFollowUp = Boolean(program.followUp);
+
   return (
     <Card title="โปรแกรมที่ได้รับ" icon={ClipboardIcon}>
       <div className="space-y-4">
@@ -2095,12 +2104,26 @@ function ProgramReceivedCard({ record }) {
               Strength Plan
             </div>
 
-            <div className="mt-2 text-lg font-black text-slate-900">
-              {show(program.goal)}
-            </div>
+            <div className="mt-2 space-y-2">
+              <div className="text-base font-black text-slate-900">
+                {program.strengthFrequency
+                  ? `${program.strengthFrequency} วัน/สัปดาห์`
+                  : "ยังไม่กำหนดวันฝึก"}
+              </div>
 
-            <div className="mt-1 text-base font-bold text-slate-700">
-              {show(program.setsReps)}
+              <div className="text-sm font-bold text-slate-700">
+                เป้าหมาย: {show(record.goal)}
+              </div>
+
+              {setsReps ? (
+                <div className="rounded-xl bg-white px-3 py-2 text-sm font-bold text-slate-800">
+                  {setsReps}
+                </div>
+              ) : (
+                <div className="rounded-xl bg-white px-3 py-2 text-sm font-semibold text-slate-500">
+                  ยังไม่มีรายละเอียด Sets × Reps
+                </div>
+              )}
             </div>
 
             <div className="mt-3 flex flex-wrap gap-2">
@@ -2162,6 +2185,32 @@ function ProgramReceivedCard({ record }) {
             )}
           </div>
         </div>
+
+        {(hasPrecaution || hasFollowUp) && (
+          <div className="grid gap-3 md:grid-cols-2">
+            {hasPrecaution && (
+              <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4">
+                <div className="text-sm font-bold text-amber-700">
+                  ข้อควรระวัง
+                </div>
+                <div className="mt-2 text-base font-semibold text-slate-800">
+                  {program.precaution}
+                </div>
+              </div>
+            )}
+
+            {hasFollowUp && (
+              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                <div className="text-sm font-bold text-slate-500">
+                  คำแนะนำเพิ่มเติม
+                </div>
+                <div className="mt-2 text-base font-semibold text-slate-800">
+                  {program.followUp}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </Card>
   );
