@@ -2061,6 +2061,112 @@ function ExercisePlanCard({ record }) {
   );
 }
 
+function ProgramReceivedCard({ record }) {
+  const program = record.program || {};
+
+  const focusItems = Array.isArray(program.focus)
+    ? program.focus
+    : String(program.focus || "")
+        .split("/")
+        .map((x) => x.trim())
+        .filter(Boolean);
+
+  return (
+    <Card title="โปรแกรมที่ได้รับ" icon={ClipboardIcon}>
+      <div className="space-y-4">
+        <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+          <div className="text-sm font-bold text-slate-500">
+            โปรแกรมหลัก
+          </div>
+
+          <div className="mt-1 text-2xl font-black text-slate-900">
+            {show(program.type)}
+            {program.strengthFrequency && (
+              <span className="text-slate-500">
+                {" "}• {program.strengthFrequency} วัน/สัปดาห์
+              </span>
+            )}
+          </div>
+        </div>
+
+        <div className="grid gap-4 md:grid-cols-2">
+          <div className="rounded-2xl border border-blue-200 bg-blue-50 p-4">
+            <div className="text-sm font-bold text-blue-700">
+              Strength Plan
+            </div>
+
+            <div className="mt-2 text-lg font-black text-slate-900">
+              {show(program.goal)}
+            </div>
+
+            <div className="mt-1 text-base font-bold text-slate-700">
+              {show(program.setsReps)}
+            </div>
+
+            <div className="mt-3 flex flex-wrap gap-2">
+              <span className="rounded-full border border-blue-200 bg-white px-3 py-1 text-xs font-bold text-blue-700">
+                {show(program.intensity)}
+              </span>
+
+              <span className="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-bold text-slate-700">
+                RPE {show(program.rpe)}
+              </span>
+            </div>
+          </div>
+
+          <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
+            <div className="text-sm font-bold text-emerald-700">
+              Cardio Plan
+            </div>
+
+            <div className="mt-2 text-lg font-black text-slate-900">
+              {show(program.cardioType)}
+              {program.cardioDuration && (
+                <span className="text-slate-600">
+                  {" "}• {program.cardioDuration} นาที/ครั้ง
+                </span>
+              )}
+            </div>
+
+            <div className="mt-3 grid gap-2 text-sm font-bold text-slate-700">
+              <div className="rounded-xl bg-white px-3 py-2">
+                Talk Test: {show(program.talk)}
+              </div>
+
+              <div className="rounded-xl bg-white px-3 py-2">
+                Target HR: {targetHrText(record.age, program.intensity)}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="rounded-2xl border border-slate-200 bg-white p-4">
+          <div className="text-sm font-bold text-slate-500">
+            Focus / จุดเน้น
+          </div>
+
+          <div className="mt-3 flex flex-wrap gap-2">
+            {focusItems.length ? (
+              focusItems.map((item) => (
+                <span
+                  key={item}
+                  className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-sm font-bold text-slate-700"
+                >
+                  {item}
+                </span>
+              ))
+            ) : (
+              <span className="text-sm font-semibold text-slate-500">
+                -
+              </span>
+            )}
+          </div>
+        </div>
+      </div>
+    </Card>
+  );
+}
+
 function Dashboard({ record, back }) {
   const risk = record.parq.some(Boolean);
 
@@ -2109,33 +2215,10 @@ function Dashboard({ record, back }) {
       <div className="grid gap-5 lg:grid-cols-[1.2fr_.8fr]">
         <Trend record={record} />
 
-        <Card title="โปรแกรมที่ได้รับ" icon={FileIcon}>
-          <div className="grid gap-3 sm:grid-cols-2">
-            <Info label="Program Type" value={record.program.type || record.program.split} />
-            <Info label="Cardio" value={`${record.program.cardioType || "-"} • ${record.program.cardioDuration || "-"} นาที/ครั้ง`} />
-            <Info label="Strength" value={`${show(record.program.strengthFrequency)} วัน/สัปดาห์ • ${show(record.program.strengthDose)}`} />
-            <Info label="Intensity" value={`${show(record.program.intensity)} • RPE ${show(record.program.rpe)}`} />
-            <Info label="Talk Test" value={record.program.talk} />
-            <Info label="Target HR" value={targetHrText(record.age, record.program.intensity)} />
-            <Info label="Focus" value={record.program.focus} />
-          </div>
-
-          <div className="mt-3 grid gap-3">
-            {record.program.precaution && (
-              <div className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-base leading-6 text-amber-800">
-                <b>ข้อควรระวัง:</b> {record.program.precaution}
-              </div>
-            )}
-
-            {record.program.followUp && (
-              <div className="rounded-xl border border-slate-200 bg-slate-50 p-3 text-base leading-6 text-slate-700">
-                <b>คำแนะนำเพิ่มเติม:</b> {record.program.followUp}
-              </div>
-            )}
-          </div>
-        </Card>
       </div>
-
+      
+      <ProgramReceivedCard record={record} />
+      
       <NutritionPlanCard record={record} />
 
       <ExercisePlanCard record={record} />
