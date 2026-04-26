@@ -391,35 +391,7 @@ function sortExercisesByDay(day, list = []) {
 }
 
 function exercisePlanDescription(split, daysPerWeek, daysMap = {}) {
-  const days = Number(daysPerWeek);
-
-  if (split === "Full Body") {
-    return `ฝึกทั้งตัว ${days || "-"} วัน/สัปดาห์`;
-  }
-
-  if (split === "Upper / Lower") {
-    if (days === 4) return "Upper 2 วัน + Lower 2 วัน";
-    if (days === 3) return "สลับ Upper / Lower รวม 3 วัน/สัปดาห์";
-    if (days === 2) return "Upper 1 วัน + Lower 1 วัน";
-    return `สลับ Upper / Lower รวม ${days || "-"} วัน/สัปดาห์`;
-  }
-
-  if (split === "PPL") {
-    if (days === 6) return "Push 2 วัน + Pull 2 วัน + Legs 2 วัน";
-    if (days === 3) return "Push 1 วัน + Pull 1 วัน + Legs 1 วัน";
-    return `วน Push / Pull / Legs รวม ${days || "-"} วัน/สัปดาห์`;
-  }
-
-  if (split === "Hybrid / Mixed") {
-  const map = daysMap || {};
-
-  const selected = Object.entries(map)
-    .filter(([, list]) => Array.isArray(list) && list.length > 0)
-    .map(([key]) => key);
-
-  if (!selected.length) {
-    return `ผสมหลายรูปแบบ ${days} วัน/สัปดาห์`;
-  }
+  const days = Number(daysPerWeek) || 0;
 
   const labels = {
     fullBody: "Full Body",
@@ -430,27 +402,110 @@ function exercisePlanDescription(split, daysPerWeek, daysMap = {}) {
     legs: "Legs Day",
   };
 
-  const counts = {};
-  selected.forEach((key) => (counts[key] = 1));
+  const order = ["fullBody", "upper", "lower", "push", "pull", "legs"];
 
-  let remain = days - selected.length;
-
-  if (selected.includes("fullBody")) {
-    counts.fullBody += remain > 0 ? remain : 0;
-  } else {
-    let i = 0;
-    while (remain > 0) {
-      const key = selected[i % selected.length];
-      counts[key] += 1;
-      remain--;
-      i++;
-    }
+  function formatCounts(counts) {
+    return order
+      .filter((key) => counts[key] > 0)
+      .map((key) => `${labels[key]} ${counts[key]} วัน`)
+      .join(" + ");
   }
 
-  return selected
-    .map((key) => `${labels[key]} ${counts[key]} วัน`)
-    .join(" + ");
+  if (split === "Full Body") {
+    return `Full Body ${days || "-"} วัน`;
+  }
+
+  if (split === "Upper / Lower") {
+    const upper = Math.ceil(days / 2);
+    const lower = Math.floor(days / 2);
+
+    return `Upper Day ${upper || "-"} วัน + Lower Day ${lower || "-"} วัน`;
+  }
+
+  if (split === "PPL") {
+    if (days < 3) {
+      return `PPL ควรเริ่มที่ 3 วัน/สัปดาห์ขึ้นไป`;
+    }
+
+    const counts = {
+      push: 1,
+      pull: 1,
+      legs: 1,
+    };
+
+    let remain = days - 3;
+    const pplOrder = ["push", "pull", "legs"];
+    let i = 0;
+
+    while (remain > 0) {
+      const key = pplOrder[i % pplOrder.length];
+      counts[key] += 1;
+      remain -= 1;
+      i += 1;
+    }
+
+    return formatCounts(counts);
+  }
+
+  if (split === "Hybrid / Mixed") {
+    const selected = Object.entries(daysMap || {})
+      .filter(([, list]) => Array.isArray(list) && list.length > 0)
+      .map(([key]) => key)
+      .sort((a, b) => order.indexOf(a) - order.indexOf(b));
+
+    if (!selected.length) {
+      return `ผสมหลายรูปแบบ รวม ${days || "-"} วัน/สัปดาห์`;
+    }
+
+    if (days < selected.length) {
+      return `เลือก ${selected.length} รูปแบบ แต่กำหนด ${days} วัน/สัปดาห์`;
+    }
+
+    const counts = {};
+    selected.forEach((key) => {
+      counts[key] = 1;
+    });
+
+    let remain = days - selected.length;
+
+    if (selected.includes("fullBody")) {
+      counts.fullBody += remain;
+    } else {
+      let i = 0;
+      while (remain > 0) {
+        const key = selected[i % selected.length];
+        counts[key] += 1;
+        remain -= 1;
+        i += 1;
+      }
+    }
+
+    return formatCounts(counts);
+  }
+
+  return "";
 }
+
+function exercisePlanWarning(split, daysPerWeek, daysMap = {}) {
+  const days = Number(daysPerWeek) || 0;
+
+  if (split === "PPL" && days < 3) {
+    return "PPL ควรมีอย่างน้อย 3 วัน/สัปดาห์ เพื่อให้ครบ Push / Pull / Legs";
+  }
+
+  if (split === "Upper / Lower" && days < 2) {
+    return "Upper / Lower ควรมีอย่างน้อย 2 วัน/สัปดาห์";
+  }
+
+  if (split === "Hybrid / Mixed") {
+    const selectedCount = Object.values(daysMap || {}).filter(
+      (list) => Array.isArray(list) && list.length > 0
+    ).length;
+
+    if (selectedCount > 0 && days < selectedCount) {
+      return `จำนวนวัน/สัปดาห์น้อยกว่ารูปแบบวันที่เลือก: เลือก ${selectedCount} รูปแบบ แต่กำหนด ${days} วัน`;
+    }
+  }
 
   return "";
 }
@@ -3088,7 +3143,19 @@ ${quality.issues.slice(0, 8).join("\n")}
                 <div className="text-sm font-bold text-sky-700">
                   คำอธิบายโปรแกรมอัตโนมัติ
                 </div>
-              
+                  {exercisePlanWarning(
+                    draft.exerciseLog?.split || "Full Body",
+                    draft.exerciseLog?.daysPerWeek || "3",
+                    draft.exerciseLog?.days
+                  ) && (
+                    <div className="mt-3 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-bold text-amber-800">
+                      {exercisePlanWarning(
+                        draft.exerciseLog?.split || "Full Body",
+                        draft.exerciseLog?.daysPerWeek || "3",
+                        draft.exerciseLog?.days
+                      )}
+                    </div>
+                  )}
                 <div className="mt-1 text-lg font-black text-slate-900">
                   {exercisePlanDescription(
                     draft.exerciseLog?.split || "Full Body",
@@ -3193,7 +3260,17 @@ ${quality.issues.slice(0, 8).join("\n")}
                 type="button"
                 onClick={() => {
                   const currentLog = draft.exerciseLog || {};
-
+                  const warning = exercisePlanWarning(
+                    currentLog.split || "Full Body",
+                    currentLog.daysPerWeek || "3",
+                    currentLog.days
+                  );
+                
+                  if (warning) {
+                    alert(warning);
+                    return;
+                  }
+                  
                   const oldProgram =
                     currentLog.updatedTo ||
                     `${currentLog.split || "Full Body"} ${currentLog.daysPerWeek || "3"} วัน/สัปดาห์`;
