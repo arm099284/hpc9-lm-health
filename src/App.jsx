@@ -1822,13 +1822,13 @@ function ExercisePlanCard({ record }) {
 
   return (
     <Card title="โปรแกรมออกกำลังกายของฉัน" icon={ActivityIcon}>
-      <div className="grid gap-4 lg:grid-cols-[1.45fr_.65fr]">
-        <div className="rounded-3xl border border-slate-200 bg-slate-50 p-5">
+      <div className="grid gap-4 xl:grid-cols-[1.45fr_.65fr]">
+        <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4 md:p-5">
           <div className="text-sm font-bold text-slate-500">
             My Exercise Plan
           </div>
 
-          <div className="mt-1 text-3xl font-black text-slate-900">
+          <div className="mt-1 text-2xl font-black text-slate-900 md:text-3xl">
             {log.split || "ยังไม่ได้กำหนดโปรแกรม"}{" "}
             {log.daysPerWeek ? `${log.daysPerWeek} วัน/สัปดาห์` : ""}
           </div>
@@ -1852,7 +1852,7 @@ function ExercisePlanCard({ record }) {
             ให้ทำตามลำดับท่าที่แสดงจากบนลงล่าง
           </div>
 
-          <div className="mt-5 grid gap-3 md:grid-cols-2">
+          <div className="mt-5 grid gap-3 lg:grid-cols-2">
             {activeDays.length ? (
               activeDays.map(([dayKey, list]) => (
                 <div
@@ -1868,7 +1868,7 @@ function ExercisePlanCard({ record }) {
                       (exercise, index) => (
                         <li
                           key={exercise}
-                          className="flex items-center gap-3 rounded-xl bg-slate-50 px-3 py-2 text-sm font-bold text-slate-700"
+                          className="flex items-center gap-2 rounded-xl bg-slate-50 px-3 py-2 text-sm font-semibold text-slate-700 md:gap-3 md:font-bold"
                         >
                           <span className="flex h-7 w-7 items-center justify-center rounded-full bg-slate-900 text-xs text-white">
                             {String(index + 1).padStart(2, "0")}
@@ -1888,7 +1888,7 @@ function ExercisePlanCard({ record }) {
           </div>
         </div>
 
-        <div className="rounded-3xl border border-sky-200 bg-sky-50 p-4">
+        <div className="rounded-3xl border border-sky-200 bg-sky-50 p-3 md:p-4">
           <div className="text-sm font-bold text-sky-700">
             อัปเดต 4 ครั้งล่าสุด
           </div>
