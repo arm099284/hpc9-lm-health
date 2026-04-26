@@ -3045,17 +3045,22 @@ ${quality.issues.slice(0, 8).join("\n")}
               <button
                 type="button"
                 onClick={() => {
+                  const currentLog = draft.exerciseLog || {};
+
                   const oldProgram =
-                    draft.exerciseLog?.updatedTo ||
-                    `${draft.exerciseLog?.split || "Full Body"} ${draft.exerciseLog?.daysPerWeek || "3"} วัน/สัปดาห์`;
-            
+                    currentLog.updatedTo ||
+                    `${currentLog.split || "Full Body"} ${currentLog.daysPerWeek || "3"} วัน/สัปดาห์`;
+                  
                   const newProgram =
-                    `${draft.exerciseLog?.split || "Full Body"} ${draft.exerciseLog?.daysPerWeek || "3"} วัน/สัปดาห์`;
-            
-                  update(["exerciseLog", "updatedFrom"], oldProgram);
-                  update(["exerciseLog", "updatedTo"], newProgram);
-                  update(["exerciseLog", "updatedBy"], adminUser?.name || draft.updatedBy || "Trainer");
-                  update(["exerciseLog", "updatedAt"], new Date().toISOString());
+                    `${currentLog.split || "Full Body"} ${currentLog.daysPerWeek || "3"} วัน/สัปดาห์`;
+                  
+                  update(["exerciseLog"], {
+                    ...currentLog,
+                    updatedFrom: oldProgram,
+                    updatedTo: newProgram,
+                    updatedBy: adminUser?.name || draft.updatedBy || "Trainer",
+                    updatedAt: new Date().toISOString(),
+                  });
             
                   alert("บันทึกโปรแกรมแล้ว");
                 }}
