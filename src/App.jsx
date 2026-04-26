@@ -2863,7 +2863,30 @@ ${quality.issues.slice(0, 8).join("\n")}
                     )}
                   </ol>
                 </div>
-              </div>            
+              </div>
+            <div className="mt-5 flex justify-end">
+              <button
+                type="button"
+                onClick={() => {
+                  const oldProgram =
+                    draft.exerciseLog?.updatedTo ||
+                    `${draft.exerciseLog?.split || "Full Body"} ${draft.exerciseLog?.daysPerWeek || "3"} วัน/สัปดาห์`;
+            
+                  const newProgram =
+                    `${draft.exerciseLog?.split || "Full Body"} ${draft.exerciseLog?.daysPerWeek || "3"} วัน/สัปดาห์`;
+            
+                  update(["exerciseLog", "updatedFrom"], oldProgram);
+                  update(["exerciseLog", "updatedTo"], newProgram);
+                  update(["exerciseLog", "updatedBy"], adminUser?.name || "");
+                  update(["exerciseLog", "updatedAt"], new Date().toISOString());
+            
+                  alert("บันทึกโปรแกรมแล้ว");
+                }}
+                className="rounded-xl bg-emerald-600 px-5 py-3 text-base font-bold text-white hover:bg-emerald-700"
+              >
+                บันทึกโปรแกรม
+              </button>
+            </div>
           </Card>
         )}
         
