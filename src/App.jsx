@@ -411,8 +411,46 @@ function exercisePlanDescription(split, daysPerWeek) {
   }
 
   if (split === "Hybrid / Mixed") {
-    return `ผสมหลายรูปแบบ รวม ${days || "-"} วัน/สัปดาห์ ตามที่เทรนเนอร์กำหนด`;
+  const map = daysMap || {};
+
+  const selected = Object.entries(map)
+    .filter(([, list]) => Array.isArray(list) && list.length > 0)
+    .map(([key]) => key);
+
+  if (!selected.length) {
+    return `ผสมหลายรูปแบบ ${days} วัน/สัปดาห์`;
   }
+
+  const labels = {
+    fullBody: "Full Body",
+    upper: "Upper Day",
+    lower: "Lower Day",
+    push: "Push Day",
+    pull: "Pull Day",
+    legs: "Legs Day",
+  };
+
+  const counts = {};
+  selected.forEach((key) => (counts[key] = 1));
+
+  let remain = days - selected.length;
+
+  if (selected.includes("fullBody")) {
+    counts.fullBody += remain > 0 ? remain : 0;
+  } else {
+    let i = 0;
+    while (remain > 0) {
+      const key = selected[i % selected.length];
+      counts[key] += 1;
+      remain--;
+      i++;
+    }
+  }
+
+  return selected
+    .map((key) => `${labels[key]} ${counts[key]} วัน`)
+    .join(" + ");
+}
 
   return "";
 }
