@@ -2683,6 +2683,18 @@ ${quality.issues.slice(0, 8).join("\n")}
             <button onClick={() => setTab("general")} className={`rounded-xl px-4 py-3 text-left text-base font-semibold ${tab === "general" ? "bg-slate-900 text-white" : "bg-slate-50 text-slate-700"}`}>ข้อมูลทั่วไป</button>
             <button onClick={() => setTab("parq")} className={`rounded-xl px-4 py-3 text-left text-base font-semibold ${tab === "parq" ? "bg-slate-900 text-white" : "bg-slate-50 text-slate-700"}`}>PAR-Q</button>
             <button onClick={() => setTab("program")} className={`rounded-xl px-4 py-3 text-left text-base font-semibold ${tab === "program" ? "bg-slate-900 text-white" : "bg-slate-50 text-slate-700"}`}>โปรแกรม</button>
+            
+            <button
+              onClick={() => setTab("exerciseLog")}
+              className={`rounded-xl px-4 py-3 text-left text-base font-semibold ${
+                tab === "exerciseLog"
+                  ? "bg-slate-900 text-white"
+                  : "bg-slate-50 text-slate-700"
+              }`}
+            >
+              Trainer Exercise Log
+            </button>
+            
             {[0, 1, 2, 3].map((i) => <button key={i} onClick={() => { setIdx(i); setTab("session"); }} className={`rounded-xl px-4 py-3 text-left text-base font-semibold ${tab === "session" && idx === i ? "bg-slate-900 text-white" : "bg-slate-50 text-slate-700"}`}>บันทึกครั้งที่ {i + 1}</button>)}
           </div>
         </Card>
@@ -2703,6 +2715,15 @@ ${quality.issues.slice(0, 8).join("\n")}
         {tab === "general" && <GeneralForm draft={draft} update={update} />}
         {tab === "parq" && <ParqForm draft={draft} update={update} />}
         {tab === "program" && <ProgramForm draft={draft} update={update} />}
+        
+        {tab === "exerciseLog" && (
+          <Card title="Trainer Exercise Log" icon={ActivityIcon}>
+            <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-base font-semibold text-amber-800">
+              เตรียมเพิ่มหน้าฟอร์มเลือก Split / วันฝึก / ท่าออกกำลังกาย
+            </div>
+          </Card>
+        )}
+        
         {tab === "session" && <SessionForm draft={draft} update={update} idx={idx} />}
       </section>
     </main>
