@@ -3439,9 +3439,12 @@ function ProgramForm({ draft, update }) {
         <div className="grid gap-4 md:grid-cols-2">
           <Select
             label="Program Type"
-            value={program.type || program.split || "Full Body"}
-            onChange={(v) => update(["program", "type"], v)}
-            options={["Full Body", "Upper/Lower", "PPL", "Bro Split", "Mobility/Corrective", "Home Program"]}
+            value={draft.program.type}
+            onChange={(v) => {
+              update(["program", "type"], v);
+              update(["exerciseLog", "split"], v);
+            }}
+            options={["Full Body", "Upper / Lower", "PPL", "Hybrid / Mixed"]}
           />
 
           <Select
@@ -3502,8 +3505,11 @@ function ProgramForm({ draft, update }) {
           <div className="grid gap-4 md:grid-cols-2">
             <Field
               label="วันฝึกกล้ามเนื้อ/สัปดาห์"
-              value={program.strengthFrequency || ""}
-              onChange={(v) => update(["program", "strengthFrequency"], v)}
+              value={draft.program.strengthFrequency}
+              onChange={(v) => {
+                update(["program", "strengthFrequency"], v);
+                update(["exerciseLog", "daysPerWeek"], v);
+              }}
             />
 
             <Select
