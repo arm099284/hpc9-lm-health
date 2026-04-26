@@ -2736,14 +2736,14 @@ function AdminSummary({ records, auditLogs, onFullBackup, onRestoreBackup }) {
           <ResponsiveContainer>
             <BarChart
               data={summaryChartRows}
-              barCategoryGap="45%"
+              barCategoryGap="30%"
               margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
             >
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="name" tick={{ fontSize: 14 }} />
               <YAxis allowDecimals={false} tick={{ fontSize: 12 }} />
               <Tooltip />
-              <Bar dataKey="value" barSize={28} radius={[8, 8, 0, 0]}>
+              <Bar dataKey="value" barSize={56} radius={[10, 10, 0, 0]}>
                 {summaryChartRows.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={outcomeColor(entry.name)} />
                 ))}
