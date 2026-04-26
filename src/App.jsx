@@ -347,18 +347,46 @@ function toggleExercise(list = [], exercise) {
 }
 
 function sortExercisesByDay(day, list = []) {
-  const order = groupsForExerciseDay(day);
+  const dayOrder = {
+    "Full Body": [
+      "Goblet Squat", "Leg Press", "Lunge", "Romanian Deadlift", "Deadlift",
+      "Hip Thrust", "Glute Bridge", "Step-up", "Chest Press", "Push-up",
+      "Shoulder Press", "Lat Pulldown", "Seated Row", "Dumbbell Row",
+      "Plank", "Dead Bug", "Walking", "Cycling"
+    ],
+    "Upper Day": [
+      "Chest Press", "Push-up", "Shoulder Press", "Lat Pulldown",
+      "Seated Row", "Dumbbell Row", "Lateral Raise", "Face Pull",
+      "Biceps Curl", "Triceps Pushdown"
+    ],
+    "Lower Day": [
+      "Goblet Squat", "Leg Press", "Lunge", "Romanian Deadlift",
+      "Deadlift", "Hip Thrust", "Glute Bridge", "Leg Curl",
+      "Calf Raise", "Plank", "Side Plank"
+    ],
+    "Push Day": [
+      "Chest Press", "Shoulder Press", "Push-up",
+      "Lateral Raise", "Triceps Pushdown"
+    ],
+    "Pull Day": [
+      "Lat Pulldown", "Seated Row", "Dumbbell Row",
+      "Face Pull", "Biceps Curl"
+    ],
+    "Legs Day": [
+      "Goblet Squat", "Leg Press", "Lunge",
+      "Romanian Deadlift", "Deadlift", "Hip Thrust",
+      "Glute Bridge", "Leg Curl", "Calf Raise",
+      "Plank", "Side Plank"
+    ],
+  };
+
+  const order = dayOrder[day] || dayOrder["Full Body"];
 
   return [...list].sort((a, b) => {
-    const groupA = order.findIndex((group) =>
-      exerciseOptions[group]?.includes(a)
-    );
+    const indexA = order.indexOf(a);
+    const indexB = order.indexOf(b);
 
-    const groupB = order.findIndex((group) =>
-      exerciseOptions[group]?.includes(b)
-    );
-
-    return groupA - groupB;
+    return (indexA === -1 ? 999 : indexA) - (indexB === -1 ? 999 : indexB);
   });
 }
 
@@ -1614,6 +1642,11 @@ function ExercisePlanCard({ record }) {
       allowedDays.includes(dayKey) &&
       Array.isArray(list) &&
       list.length > 0
+
+    const dayDisplayOrder = ["fullBody", "upper", "lower", "push", "pull", "legs"];
+    activeDays.sort(
+      ([a], [b]) => dayDisplayOrder.indexOf(a) - dayDisplayOrder.indexOf(b)
+
   );
 
   return (
