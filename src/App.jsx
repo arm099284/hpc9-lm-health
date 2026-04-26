@@ -38,6 +38,15 @@ const HeartIcon = (props) => <IconBase {...props}><path d="M20.8 4.6a5.5 5.5 0 0
 const SearchIcon = (props) => <IconBase {...props}><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /></IconBase>;
 const UserIcon = (props) => <IconBase {...props}><circle cx="12" cy="8" r="4" /><path d="M4 21a8 8 0 0 1 16 0" /></IconBase>;
 
+function outcomeColor(name) {
+  if (name === "เทียบได้ ≥2 ครั้ง") return "#93c5fd";
+  if (name === "ดีขึ้น") return "#86efac";
+  if (name === "ต้องติดตาม") return "#fde68a";
+  if (name === "คงเดิม") return "#cbd5e1";
+  if (name === "ข้อมูลไม่พอ") return "#94a3b8";
+  return "#94a3b8";
+}
+
 const ADMIN_PASSWORD = "LMHPC9";
 const ADMIN_USERS = {
   admin1: { id: "admin1", name: "ชัยวัฒน์", role: "Admin" },
@@ -1292,7 +1301,7 @@ function Trend({ record }) {
       <div className="h-80">
         <ResponsiveContainer>
           <LineChart data={data} margin={{ top: 12, right: 18, left: 8, bottom: 6 }}>
-            <CartesianGrid strokeDasharray="3 3" />
+            <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
             <XAxis dataKey="name" tick={{ fontSize: 14 }} />
             <YAxis tick={{ fontSize: 14 }} domain={yDomain} allowDecimals={true} tickFormatter={(v) => Number(v).toFixed(Number.isInteger(v) ? 0 : 1)} />
             <Tooltip formatter={(v) => [`${v} ${item[2]}`, item[1]]} labelFormatter={(label, payload) => `${label}${payload?.[0]?.payload?.date ? ` • ${payload[0].payload.date}` : ""}`} />
@@ -1358,7 +1367,36 @@ function OhsTable({ record }) {
         </div>
         <div className="h-72">
           <ResponsiveContainer>
-            <BarChart data={chart}><CartesianGrid strokeDasharray="3 3" /><XAxis dataKey="name" tick={{ fontSize: 14 }} /><YAxis domain={[0, 6]} tick={{ fontSize: 12 }} /><Tooltip /><Bar dataKey="normal" fill="#0f172a" radius={[6, 6, 0, 0]} /></BarChart>
+            <BarChart
+              data={chart}
+              barCategoryGap="45%"
+              margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
+            >
+              <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+            
+              <XAxis
+                dataKey="name"
+                tick={{ fontSize: 14, fill: "#64748b" }}
+                axisLine={{ stroke: "#cbd5e1" }}
+                tickLine={false}
+              />
+            
+              <YAxis
+                domain={[0, 6]}
+                tick={{ fontSize: 12, fill: "#64748b" }}
+                axisLine={{ stroke: "#cbd5e1" }}
+                tickLine={false}
+              />
+            
+              <Tooltip />
+            
+              <Bar
+                dataKey="normal"
+                fill="#0f172a"
+                barSize={28}
+                radius={[8, 8, 0, 0]}
+              />
+            </BarChart>
           </ResponsiveContainer>
         </div>
       </div>
@@ -2696,12 +2734,20 @@ function AdminSummary({ records, auditLogs, onFullBackup, onRestoreBackup }) {
       <Card title="ภาพรวมผลลัพธ์" icon={ActivityIcon}>
         <div className="h-72">
           <ResponsiveContainer>
-            <BarChart data={summaryChartRows}>
+            <BarChart
+              data={summaryChartRows}
+              barCategoryGap="45%"
+              margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
+            >
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="name" tick={{ fontSize: 14 }} />
               <YAxis allowDecimals={false} tick={{ fontSize: 12 }} />
               <Tooltip />
-              <Bar dataKey="value" fill="#0f172a" radius={[6, 6, 0, 0]} />
+              <Bar dataKey="value" barSize={28} radius={[8, 8, 0, 0]}>
+                {summaryChartRows.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={outcomeColor(entry.name)} />
+                ))}
+              </Bar>
             </BarChart>
           </ResponsiveContainer>
         </div>
