@@ -1586,6 +1586,116 @@ function NutritionPlanCard({ record }) {
   );
 }
 
+function ExercisePlanCard({ record }) {
+  const log = record.exerciseLog || {};
+  const days = log.days || {};
+
+  const dayNames = {
+    fullBody: "Full Body",
+    upper: "Upper Day",
+    lower: "Lower Day",
+    push: "Push Day",
+    pull: "Pull Day",
+    legs: "Legs Day",
+  };
+
+  const activeDays = Object.entries(days).filter(
+    ([, list]) => Array.isArray(list) && list.length > 0
+  );
+
+  return (
+    <Card title="โปรแกรมออกกำลังกายของฉัน" icon={ActivityIcon}>
+      <div className="grid gap-4 lg:grid-cols-[1.2fr_.8fr]">
+        <div className="rounded-3xl border border-slate-200 bg-slate-50 p-5">
+          <div className="text-sm font-bold text-slate-500">
+            My Exercise Plan
+          </div>
+
+          <div className="mt-1 text-3xl font-black text-slate-900">
+            {log.split || "ยังไม่ได้กำหนดโปรแกรม"}{" "}
+            {log.daysPerWeek ? `${log.daysPerWeek} วัน/สัปดาห์` : ""}
+          </div>
+
+          <div className="mt-2 text-base font-semibold text-slate-500">
+            เป้าหมาย: {show(record.goal)}
+          </div>
+
+          <div className="mt-5 grid gap-3 md:grid-cols-2">
+            {activeDays.length ? (
+              activeDays.map(([dayKey, list]) => (
+                <div
+                  key={dayKey}
+                  className="rounded-2xl border border-white bg-white p-4 shadow-sm"
+                >
+                  <div className="mb-3 text-lg font-black text-slate-900">
+                    {dayNames[dayKey] || dayKey}
+                  </div>
+
+                  <ol className="space-y-2">
+                    {sortExercisesByDay(dayNames[dayKey], list).map(
+                      (exercise, index) => (
+                        <li
+                          key={exercise}
+                          className="flex items-center gap-3 rounded-xl bg-slate-50 px-3 py-2 text-sm font-bold text-slate-700"
+                        >
+                          <span className="flex h-7 w-7 items-center justify-center rounded-full bg-slate-900 text-xs text-white">
+                            {String(index + 1).padStart(2, "0")}
+                          </span>
+                          {exercise}
+                        </li>
+                      )
+                    )}
+                  </ol>
+                </div>
+              ))
+            ) : (
+              <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-base font-semibold text-amber-800">
+                ยังไม่มีโปรแกรมออกกำลังกาย
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="rounded-3xl border border-sky-200 bg-sky-50 p-5">
+          <div className="text-sm font-bold text-sky-700">
+            อัปเดตล่าสุด
+          </div>
+
+          {log.updatedAt ? (
+            <>
+              <div className="mt-2 text-sm font-semibold text-slate-500">
+                {formatDateTimeThai(log.updatedAt)}
+              </div>
+
+              <div className="mt-1 text-base font-bold text-slate-900">
+                โดย {show(log.updatedBy)}
+              </div>
+
+              <div className="mt-4 rounded-2xl bg-white p-4 text-base font-black text-slate-900 shadow-sm">
+                <div>{show(log.updatedFrom)}</div>
+                <div className="my-2 text-center text-2xl text-sky-600">
+                  ↓
+                </div>
+                <div>{show(log.updatedTo)}</div>
+              </div>
+
+              {log.updateReason && (
+                <div className="mt-3">
+                  <Pill tone="good">เหตุผล: {log.updateReason}</Pill>
+                </div>
+              )}
+            </>
+          ) : (
+            <div className="mt-3 rounded-2xl bg-white p-4 text-base font-semibold text-slate-600">
+              ยังไม่มีข้อมูลการอัปเดตโปรแกรม
+            </div>
+          )}
+        </div>
+      </div>
+    </Card>
+  );
+}
+
 function Dashboard({ record, back }) {
   const risk = record.parq.some(Boolean);
 
@@ -1661,10 +1771,14 @@ function Dashboard({ record, back }) {
         </Card>
       </div>
 
+      <CompareTable record={record} title="ตารางเปรียบเทียบ InBody / Body Composition" icon={HeartIcon} list={metrics.inbody} />
+
       <NutritionPlanCard record={record} />
 
-      <CompareTable record={record} title="ตารางเปรียบเทียบ InBody / Body Composition" icon={HeartIcon} list={metrics.inbody} />
+      <ExercisePlanCard record={record} />
+
       <CompareTable record={record} title="ตารางเปรียบเทียบ Fitness Test 5 ด้าน" icon={ActivityIcon} list={metrics.fitness} withFitnessInterpretation />
+
       <OhsTable record={record} />
     </main>
   );
