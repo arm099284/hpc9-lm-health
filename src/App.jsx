@@ -1955,32 +1955,24 @@ function ExercisePlanCard({ record }) {
               เป้าหมาย: {show(record.goal)}
             </div>
             {(setsRepsSummary || cardioSummary) && (
-              <div className="mt-3 rounded-xl border border-slate-200 bg-white/70 px-3 py-2 shadow-sm">
+              <div className="mt-3 inline-block w-fit max-w-full rounded-xl border border-slate-200 bg-white/70 px-2.5 py-1.5 shadow-sm">
                 <div className="mb-1.5 text-[10px] font-bold uppercase tracking-wide text-slate-400">
                   สรุปแผน / Plan Summary
                 </div>
             
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-1.5">
                   {setsRepsSummary && (
-                    <div className="inline-flex flex-col rounded-lg border border-blue-100 bg-blue-50 px-3 py-1.5">
-                      <div className="text-[10px] font-bold text-blue-500">
-                        Strength
-                      </div>
-                      <div className="text-xs font-black text-slate-900">
-                        {setsRepsSummary}
-                      </div>
-                    </div>
+                    <span className="inline-flex items-center rounded-full border border-blue-100 bg-blue-50 px-3 py-1.5 text-xs font-bold text-blue-700">
+                      <span className="mr-1 text-blue-500">Strength:</span>
+                      <span className="text-slate-900">{setsRepsSummary}</span>
+                    </span>
                   )}
-            
+                
                   {cardioSummary && (
-                    <div className="inline-flex flex-col rounded-lg border border-emerald-100 bg-emerald-50 px-3 py-1.5">
-                      <div className="text-[10px] font-bold text-emerald-600">
-                        Cardio
-                      </div>
-                      <div className="text-xs font-black text-slate-900">
-                        {cardioSummary}
-                      </div>
-                    </div>
+                    <span className="inline-flex items-center rounded-full border border-emerald-100 bg-emerald-50 px-3 py-1.5 text-xs font-bold text-emerald-700">
+                      <span className="mr-1 text-emerald-600">Cardio:</span>
+                      <span className="text-slate-900">{cardioSummary}</span>
+                    </span>
                   )}
                 </div>
               </div>
