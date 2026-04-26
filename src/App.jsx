@@ -399,6 +399,47 @@ function sortExercisesByDay(day, list = []) {
   });
 }
 
+function exerciseMuscleText(exercise) {
+  const muscles = {
+    "Goblet Squat": "ต้นขา / ก้น / แกนกลาง",
+    "Leg Press": "ต้นขา / ก้น",
+    "Lunge": "ต้นขา / ก้น / การทรงตัว",
+    "Leg Curl": "หลังต้นขา",
+    "Calf Raise": "น่อง",
+
+    "Romanian Deadlift": "หลังต้นขา / ก้น / หลังล่าง",
+    "Deadlift": "หลังล่าง / ก้น / หลังขา",
+    "Hip Thrust": "ก้น / หลังต้นขา",
+    "Glute Bridge": "ก้น / หลังต้นขา",
+    "Step-up": "ต้นขา / ก้น / การทรงตัว",
+
+    "Push-up": "อก / ไหล่ / หลังแขน",
+    "Chest Press": "อก / ไหล่ / หลังแขน",
+    "Shoulder Press": "ไหล่ / หลังแขน",
+    "Lateral Raise": "ไหล่ด้านข้าง",
+    "Triceps Pushdown": "หลังแขน",
+
+    "Lat Pulldown": "ปีก / หลังบน / หน้าแขน",
+    "Seated Row": "หลังกลาง / ปีก / หน้าแขน",
+    "Dumbbell Row": "หลังกลาง / ปีก / หน้าแขน",
+    "Face Pull": "หลังไหล่ / หลังบน",
+    "Biceps Curl": "หน้าแขน",
+
+    "Plank": "แกนกลาง",
+    "Side Plank": "แกนกลางด้านข้าง",
+    "Dead Bug": "แกนกลาง / ควบคุมลำตัว",
+    "Bird Dog": "แกนกลาง / หลังล่าง",
+    "Leg Raise": "หน้าท้องส่วนล่าง",
+
+    "Walking": "หัวใจและปอด / ขา",
+    "Cycling": "หัวใจและปอด / ต้นขา",
+    "Rowing": "หัวใจและปอด / หลัง / ขา",
+    "HIIT": "หัวใจและปอด / เผาผลาญพลังงาน",
+  };
+
+  return muscles[exercise] || "";
+}
+
 function exercisePlanDescription(split, daysPerWeek, daysMap = {}) {
   const days = Number(daysPerWeek) || 0;
 
@@ -1986,12 +2027,23 @@ function ExercisePlanCard({ record }) {
                     (exercise, index) => (
                       <li
                         key={exercise}
-                        className="flex items-center gap-2 rounded-xl bg-slate-50 px-3 py-2 text-sm font-semibold text-slate-700 md:gap-3 md:font-bold"
+                        className="flex items-start gap-3 rounded-xl border border-slate-200 bg-slate-100 px-3 py-2.5 text-sm text-slate-800"
                       >
-                        <span className="flex h-7 w-7 items-center justify-center rounded-full bg-slate-900 text-xs text-white">
+                        <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-slate-900 text-xs font-bold text-white">
                           {String(index + 1).padStart(2, "0")}
                         </span>
-                        {exercise}
+                      
+                        <div className="min-w-0">
+                          <div className="font-bold text-slate-900">
+                            {exercise}
+                          </div>
+                      
+                          {exerciseMuscleText(exercise) && (
+                            <div className="mt-0.5 text-xs font-medium leading-5 text-slate-400">
+                              {exerciseMuscleText(exercise)}
+                            </div>
+                          )}
+                        </div>
                       </li>
                     )
                   )}
