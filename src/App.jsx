@@ -4314,29 +4314,41 @@ function LmAssessmentForm({ draft, update }) {
     emerald: {
       dot: "bg-emerald-500",
       button: "border-emerald-600 bg-emerald-600 text-white",
+      panel: "border-emerald-200 bg-emerald-50",
+      panelText: "text-emerald-700",
     },
     sky: {
       dot: "bg-sky-500",
       button: "border-sky-600 bg-sky-600 text-white",
+      panel: "border-sky-200 bg-sky-50",
+      panelText: "text-sky-700",
     },
     indigo: {
       dot: "bg-indigo-500",
       button: "border-indigo-600 bg-indigo-600 text-white",
+      panel: "border-indigo-200 bg-indigo-50",
+      panelText: "text-indigo-700",
     },
     violet: {
       dot: "bg-violet-500",
       button: "border-violet-600 bg-violet-600 text-white",
+      panel: "border-violet-200 bg-violet-50",
+      panelText: "text-violet-700",
     },
     amber: {
       dot: "bg-amber-500",
       button: "border-amber-600 bg-amber-600 text-white",
+      panel: "border-amber-200 bg-amber-50",
+      panelText: "text-amber-700",
     },
     rose: {
       dot: "bg-rose-500",
       button: "border-rose-600 bg-rose-600 text-white",
+      panel: "border-rose-200 bg-rose-50",
+      panelText: "text-rose-700",
     },
   };
-
+  
   const lmAssessments = Array.isArray(draft.lmAssessments)
     ? draft.lmAssessments
     : [
@@ -4724,18 +4736,18 @@ function LmAssessmentForm({ draft, update }) {
 
                   {isOpen && (
                     <div className="border-t border-slate-200 px-4 py-4">
-                      <div className="mb-4 rounded-xl border border-slate-200 bg-white p-4">
+                      <div className={`mb-4 rounded-xl border p-4 ${color.panel}`}>
                         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                           <div>
-                            <div className="text-sm font-bold text-slate-500">
+                            <div className={`text-sm font-black ${color.panelText}`}>
                               รายละเอียดหมวด
                             </div>
-
-                            <div className="mt-1 text-base font-bold text-slate-900">
+                      
+                            <div className="mt-1 text-base font-black text-slate-900">
                               {section.desc}
                             </div>
                           </div>
-
+                      
                           <div className="flex flex-wrap gap-2">
                             <Pill>{answered}/{questions.length} ข้อ</Pill>
                             <Pill>เต็ม {section.max}</Pill>
