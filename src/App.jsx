@@ -2576,6 +2576,192 @@ function ProgramReceivedCard({ record }) {
   );
 }
 
+function LmHnSummaryStrip({ record }) {
+  const categories = [
+    { key: "nutrition", thai: "โภชนาการ", max: 10 },
+    { key: "physical", thai: "กิจกรรมทางกาย", max: 10 },
+    { key: "sleep", thai: "การนอน", max: 10 },
+    { key: "stress", thai: "ความเครียด", max: 5 },
+    { key: "substances", thai: "สุรา/บุหรี่", max: 10 },
+    { key: "relationship", thai: "ความสัมพันธ์", max: 5 },
+  ];
+
+  const assessments = Array.isArray(record.lmAssessments)
+    ? record.lmAssessments
+    : [];
+
+  const rows = [0, 1, 2, 3].map((index) => {
+    const assessment = assessments[index] || blankLmAssessment(index + 1);
+
+    const answered = LM_QUESTIONS.filter(
+      (question) =>
+        assessment.answers?.[question.id] !== undefined &&
+        assessment.answers?.[question.id] !== null &&
+        assessment.answers?.[question.id] !== ""
+    ).length;
+
+    const calculated = calculateLmAssessment(assessment, record);
+
+    return {
+      no: index + 1,
+      assessment,
+      answered,
+      total: answered > 0 ? calculated.total : null,
+      scores: calculated.scores,
+    };
+  });
+
+  const latest =
+    [...rows].reverse().find((item) => item.answered > 0) || null;
+
+  const isComplete = latest?.answered === LM_QUESTIONS.length;
+
+  const interpretation =
+    latest && isComplete
+      ? lmScoreInterpret(latest.total)
+      : latest
+        ? { label: "ยังไม่ครบ", tone: "warn" }
+        : { label: "ยังไม่มีข้อมูล", tone: "gray" };
+
+  function categoryAnsweredCount(categoryKey, assessment) {
+    return LM_QUESTIONS.filter(
+      (question) =>
+        question.category === categoryKey &&
+        assessment.answers?.[question.id] !== undefined &&
+        assessment.answers?.[question.id] !== null &&
+        assessment.answers?.[question.id] !== ""
+    ).length;
+  }
+
+  function categoryQuestionCount(categoryKey) {
+    return LM_QUESTIONS.filter((question) => question.category === categoryKey)
+      .length;
+  }
+
+  const categorySummary = latest
+    ? categories.map((item) => {
+        const score = latest.scores?.[item.key] ?? 0;
+        const answered = categoryAnsweredCount(item.key, latest.assessment);
+        const totalQuestions = categoryQuestionCount(item.key);
+        const percent = (score / item.max) * 100;
+
+        let tone = "bad";
+        if (percent >= 80) tone = "good";
+        else if (percent >= 60) tone = "warn";
+
+        return {
+          ...item,
+          score,
+          answered,
+          totalQuestions,
+          tone,
+        };
+      })
+    : [];
+
+  const strengths = categorySummary
+    .filter(
+      (item) =>
+        item.answered === item.totalQuestions && item.tone === "good"
+    )
+    .sort((a, b) => b.score / b.max - a.score / a.max);
+
+  const improvements = categorySummary
+    .filter(
+      (item) =>
+        item.answered === item.totalQuestions && item.tone === "bad"
+    )
+    .sort((a, b) => a.score / a.max - b.score / b.max);
+
+  return (
+    <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+        <div>
+          <div className="text-sm font-black text-slate-500">
+            พฤติกรรมสุขภาพ LM
+          </div>
+
+          <div className="mt-1 flex flex-wrap items-center gap-2">
+            <div className="text-2xl font-black text-slate-900">
+              {latest ? `${latest.total}/50` : "-/50"}
+            </div>
+
+            <Pill tone={interpretation.tone}>
+              {interpretation.label}
+            </Pill>
+
+            {latest && (
+              <Pill>
+                ล่าสุดครั้งที่ {latest.no} • ตอบแล้ว {latest.answered}/16 ข้อ
+              </Pill>
+            )}
+          </div>
+        </div>
+
+        <div className="flex flex-wrap gap-2">
+          {rows.map((item) => (
+            <span
+              key={item.no}
+              className={`inline-flex items-center rounded-full border px-3 py-1.5 text-xs font-black ${
+                latest?.no === item.no
+                  ? "border-slate-900 bg-slate-900 text-white"
+                  : "border-slate-200 bg-slate-50 text-slate-600"
+              }`}
+            >
+              ครั้ง {item.no}:{" "}
+              <span className="ml-1">
+                {item.total === null ? "-/50" : `${item.total}/50`}
+              </span>
+            </span>
+          ))}
+        </div>
+      </div>
+
+      <div className="mt-3 grid gap-3 md:grid-cols-2">
+        <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3">
+          <div className="text-sm font-black text-emerald-800">
+            จุดเด่น
+          </div>
+
+          <div className="mt-2 flex flex-wrap gap-2">
+            {strengths.length ? (
+              strengths.map((item) => (
+                <Pill key={item.key} tone="good">
+                  {item.thai} {item.score}/{item.max}
+                </Pill>
+              ))
+            ) : (
+              <span className="text-sm font-semibold text-emerald-800/70">
+                ยังไม่มีข้อมูลจุดเด่น
+              </span>
+            )}
+          </div>
+        </div>
+
+        <div className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3">
+          <div className="text-sm font-black text-rose-800">
+            ควรปรับ
+          </div>
+
+          <div className="mt-2 flex flex-wrap gap-2">
+            {improvements.length ? (
+              improvements.map((item) => (
+                <Pill key={item.key} tone="bad">
+                  {item.thai} {item.score}/{item.max}
+                </Pill>
+              ))
+            ) : (
+              <span className="text-sm font-semibold text-rose-800/70">
+                ยังไม่มีข้อมูลที่ควรปรับ
+              </span>
+            )}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function Dashboard({ record, back }) {
   const risk = record.parq.some(Boolean);
 
@@ -2620,6 +2806,8 @@ function Dashboard({ record, back }) {
       </section>
 
       <Summary record={record} />
+
+      <LmHnSummaryStrip record={record} />
 
       <div className="grid gap-5 lg:grid-cols-[1.2fr_.8fr]">
         <Trend record={record} />
