@@ -4804,16 +4804,14 @@ function LmAssessmentForm({ draft, update }) {
       (item) =>
         item.answered === item.totalQuestions && item.tone === "good"
     )
-    .sort((a, b) => (b.score / b.max) - (a.score / a.max))
-    .slice(0, 3);
+    .sort((a, b) => (b.score / b.max) - (a.score / a.max));
   
   const improvements = categorySummary
     .filter(
       (item) =>
         item.answered === item.totalQuestions && item.tone === "bad"
     )
-    .sort((a, b) => (a.score / a.max) - (b.score / b.max))
-    .slice(0, 3);
+    .sort((a, b) => (a.score / a.max) - (b.score / b.max));
 
   return (
     <Card title="แบบประเมินพฤติกรรมสุขภาพ LM" icon={FileIcon}>
