@@ -3569,6 +3569,83 @@ function AdminSummary({ records, auditLogs, onFullBackup, onRestoreBackup }) {
   );
 }
 
+function SidebarStatusBadge({ tone = "gray", children }) {
+  const cls = {
+    good: "border-emerald-200 bg-emerald-50 text-emerald-700",
+    warn: "border-amber-200 bg-amber-50 text-amber-700",
+    bad: "border-rose-200 bg-rose-50 text-rose-700",
+    gray: "border-slate-200 bg-slate-50 text-slate-500",
+    info: "border-sky-200 bg-sky-50 text-sky-700",
+    dark: "border-slate-800 bg-slate-900 text-white",
+  }[tone] || "border-slate-200 bg-slate-50 text-slate-500";
+
+  return (
+    <span className={`shrink-0 rounded-full border px-2 py-0.5 text-[11px] font-black ${cls}`}>
+      {children}
+    </span>
+  );
+}
+
+function SidebarMenuButton({ active, icon, title, subtitle, badge, tone, onClick }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`group flex w-full items-center gap-3 rounded-2xl border px-3 py-3 text-left transition ${
+        active
+          ? "border-slate-900 bg-slate-900 text-white shadow-sm"
+          : "border-slate-200 bg-white text-slate-700 hover:border-sky-200 hover:bg-sky-50"
+      }`}
+    >
+      <div
+        className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border text-xs font-black ${
+          active
+            ? "border-white/20 bg-white/10 text-white"
+            : "border-slate-200 bg-slate-50 text-slate-500 group-hover:border-sky-200 group-hover:bg-white group-hover:text-sky-700"
+        }`}
+      >
+        {icon}
+      </div>
+
+      <div className="min-w-0 flex-1">
+        <div className={`truncate text-sm font-black ${active ? "text-white" : "text-slate-900"}`}>
+          {title}
+        </div>
+
+        {subtitle && (
+          <div className={`mt-0.5 truncate text-xs font-semibold ${active ? "text-white/65" : "text-slate-400"}`}>
+            {subtitle}
+          </div>
+        )}
+      </div>
+
+      {badge && (
+        active ? (
+          <span className="shrink-0 rounded-full border border-white/20 bg-white/10 px-2 py-0.5 text-[11px] font-black text-white">
+            {badge}
+          </span>
+        ) : (
+          <SidebarStatusBadge tone={tone}>{badge}</SidebarStatusBadge>
+        )
+      )}
+    </button>
+  );
+}
+
+function SidebarMenuGroup({ title, children }) {
+  return (
+    <div>
+      <div className="mb-2 px-1 text-[11px] font-black uppercase tracking-wide text-slate-400">
+        {title}
+      </div>
+
+      <div className="space-y-2">
+        {children}
+      </div>
+    </div>
+  );
+}
+
 function Staff({ records, setRecords, adminUser, addAuditLog, refreshData }) {
   const first = Object.keys(records)[0] || "";
   const [hn, setHn] = useState(first);
@@ -3725,6 +3802,157 @@ ${quality.issues.slice(0, 8).join("\n")}
     alert(`กู้คืนข้อมูล HN ${deletedBackup.hn} แล้ว`);
   }
 
+  const generalComplete = Boolean(
+  draft.hn &&
+  draft.name &&
+  draft.sex &&
+  draft.age &&
+  draft.height &&
+  draft.goal
+);
+
+const parqRisk = Array.isArray(draft.parq) && draft.parq.some(Boolean);
+
+const programComplete = Boolean(
+  draft.program?.type &&
+  draft.program?.strengthFrequency &&
+  draft.program?.cardioDuration &&
+  draft.program?.intensity
+);
+
+const exerciseDays = draft.exerciseLog?.days || {};
+const exerciseDayCount = Object.values(exerciseDays).filter(
+  (list) => Array.isArray(list) && list.length > 0
+).length;
+
+const exerciseLogComplete = Boolean(
+  draft.exerciseLog?.split &&
+  draft.exerciseLog?.daysPerWeek &&
+  exerciseDayCount > 0
+);
+
+const lmRounds = Array.isArray(draft.lmAssessments)
+  ? draft.lmAssessments
+  : [];
+
+const lmRoundStats = [0, 1, 2, 3].map((index) => {
+  const assessment = lmRounds[index] || blankLmAssessment(index + 1);
+
+  const answered = LM_QUESTIONS.filter(
+    (question) =>
+      assessment.answers?.[question.id] !== undefined &&
+      assessment.answers?.[question.id] !== null &&
+      assessment.answers?.[question.id] !== ""
+  ).length;
+
+  const calculated = calculateLmAssessment(assessment, draft);
+
+  return {
+    answered,
+    total: answered > 0 ? calculated.total : null,
+  };
+});
+
+const bestLmRound = lmRoundStats.reduce(
+  (best, item) => (item.answered > best.answered ? item : best),
+  { answered: 0, total: null }
+);
+
+const lmMenuTone =
+  bestLmRound.answered === 0
+    ? "gray"
+    : bestLmRound.answered < 16
+      ? "warn"
+      : "good";
+
+const lmMenuBadge =
+  bestLmRound.answered === 0
+    ? "รอกรอก"
+    : bestLmRound.answered < 16
+      ? `${bestLmRound.answered}/16`
+      : `${bestLmRound.total}/50`;
+
+const sessionDone = [0, 1, 2, 3].map((index) =>
+  sessionHasAnyData(draft.sessions?.[index])
+);
+
+const primaryMenuItems = [
+  {
+    key: "general",
+    icon: "ID",
+    title: "ข้อมูลทั่วไป",
+    subtitle: "HN / ประวัติพื้นฐาน",
+    badge: generalComplete ? "ครบ" : "ยังไม่ครบ",
+    tone: generalComplete ? "good" : "warn",
+    active: tab === "general",
+    done: generalComplete,
+    onClick: () => setTab("general"),
+  },
+  {
+    key: "lm",
+    icon: "LM",
+    title: "แบบประเมิน LM",
+    subtitle: "พฤติกรรมสุขภาพ 6 หมวด",
+    badge: lmMenuBadge,
+    tone: lmMenuTone,
+    active: tab === "lm",
+    done: bestLmRound.answered === 16,
+    onClick: () => setTab("lm"),
+  },
+  {
+    key: "parq",
+    icon: "PQ",
+    title: "PAR-Q",
+    subtitle: "คัดกรองก่อนออกกำลังกาย",
+    badge: parqRisk ? "ต้องประเมิน" : "ผ่าน",
+    tone: parqRisk ? "bad" : "good",
+    active: tab === "parq",
+    done: !parqRisk,
+    onClick: () => setTab("parq"),
+  },
+  {
+    key: "program",
+    icon: "PG",
+    title: "โปรแกรม",
+    subtitle: "Exercise Prescription",
+    badge: programComplete ? "ครบ" : "ยังไม่ครบ",
+    tone: programComplete ? "good" : "warn",
+    active: tab === "program",
+    done: programComplete,
+    onClick: () => setTab("program"),
+  },
+  {
+    key: "exerciseLog",
+    icon: "EX",
+    title: "Trainer Exercise Log",
+    subtitle: exerciseDayCount ? `${exerciseDayCount} รูปแบบวันฝึก` : "ยังไม่เลือกท่า",
+    badge: exerciseLogComplete ? "ครบ" : "ยังไม่ครบ",
+    tone: exerciseLogComplete ? "good" : "warn",
+    active: tab === "exerciseLog",
+    done: exerciseLogComplete,
+    onClick: () => setTab("exerciseLog"),
+  },
+];
+
+const sessionMenuItems = [0, 1, 2, 3].map((index) => ({
+  key: `session-${index}`,
+  icon: `${index + 1}`,
+  title: `บันทึกครั้งที่ ${index + 1}`,
+  subtitle: sessionDone[index] ? "มีข้อมูลแล้ว" : "ยังไม่เริ่ม",
+  badge: sessionDone[index] ? "มีข้อมูล" : "ว่าง",
+  tone: sessionDone[index] ? "good" : "gray",
+  active: tab === "session" && idx === index,
+  done: sessionDone[index],
+  onClick: () => {
+    setIdx(index);
+    setTab("session");
+  },
+}));
+
+const allMenuItems = [...primaryMenuItems, ...sessionMenuItems];
+const menuDoneCount = allMenuItems.filter((item) => item.done).length;
+const menuProgress = Math.round((menuDoneCount / allMenuItems.length) * 100);
+  
   return (
     <main className="mx-auto grid max-w-7xl gap-5 px-4 py-6 lg:grid-cols-[280px_1fr]">
       <aside className="space-y-4">
@@ -3740,34 +3968,68 @@ ${quality.issues.slice(0, 8).join("\n")}
             </div>
           </div>
         </Card>
-        <Card title="เมนู" icon={ClipboardIcon}>
-          <div className="grid gap-2">
-            <button onClick={() => setTab("general")} className={`rounded-xl px-4 py-3 text-left text-base font-semibold ${tab === "general" ? "bg-slate-900 text-white" : "bg-slate-50 text-slate-700"}`}>ข้อมูลทั่วไป</button>
-            <button
-              onClick={() => setTab("lm")}
-              className={`rounded-xl px-4 py-3 text-left text-base font-semibold ${
-                tab === "lm"
-                  ? "bg-slate-900 text-white"
-                  : "bg-slate-50 text-slate-700 hover:bg-slate-100"
-              }`}
-            >
-              แบบประเมิน LM
-            </button>
-            <button onClick={() => setTab("parq")} className={`rounded-xl px-4 py-3 text-left text-base font-semibold ${tab === "parq" ? "bg-slate-900 text-white" : "bg-slate-50 text-slate-700"}`}>PAR-Q</button>
-            <button onClick={() => setTab("program")} className={`rounded-xl px-4 py-3 text-left text-base font-semibold ${tab === "program" ? "bg-slate-900 text-white" : "bg-slate-50 text-slate-700"}`}>โปรแกรม</button>
-            
-            <button
-              onClick={() => setTab("exerciseLog")}
-              className={`rounded-xl px-4 py-3 text-left text-base font-semibold ${
-                tab === "exerciseLog"
-                  ? "bg-slate-900 text-white"
-                  : "bg-slate-50 text-slate-700"
-              }`}
-            >
-              Trainer Exercise Log
-            </button>
-            
-            {[0, 1, 2, 3].map((i) => <button key={i} onClick={() => { setIdx(i); setTab("session"); }} className={`rounded-xl px-4 py-3 text-left text-base font-semibold ${tab === "session" && idx === i ? "bg-slate-900 text-white" : "bg-slate-50 text-slate-700"}`}>บันทึกครั้งที่ {i + 1}</button>)}
+        <Card
+          title="เมนู"
+          icon={ClipboardIcon}
+          right={
+            <SidebarStatusBadge tone={menuDoneCount === allMenuItems.length ? "good" : "info"}>
+              {menuDoneCount}/{allMenuItems.length}
+            </SidebarStatusBadge>
+          }
+        >
+          <div className="space-y-4">
+            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-3">
+              <div className="mb-2 flex items-center justify-between gap-2">
+                <div className="text-xs font-black text-slate-500">
+                  ความครบถ้วนข้อมูล
+                </div>
+        
+                <div className="text-xs font-black text-slate-700">
+                  {menuProgress}%
+                </div>
+              </div>
+        
+              <div className="h-2 overflow-hidden rounded-full bg-white">
+                <div
+                  className="h-full rounded-full bg-slate-900 transition-all"
+                  style={{ width: `${menuProgress}%` }}
+                />
+              </div>
+            </div>
+        
+            <SidebarMenuGroup title="ข้อมูลตั้งต้น">
+              {primaryMenuItems.map((item) => (
+                <SidebarMenuButton
+                  key={item.key}
+                  active={item.active}
+                  icon={item.icon}
+                  title={item.title}
+                  subtitle={item.subtitle}
+                  badge={item.badge}
+                  tone={item.tone}
+                  onClick={item.onClick}
+                />
+              ))}
+            </SidebarMenuGroup>
+        
+            <SidebarMenuGroup title="การติดตามผล">
+              {sessionMenuItems.map((item) => (
+                <SidebarMenuButton
+                  key={item.key}
+                  active={item.active}
+                  icon={item.icon}
+                  title={item.title}
+                  subtitle={item.subtitle}
+                  badge={item.badge}
+                  tone={item.tone}
+                  onClick={item.onClick}
+                />
+              ))}
+            </SidebarMenuGroup>
+        
+            <div className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold leading-5 text-slate-500">
+              ดู badge ด้านขวาเพื่อเช็กว่าส่วนไหนกรอกครบแล้วหรือยังต้องตรวจ
+            </div>
           </div>
         </Card>
       </aside>
