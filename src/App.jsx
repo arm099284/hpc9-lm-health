@@ -3957,59 +3957,101 @@ ${quality.issues.slice(0, 8).join("\n")}
 
 function LmAssessmentForm({ draft }) {
   const [round, setRound] = useState(0);
+  const [openSection, setOpenSection] = useState("nutrition");
 
   const rounds = [1, 2, 3, 4];
 
   const sections = [
     {
+      key: "nutrition",
       label: "Nutrition",
       thai: "โภชนาการ",
       max: 10,
-      tone: "border-emerald-200 bg-emerald-50 text-emerald-700",
+      tone: "emerald",
       desc: "อาหารนอกบ้าน เครื่องดื่มหวาน ผัก และผลไม้",
+      questions: 4,
     },
     {
+      key: "physical",
       label: "Physical Activity",
       thai: "กิจกรรมทางกาย",
       max: 10,
-      tone: "border-sky-200 bg-sky-50 text-sky-700",
+      tone: "sky",
       desc: "แรงต้าน การนั่งนาน และแอโรบิกต่อสัปดาห์",
+      questions: 3,
     },
     {
+      key: "sleep",
       label: "Sleep",
       thai: "การนอน",
       max: 10,
-      tone: "border-indigo-200 bg-indigo-50 text-indigo-700",
-      desc: "ชั่วโมงนอน ความสดชื่น และหลับ ๆ ตื่น ๆ",
+      tone: "indigo",
+      desc: "ชั่วโมงนอน ความสดชื่น และคุณภาพการนอน",
+      questions: 3,
     },
     {
+      key: "stress",
       label: "Stress",
       thai: "ความเครียด",
       max: 5,
-      tone: "border-violet-200 bg-violet-50 text-violet-700",
+      tone: "violet",
       desc: "สมาธิ/ฝึกจิตใจ และการจัดการความเครียด",
+      questions: 2,
     },
     {
+      key: "substances",
       label: "Substances",
       thai: "สุรา บุหรี่ และสารเสพติด",
       max: 10,
-      tone: "border-amber-200 bg-amber-50 text-amber-700",
+      tone: "amber",
       desc: "แอลกอฮอล์ บุหรี่ บุหรี่ไฟฟ้า หรือสารเสพติด",
+      questions: 2,
     },
     {
+      key: "relationship",
       label: "Relationship & Health Literacy",
       thai: "ความสัมพันธ์และความรอบรู้สุขภาพ",
       max: 5,
-      tone: "border-rose-200 bg-rose-50 text-rose-700",
+      tone: "rose",
       desc: "การรับฟังผู้อื่น และการพบปะคนใกล้ชิด",
+      questions: 2,
     },
   ];
+
+  const toneClass = {
+    emerald: {
+      soft: "border-emerald-200 bg-emerald-50 text-emerald-700",
+      dot: "bg-emerald-500",
+    },
+    sky: {
+      soft: "border-sky-200 bg-sky-50 text-sky-700",
+      dot: "bg-sky-500",
+    },
+    indigo: {
+      soft: "border-indigo-200 bg-indigo-50 text-indigo-700",
+      dot: "bg-indigo-500",
+    },
+    violet: {
+      soft: "border-violet-200 bg-violet-50 text-violet-700",
+      dot: "bg-violet-500",
+    },
+    amber: {
+      soft: "border-amber-200 bg-amber-50 text-amber-700",
+      dot: "bg-amber-500",
+    },
+    rose: {
+      soft: "border-rose-200 bg-rose-50 text-rose-700",
+      dot: "bg-rose-500",
+    },
+  };
+
+  const activeSection = sections.find((section) => section.key === openSection);
 
   return (
     <Card title="แบบประเมินพฤติกรรมสุขภาพ LM" icon={FileIcon}>
       <div className="space-y-5">
         <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4">
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
             <div>
               <div className="text-sm font-bold text-slate-500">
                 Lifestyle Medicine Assessment
@@ -4030,9 +4072,9 @@ function LmAssessmentForm({ draft }) {
                   key={item}
                   type="button"
                   onClick={() => setRound(index)}
-                  className={`rounded-2xl border px-4 py-3 text-sm font-black ${
+                  className={`rounded-2xl border px-4 py-2.5 text-sm font-black transition ${
                     round === index
-                      ? "border-slate-900 bg-slate-900 text-white"
+                      ? "border-slate-900 bg-slate-900 text-white shadow-sm"
                       : "border-slate-200 bg-white text-slate-600 hover:bg-slate-100"
                   }`}
                 >
@@ -4043,38 +4085,51 @@ function LmAssessmentForm({ draft }) {
           </div>
         </div>
 
-        <div className="grid gap-4 lg:grid-cols-[260px_1fr]">
-          <div className="rounded-3xl border border-slate-200 bg-white p-4 shadow-sm">
-            <div className="text-sm font-bold text-slate-500">
-              คะแนนครั้งนี้
-            </div>
-
-            <div className="mt-2 text-4xl font-black text-slate-900">
-              - / 50
-            </div>
-
-            <div className="mt-2">
-              <Pill>รอกรอกข้อมูล</Pill>
-            </div>
-
-            <div className="mt-4 border-t border-slate-100 pt-4">
+        <div className="grid gap-4 xl:grid-cols-[240px_1fr]">
+          <div className="space-y-4">
+            <div className="rounded-3xl border border-slate-200 bg-white p-4 shadow-sm">
               <div className="text-sm font-bold text-slate-500">
-                เปรียบเทียบ 4 ครั้ง
+                คะแนนครั้งนี้
+              </div>
+
+              <div className="mt-2 flex items-end gap-2">
+                <div className="text-3xl font-black text-slate-900">
+                  - / 50
+                </div>
+                <div className="pb-1 text-sm font-bold text-slate-400">
+                  คะแนน
+                </div>
+              </div>
+
+              <div className="mt-3">
+                <Pill>รอกรอกข้อมูล</Pill>
+              </div>
+            </div>
+
+            <div className="rounded-3xl border border-slate-200 bg-white p-4 shadow-sm">
+              <div className="text-sm font-bold text-slate-500">
+                คะแนน 4 ครั้ง
               </div>
 
               <div className="mt-3 grid gap-2">
-                {rounds.map((item) => (
-                  <div
+                {rounds.map((item, index) => (
+                  <button
                     key={item}
-                    className="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 px-3 py-2"
+                    type="button"
+                    onClick={() => setRound(index)}
+                    className={`flex items-center justify-between rounded-xl border px-3 py-2 text-left transition ${
+                      round === index
+                        ? "border-slate-900 bg-slate-900 text-white"
+                        : "border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100"
+                    }`}
                   >
-                    <span className="text-sm font-bold text-slate-500">
+                    <span className="text-sm font-bold">
                       ครั้งที่ {item}
                     </span>
-                    <span className="text-sm font-black text-slate-900">
+                    <span className="text-sm font-black">
                       - / 50
                     </span>
-                  </div>
+                  </button>
                 ))}
               </div>
             </div>
@@ -4082,17 +4137,23 @@ function LmAssessmentForm({ draft }) {
 
           <div className="space-y-4">
             <div className="rounded-3xl border border-slate-200 bg-white p-4 shadow-sm">
-              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
                 <div>
                   <div className="text-sm font-bold text-slate-500">
                     สรุปอัตโนมัติ
                   </div>
+
                   <div className="mt-1 text-lg font-black text-slate-900">
                     ยังไม่มีข้อมูลสำหรับแปลผล
                   </div>
                 </div>
 
-                <Pill>บันทึกครั้งที่ {round + 1}</Pill>
+                <button
+                  type="button"
+                  className="rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-bold text-white hover:bg-slate-800"
+                >
+                  บันทึกครั้งที่ {round + 1}
+                </button>
               </div>
 
               <div className="mt-3 grid gap-3 md:grid-cols-2">
@@ -4116,38 +4177,96 @@ function LmAssessmentForm({ draft }) {
               </div>
             </div>
 
-            <div className="grid gap-3 md:grid-cols-2">
-              {sections.map((section) => (
-                <div
-                  key={section.label}
-                  className="rounded-3xl border border-slate-200 bg-white p-4 shadow-sm"
-                >
-                  <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <div className="text-base font-black text-slate-900">
-                        {section.label}
-                      </div>
-                      <div className="text-sm font-bold text-slate-500">
-                        {section.thai}
-                      </div>
-                    </div>
-
-                    <span
-                      className={`rounded-full border px-3 py-1 text-xs font-black ${section.tone}`}
-                    >
-                      - / {section.max}
-                    </span>
+            <div className="rounded-3xl border border-slate-200 bg-white p-4 shadow-sm">
+              <div className="mb-3 flex items-center justify-between gap-3">
+                <div>
+                  <div className="text-sm font-bold text-slate-500">
+                    หมวดแบบประเมิน
                   </div>
-
-                  <div className="mt-3 text-sm font-semibold leading-6 text-slate-500">
-                    {section.desc}
-                  </div>
-
-                  <div className="mt-4 rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-3 text-sm font-semibold text-slate-500">
-                    เตรียมเพิ่มคำถามและตัวเลือกคะแนนของหมวดนี้
+                  <div className="text-sm font-semibold text-slate-400">
+                    กดเปิดทีละหมวดเพื่อลดความรก
                   </div>
                 </div>
-              ))}
+
+                <Pill>6 หมวด</Pill>
+              </div>
+
+              <div className="space-y-2">
+                {sections.map((section) => {
+                  const isOpen = openSection === section.key;
+                  const color = toneClass[section.tone];
+
+                  return (
+                    <div
+                      key={section.key}
+                      className={`rounded-2xl border transition ${
+                        isOpen
+                          ? "border-slate-300 bg-slate-50"
+                          : "border-slate-200 bg-white"
+                      }`}
+                    >
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setOpenSection(isOpen ? "" : section.key)
+                        }
+                        className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left"
+                      >
+                        <div className="flex min-w-0 items-center gap-3">
+                          <span
+                            className={`h-3 w-3 shrink-0 rounded-full ${color.dot}`}
+                          />
+
+                          <div className="min-w-0">
+                            <div className="truncate text-base font-black text-slate-900">
+                              {section.label}
+                            </div>
+                            <div className="truncate text-sm font-bold text-slate-500">
+                              {section.thai}
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="flex shrink-0 items-center gap-2">
+                          <span
+                            className={`rounded-full border px-3 py-1 text-xs font-black ${color.soft}`}
+                          >
+                            - / {section.max}
+                          </span>
+
+                          <span className="text-lg font-black text-slate-400">
+                            {isOpen ? "−" : "+"}
+                          </span>
+                        </div>
+                      </button>
+
+                      {isOpen && (
+                        <div className="border-t border-slate-200 px-4 py-4">
+                          <div className="rounded-2xl border border-slate-200 bg-white p-4">
+                            <div className="text-sm font-bold text-slate-500">
+                              รายละเอียดหมวด
+                            </div>
+
+                            <div className="mt-1 text-base font-bold text-slate-900">
+                              {section.desc}
+                            </div>
+
+                            <div className="mt-3 flex flex-wrap gap-2">
+                              <Pill>{section.questions} ข้อ</Pill>
+                              <Pill>คะแนนเต็ม {section.max}</Pill>
+                              <Pill>สถานะ: รอกรอก</Pill>
+                            </div>
+
+                            <div className="mt-4 rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-4 text-sm font-semibold text-slate-500">
+                              ขั้นถัดไปจะเพิ่มคำถาม ตัวเลือก และคะแนนอัตโนมัติในหมวดนี้
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
             </div>
 
             <div className="flex justify-end">
