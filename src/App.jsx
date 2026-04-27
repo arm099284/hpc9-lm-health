@@ -5201,7 +5201,7 @@ function LmAssessmentForm({ draft, update }) {
                   )}
                 </div>
               );
-            })}
+            })
           </div>
         </div>
 
