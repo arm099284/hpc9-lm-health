@@ -387,9 +387,40 @@ function validateBackupPayload(payload) {
 
 function normalizeRecord(record) {
   const merged = { ...clone(blankRecord), ...clone(record) };
-  merged.parq = Array.isArray(merged.parq) ? [...blankRecord.parq.map((x, i) => merged.parq[i] ?? x)] : clone(blankRecord.parq);
+
+  merged.parq = Array.isArray(merged.parq)
+    ? [...blankRecord.parq.map((x, i) => merged.parq[i] ?? x)]
+    : clone(blankRecord.parq);
+
   merged.program = { ...clone(blankRecord.program), ...(record.program || {}) };
-  merged.sessions = [0, 1, 2, 3].map((i) => ({ ...session(i + 1), ...(record.sessions?.[i] || {}), no: i + 1 }));
+
+  const defaultExerciseLog = {
+    ...clone(blankRecord.exerciseLog),
+    split: record.exerciseLog?.split || merged.program?.type || "Full Body",
+    daysPerWeek:
+      record.exerciseLog?.daysPerWeek ||
+      merged.program?.strengthFrequency ||
+      "3",
+  };
+
+  merged.exerciseLog = {
+    ...defaultExerciseLog,
+    ...(record.exerciseLog || {}),
+    days: {
+      ...defaultExerciseLog.days,
+      ...(record.exerciseLog?.days || {}),
+    },
+    history: Array.isArray(record.exerciseLog?.history)
+      ? record.exerciseLog.history
+      : [],
+  };
+
+  merged.sessions = [0, 1, 2, 3].map((i) => ({
+    ...session(i + 1),
+    ...(record.sessions?.[i] || {}),
+    no: i + 1,
+  }));
+
   return merged;
 }
 
@@ -846,6 +877,25 @@ const blankRecord = {
     followUp: "",
     note: "",
   },
+    exerciseLog: {
+    split: "Full Body",
+    daysPerWeek: "3",
+    updateReason: "",
+    description: "",
+    updatedFrom: "",
+    updatedTo: "",
+    updatedBy: "",
+    updatedAt: "",
+    days: {
+      fullBody: [],
+      upper: [],
+      lower: [],
+      push: [],
+      pull: [],
+      legs: [],
+    },
+    history: [],
+  },
   sessions: [session(1), session(2), session(3), session(4)],
 };
 
@@ -1212,7 +1262,14 @@ function ohsSummary(s) {
 function setDeep(obj, path, val) {
   const next = clone(obj);
   let cur = next;
-  path.slice(0, -1).forEach((p) => (cur = cur[p]));
+
+  path.slice(0, -1).forEach((p) => {
+    if (!cur[p] || typeof cur[p] !== "object") {
+      cur[p] = {};
+    }
+    cur = cur[p];
+  });
+
   cur[path[path.length - 1]] = val;
   return next;
 }
@@ -3493,8 +3550,10 @@ function Staff({ records, setRecords, adminUser, addAuditLog, refreshData }) {
   const pagedPatients = filteredPatients.slice((safeStaffPage - 1) * PAGE_SIZE, safeStaffPage * PAGE_SIZE);
 
   function selectRecord(x) {
+    const selected = normalizeRecord(records[x]);
+  
     setHn(x);
-    setDraft(clone(records[x]));
+    setDraft(clone(selected));
     setIdx(0);
     setTab("general");
   }
