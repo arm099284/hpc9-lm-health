@@ -4776,12 +4776,15 @@ function LmAssessmentForm({ draft, update }) {
                                                 : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
                                           }`}
                                         >
-                                          <div>{option}</div>
+                                          <div className="text-sm font-black leading-5">
+                                            {option}
+                                          </div>
+                                          
                                           <div
-                                            className={`mt-0.5 text-[10px] font-bold ${
+                                            className={`mt-0.5 text-[9px] font-semibold leading-3 ${
                                               selected
-                                                ? "text-white/80"
-                                                : "text-slate-400"
+                                                ? "text-white/60"
+                                                : "text-slate-300"
                                             }`}
                                           >
                                             {disabled
@@ -4806,7 +4809,7 @@ function LmAssessmentForm({ draft, update }) {
 
             <div className="rounded-2xl border border-sky-200 bg-sky-50 p-4 text-sm font-semibold text-sky-800">
               เลือกคำตอบแล้วระบบจะคำนวณคะแนนทันที จากนั้นกดปุ่ม
-              “บันทึกข้อมูล” ด้านบนขวา เพื่อบันทึกลงระบบ
+              “บันทึกข้อมูล”
             </div>
           </div>
         </div>
