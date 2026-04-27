@@ -3632,11 +3632,40 @@ function SidebarMenuButton({ active, icon, title, subtitle, badge, tone, onClick
   );
 }
 
-function SidebarMenuGroup({ title, children }) {
+function SidebarMenuGroup({ title, tone = "slate", children }) {
+  const toneClass = {
+    sky: {
+      wrap: "border-sky-100 bg-sky-50/60",
+      label: "text-sky-700",
+      line: "bg-sky-300",
+    },
+    indigo: {
+      wrap: "border-indigo-100 bg-indigo-50/50",
+      label: "text-indigo-700",
+      line: "bg-indigo-300",
+    },
+    emerald: {
+      wrap: "border-emerald-100 bg-emerald-50/50",
+      label: "text-emerald-700",
+      line: "bg-emerald-300",
+    },
+    slate: {
+      wrap: "border-slate-200 bg-slate-50/80",
+      label: "text-slate-600",
+      line: "bg-slate-300",
+    },
+  }[tone];
+
   return (
-    <div>
-      <div className="mb-2 px-1 text-[11px] font-black uppercase tracking-wide text-slate-400">
-        {title}
+    <div className={`rounded-2xl border p-3 ${toneClass.wrap}`}>
+      <div className="mb-3 flex items-center gap-2">
+        <span className={`h-2 w-2 rounded-full ${toneClass.line}`} />
+
+        <div
+          className={`text-[11px] font-black uppercase tracking-wide ${toneClass.label}`}
+        >
+          {title}
+        </div>
       </div>
 
       <div className="space-y-2">
@@ -4004,7 +4033,7 @@ const menuProgress = Math.round((menuDoneCount / allMenuItems.length) * 100);
               </div>
             </div>
         
-            <SidebarMenuGroup title="ข้อมูลและการคัดกรอง">
+            <SidebarMenuGroup title="ข้อมูลและการคัดกรอง" tone="sky">
               {screeningMenuItems.map((item) => (
                 <SidebarMenuButton
                   key={item.key}
@@ -4019,7 +4048,7 @@ const menuProgress = Math.round((menuDoneCount / allMenuItems.length) * 100);
               ))}
             </SidebarMenuGroup>
             
-            <SidebarMenuGroup title="แผนการดูแล / ออกกำลังกาย">
+            <SidebarMenuGroup title="แผนการดูแล / ออกกำลังกาย" tone="indigo">
               {carePlanMenuItems.map((item) => (
                 <SidebarMenuButton
                   key={item.key}
@@ -4034,7 +4063,7 @@ const menuProgress = Math.round((menuDoneCount / allMenuItems.length) * 100);
               ))}
             </SidebarMenuGroup>
         
-            <SidebarMenuGroup title="การติดตามผล">
+            <SidebarMenuGroup title="การติดตามผล" tone="emerald">
               {sessionMenuItems.map((item) => (
                 <SidebarMenuButton
                   key={item.key}
