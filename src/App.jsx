@@ -4358,24 +4358,33 @@ function LmAssessmentForm({ draft, update }) {
       currentAssessment.answers?.[question.id] !== ""
   ).length;
 
+  const isComplete = answeredCount === LM_QUESTIONS.length;
   const totalForDisplay = answeredCount > 0 ? currentCalculated.total : null;
-  const interpretation = lmScoreInterpret(totalForDisplay);
+
+  const interpretation = isComplete
+    ? lmScoreInterpret(totalForDisplay)
+    : {
+        label: answeredCount > 0 ? "ยังไม่ครบ" : "รอกรอก",
+        tone: answeredCount > 0 ? "warn" : "gray",
+        text: "ตอบให้ครบ 16 ข้อก่อนแปลผลคะแนนรวม",
+      };
 
   const roundScores = rounds.map((item, index) => {
     const assessment = lmAssessments[index] || blankLmAssessment(index + 1);
 
-    const answered = LM_QUESTIONS.some(
+    const answered = LM_QUESTIONS.filter(
       (question) =>
         assessment.answers?.[question.id] !== undefined &&
         assessment.answers?.[question.id] !== null &&
         assessment.answers?.[question.id] !== ""
-    );
+    ).length;
 
     const calculated = calculateLmAssessment(assessment, draft);
 
     return {
       no: item,
-      total: answered ? calculated.total : null,
+      answered,
+      total: answered > 0 ? calculated.total : null,
     };
   });
 
@@ -4453,6 +4462,7 @@ function LmAssessmentForm({ draft, update }) {
     const score = categoryScore(section.key);
     const answered = categoryAnsweredCount(section.key);
     const totalQuestions = categoryQuestions(section.key).length;
+    const status = categoryStatus(answered, totalQuestions);
 
     return {
       ...section,
@@ -4460,21 +4470,27 @@ function LmAssessmentForm({ draft, update }) {
       answered,
       totalQuestions,
       tone: categoryTone(score, section.max, answered > 0),
-      status: categoryStatus(answered, totalQuestions),
+      status,
     };
   });
 
   const strengths = categorySummary
-    .filter((item) => item.answered > 0 && item.tone === "good")
+    .filter(
+      (item) =>
+        item.answered === item.totalQuestions && item.tone === "good"
+    )
     .slice(0, 3);
 
   const improvements = categorySummary
-    .filter((item) => item.answered > 0 && item.tone === "bad")
+    .filter(
+      (item) =>
+        item.answered === item.totalQuestions && item.tone === "bad"
+    )
     .slice(0, 3);
 
   return (
     <Card title="แบบประเมินพฤติกรรมสุขภาพ LM" icon={FileIcon}>
-      <div className="space-y-5">
+      <div className="space-y-4">
         <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
           <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
             <div>
@@ -4510,322 +4526,332 @@ function LmAssessmentForm({ draft, update }) {
           </div>
         </div>
 
-        <div className="grid gap-4 xl:grid-cols-[230px_1fr]">
-          <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-            <div className="text-sm font-bold text-slate-500">
-              คะแนนครั้งนี้
-            </div>
-
-            <div className="mt-2 flex items-end gap-2">
-              <div className="text-3xl font-black text-slate-900">
-                {totalForDisplay === null ? "-" : totalForDisplay} / 50
-              </div>
-              <div className="pb-1 text-xs font-bold text-slate-400">
-                คะแนน
-              </div>
-            </div>
-
-            <div className="mt-3">
-              <Pill tone={interpretation.tone}>{interpretation.label}</Pill>
-            </div>
-
-            <div className="mt-3 rounded-xl border border-slate-100 bg-slate-50 p-3 text-xs font-semibold leading-5 text-slate-500">
-              {interpretation.text}
-            </div>
-
-            <div className="mt-4 border-t border-slate-100 pt-4">
+        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+          <div className="grid gap-4 xl:grid-cols-[180px_1fr] xl:items-center">
+            <div>
               <div className="text-sm font-bold text-slate-500">
-                คะแนน 4 ครั้ง
+                คะแนนครั้งนี้
               </div>
 
-              <div className="mt-3 grid gap-2">
+              <div className="mt-1 flex items-end gap-2">
+                <div className="text-3xl font-black text-slate-900">
+                  {totalForDisplay === null ? "-" : totalForDisplay} / 50
+                </div>
+                <div className="pb-1 text-xs font-bold text-slate-400">
+                  คะแนน
+                </div>
+              </div>
+
+              <div className="mt-2">
+                <Pill tone={interpretation.tone}>{interpretation.label}</Pill>
+              </div>
+            </div>
+
+            <div className="min-w-0">
+              <div className="mb-2 flex items-center justify-between gap-3">
+                <div className="text-sm font-bold text-slate-500">
+                  คะแนน 4 ครั้ง
+                </div>
+
+                <Pill tone={isComplete ? "good" : "warn"}>
+                  ตอบแล้ว {answeredCount}/16 ข้อ
+                </Pill>
+              </div>
+
+              <div className="grid gap-2 sm:grid-cols-4">
                 {roundScores.map((item, index) => (
                   <button
                     key={item.no}
                     type="button"
                     onClick={() => setRound(index)}
-                    className={`flex items-center justify-between rounded-xl border px-3 py-2 text-left transition ${
+                    className={`rounded-xl border px-3 py-2 text-left transition ${
                       round === index
                         ? "border-slate-900 bg-slate-900 text-white"
                         : "border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100"
                     }`}
                   >
-                    <span className="text-sm font-bold">
+                    <div className="text-xs font-bold opacity-70">
                       ครั้งที่ {item.no}
-                    </span>
-                    <span className="text-sm font-black">
+                    </div>
+
+                    <div className="mt-0.5 text-base font-black">
                       {item.total === null ? "- / 50" : `${item.total} / 50`}
-                    </span>
+                    </div>
+
+                    <div className="mt-0.5 text-[10px] font-semibold opacity-60">
+                      {item.answered}/16 ข้อ
+                    </div>
                   </button>
                 ))}
               </div>
             </div>
           </div>
 
-          <div className="space-y-4">
-            <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-              <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-                <div>
-                  <div className="text-sm font-bold text-slate-500">
-                    สรุปอัตโนมัติ
-                  </div>
+          <div className="mt-3 rounded-xl border border-slate-100 bg-slate-50 px-3 py-2 text-xs font-semibold leading-5 text-slate-500">
+            {interpretation.text}
+          </div>
+        </div>
 
-                  <div className="mt-1 text-lg font-black text-slate-900">
-                    {answeredCount > 0
-                      ? `ตอบแล้ว ${answeredCount}/16 ข้อ`
-                      : "ยังไม่มีข้อมูลสำหรับแปลผล"}
-                  </div>
-                </div>
-
-                <Pill tone={answeredCount === 16 ? "good" : "warn"}>
-                  {answeredCount === 16 ? "ครบแล้ว" : "ยังไม่ครบ"}
-                </Pill>
+        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+          <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+            <div>
+              <div className="text-sm font-bold text-slate-500">
+                สรุปอัตโนมัติ
               </div>
 
-              <div className="mt-3 rounded-xl border border-slate-100 bg-slate-50 p-3">
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className="text-sm font-bold text-slate-500">
-                    จุดเด่น:
-                  </span>
-
-                  {strengths.length ? (
-                    strengths.map((item) => (
-                      <Pill key={item.key} tone="good">
-                        {item.thai} {item.score}/{item.max}
-                      </Pill>
-                    ))
-                  ) : (
-                    <span className="text-sm font-semibold text-slate-400">
-                      ยังไม่มีหมวดที่เด่นชัด
-                    </span>
-                  )}
-
-                  <span className="ml-0 text-sm font-bold text-slate-500 sm:ml-3">
-                    ควรปรับ:
-                  </span>
-
-                  {improvements.length ? (
-                    improvements.map((item) => (
-                      <Pill key={item.key} tone="bad">
-                        {item.thai} {item.score}/{item.max}
-                      </Pill>
-                    ))
-                  ) : (
-                    <span className="text-sm font-semibold text-slate-400">
-                      ยังไม่พบหมวดต่ำกว่า 60%
-                    </span>
-                  )}
-                </div>
+              <div className="mt-1 text-lg font-black text-slate-900">
+                {answeredCount > 0
+                  ? `ตอบแล้ว ${answeredCount}/16 ข้อ`
+                  : "ยังไม่มีข้อมูลสำหรับแปลผล"}
               </div>
             </div>
 
-            <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-              <div className="mb-3 flex items-center justify-between gap-3">
-                <div>
-                  <div className="text-sm font-bold text-slate-500">
-                    หมวดแบบประเมิน
-                  </div>
-                  <div className="text-sm font-semibold text-slate-400">
-                    กดเปิดทีละหมวดเพื่อลดความรก
-                  </div>
-                </div>
+            <Pill tone={isComplete ? "good" : "warn"}>
+              {isComplete ? "ครบแล้ว" : "ยังไม่ครบ"}
+            </Pill>
+          </div>
 
-                <Pill>{answeredCount}/16 ข้อ</Pill>
-              </div>
+          <div className="mt-3 rounded-xl border border-slate-100 bg-slate-50 p-3">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-sm font-bold text-slate-500">
+                จุดเด่น:
+              </span>
 
-              <div className="space-y-2">
-                {sections.map((section) => {
-                  const isOpen = openSection === section.key;
-                  const color = toneClass[section.tone];
-                  const questions = categoryQuestions(section.key);
-                  const score = categoryScore(section.key);
-                  const answered = categoryAnsweredCount(section.key);
-                  const sectionTone = categoryTone(
-                    score,
-                    section.max,
-                    answered > 0
-                  );
-                  const status = categoryStatus(answered, questions.length);
+              {strengths.length ? (
+                strengths.map((item) => (
+                  <Pill key={item.key} tone="good">
+                    {item.thai} {item.score}/{item.max}
+                  </Pill>
+                ))
+              ) : (
+                <span className="text-sm font-semibold text-slate-400">
+                  รอกรอกครบหมวด
+                </span>
+              )}
 
-                  return (
-                    <div
-                      key={section.key}
-                      className={`rounded-2xl border transition ${
-                        isOpen
-                          ? "border-slate-300 bg-slate-50"
-                          : "border-slate-200 bg-white"
-                      }`}
-                    >
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setOpenSection(isOpen ? "" : section.key)
-                        }
-                        className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left"
-                      >
-                        <div className="flex min-w-0 items-center gap-3">
-                          <span
-                            className={`h-3 w-3 shrink-0 rounded-full ${color.dot}`}
-                          />
+              <span className="ml-0 text-sm font-bold text-slate-500 sm:ml-3">
+                ควรปรับ:
+              </span>
 
-                          <div className="min-w-0">
-                            <div className="truncate text-base font-black text-slate-900">
-                              {section.thai}
-                            </div>
-                            <div className="truncate text-xs font-bold text-slate-400">
-                              {section.label}
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="flex shrink-0 items-center gap-2">
-                          <Pill tone={sectionTone}>
-                            {answered > 0
-                              ? `${score}/${section.max}`
-                              : `-/${section.max}`}
-                          </Pill>
-
-                          <Pill tone={status.tone}>{status.text}</Pill>
-
-                          <span className="text-lg font-black text-slate-400">
-                            {isOpen ? "−" : "+"}
-                          </span>
-                        </div>
-                      </button>
-
-                      {isOpen && (
-                        <div className="border-t border-slate-200 px-4 py-4">
-                          <div className="mb-4 rounded-xl border border-slate-200 bg-white p-4">
-                            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                              <div>
-                                <div className="text-sm font-bold text-slate-500">
-                                  รายละเอียดหมวด
-                                </div>
-
-                                <div className="mt-1 text-base font-bold text-slate-900">
-                                  {section.desc}
-                                </div>
-                              </div>
-
-                              <div className="flex flex-wrap gap-2">
-                                <Pill>{answered}/{questions.length} ข้อ</Pill>
-                                <Pill>เต็ม {section.max}</Pill>
-                              </div>
-                            </div>
-                          </div>
-
-                          <div className="space-y-4">
-                            {questions.map((question) => {
-                              const questionNo =
-                                LM_QUESTIONS.findIndex(
-                                  (item) => item.id === question.id
-                                ) + 1;
-
-                              const selectedAnswer =
-                                currentAssessment.answers?.[question.id];
-
-                              const selectedScore = lmQuestionScore(
-                                question,
-                                selectedAnswer,
-                                draft
-                              );
-
-                              return (
-                                <div
-                                  key={question.id}
-                                  className="rounded-2xl border border-slate-200 bg-white p-4"
-                                >
-                                  <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-                                    <div>
-                                      <div className="text-xs font-bold uppercase tracking-wide text-slate-400">
-                                        ข้อ {questionNo}
-                                      </div>
-
-                                      <div className="mt-1 text-base font-bold leading-6 text-slate-900">
-                                        {question.text}
-                                      </div>
-                                    </div>
-
-                                    <Pill>
-                                      คะแนน{" "}
-                                      {selectedScore === null
-                                        ? "-"
-                                        : selectedScore}
-                                    </Pill>
-                                  </div>
-
-                                  <div className="mt-4 flex flex-wrap gap-2">
-                                    {question.options.map(
-                                      (option, optionIndex) => {
-                                        const optionScore =
-                                          question.scores?.[optionIndex];
-
-                                        const disabled =
-                                          optionScore === null ||
-                                          optionScore === undefined;
-
-                                        const selected =
-                                          Number(selectedAnswer) ===
-                                          optionIndex;
-
-                                        return (
-                                          <button
-                                            key={`${question.id}-${option}`}
-                                            type="button"
-                                            disabled={disabled}
-                                            onClick={() =>
-                                              chooseAnswer(
-                                                question,
-                                                optionIndex
-                                              )
-                                            }
-                                            className={`min-w-[58px] rounded-xl border px-3 py-2 text-center transition ${
-                                              disabled
-                                                ? "cursor-not-allowed border-slate-100 bg-slate-50 text-slate-300"
-                                                : selected
-                                                  ? color.button
-                                                  : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
-                                            }`}
-                                          >
-                                            <div className="text-sm font-black leading-5">
-                                              {option}
-                                            </div>
-
-                                            <div
-                                              className={`mt-0.5 text-[9px] font-semibold leading-3 ${
-                                                selected
-                                                  ? "text-white/60"
-                                                  : "text-slate-300"
-                                              }`}
-                                            >
-                                              {disabled
-                                                ? "-"
-                                                : `${scoreLabel(
-                                                    question,
-                                                    optionIndex
-                                                  )} คะแนน`}
-                                            </div>
-                                          </button>
-                                        );
-                                      }
-                                    )}
-                                  </div>
-                                </div>
-                              );
-                            })}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-
-            <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-semibold text-slate-500">
-              เลือกคำตอบให้ครบ แล้วกด “บันทึกข้อมูล” ด้านบนขวา
+              {improvements.length ? (
+                improvements.map((item) => (
+                  <Pill key={item.key} tone="bad">
+                    {item.thai} {item.score}/{item.max}
+                  </Pill>
+                ))
+              ) : (
+                <span className="text-sm font-semibold text-slate-400">
+                  รอกรอกครบหมวด
+                </span>
+              )}
             </div>
           </div>
+        </div>
+
+        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+          <div className="mb-3 flex items-center justify-between gap-3">
+            <div>
+              <div className="text-sm font-bold text-slate-500">
+                หมวดแบบประเมิน
+              </div>
+              <div className="text-sm font-semibold text-slate-400">
+                กดเปิดทีละหมวดเพื่อลดความรก
+              </div>
+            </div>
+
+            <Pill>{answeredCount}/16 ข้อ</Pill>
+          </div>
+
+          <div className="space-y-2">
+            {sections.map((section) => {
+              const isOpen = openSection === section.key;
+              const color = toneClass[section.tone];
+              const questions = categoryQuestions(section.key);
+              const score = categoryScore(section.key);
+              const answered = categoryAnsweredCount(section.key);
+              const sectionTone = categoryTone(
+                score,
+                section.max,
+                answered > 0
+              );
+              const status = categoryStatus(answered, questions.length);
+
+              return (
+                <div
+                  key={section.key}
+                  className={`rounded-2xl border transition ${
+                    isOpen
+                      ? "border-slate-300 bg-slate-50"
+                      : "border-slate-200 bg-white"
+                  }`}
+                >
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setOpenSection(isOpen ? "" : section.key)
+                    }
+                    className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left"
+                  >
+                    <div className="flex min-w-0 items-center gap-3">
+                      <span
+                        className={`h-3 w-3 shrink-0 rounded-full ${color.dot}`}
+                      />
+
+                      <div className="min-w-0">
+                        <div className="truncate text-base font-black text-slate-900">
+                          {section.thai}
+                        </div>
+                        <div className="truncate text-xs font-bold text-slate-400">
+                          {section.label}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex shrink-0 items-center gap-2">
+                      <Pill tone={sectionTone}>
+                        {answered > 0
+                          ? `${score}/${section.max}`
+                          : `-/${section.max}`}
+                      </Pill>
+
+                      <Pill tone={status.tone}>{status.text}</Pill>
+
+                      <span className="text-lg font-black text-slate-400">
+                        {isOpen ? "−" : "+"}
+                      </span>
+                    </div>
+                  </button>
+
+                  {isOpen && (
+                    <div className="border-t border-slate-200 px-4 py-4">
+                      <div className="mb-4 rounded-xl border border-slate-200 bg-white p-4">
+                        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                          <div>
+                            <div className="text-sm font-bold text-slate-500">
+                              รายละเอียดหมวด
+                            </div>
+
+                            <div className="mt-1 text-base font-bold text-slate-900">
+                              {section.desc}
+                            </div>
+                          </div>
+
+                          <div className="flex flex-wrap gap-2">
+                            <Pill>{answered}/{questions.length} ข้อ</Pill>
+                            <Pill>เต็ม {section.max}</Pill>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="space-y-4">
+                        {questions.map((question) => {
+                          const questionNo =
+                            LM_QUESTIONS.findIndex(
+                              (item) => item.id === question.id
+                            ) + 1;
+
+                          const selectedAnswer =
+                            currentAssessment.answers?.[question.id];
+
+                          const selectedScore = lmQuestionScore(
+                            question,
+                            selectedAnswer,
+                            draft
+                          );
+
+                          return (
+                            <div
+                              key={question.id}
+                              className="rounded-2xl border border-slate-200 bg-white p-4"
+                            >
+                              <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                                <div>
+                                  <div className="text-xs font-bold uppercase tracking-wide text-slate-400">
+                                    ข้อ {questionNo}
+                                  </div>
+
+                                  <div className="mt-1 text-base font-bold leading-6 text-slate-900">
+                                    {question.text}
+                                  </div>
+                                </div>
+
+                                <Pill>
+                                  คะแนน{" "}
+                                  {selectedScore === null
+                                    ? "-"
+                                    : selectedScore}
+                                </Pill>
+                              </div>
+
+                              <div className="mt-4 flex flex-wrap gap-2">
+                                {question.options.map(
+                                  (option, optionIndex) => {
+                                    const optionScore =
+                                      question.scores?.[optionIndex];
+
+                                    const disabled =
+                                      optionScore === null ||
+                                      optionScore === undefined;
+
+                                    const selected =
+                                      Number(selectedAnswer) === optionIndex;
+
+                                    return (
+                                      <button
+                                        key={`${question.id}-${option}`}
+                                        type="button"
+                                        disabled={disabled}
+                                        onClick={() =>
+                                          chooseAnswer(
+                                            question,
+                                            optionIndex
+                                          )
+                                        }
+                                        className={`min-w-[58px] rounded-xl border px-3 py-2 text-center transition ${
+                                          disabled
+                                            ? "cursor-not-allowed border-slate-100 bg-slate-50 text-slate-300"
+                                            : selected
+                                              ? color.button
+                                              : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
+                                        }`}
+                                      >
+                                        <div className="text-sm font-black leading-5">
+                                          {option}
+                                        </div>
+
+                                        <div
+                                          className={`mt-0.5 text-[9px] font-semibold leading-3 ${
+                                            selected
+                                              ? "text-white/60"
+                                              : "text-slate-300"
+                                          }`}
+                                        >
+                                          {disabled
+                                            ? "-"
+                                            : `${scoreLabel(
+                                                question,
+                                                optionIndex
+                                              )} คะแนน`}
+                                        </div>
+                                      </button>
+                                    );
+                                  }
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-semibold text-slate-500">
+          เลือกคำตอบให้ครบ แล้วกด “บันทึกข้อมูล” ด้านบนขวา
         </div>
       </div>
     </Card>
