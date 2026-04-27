@@ -3876,7 +3876,7 @@ const sessionDone = [0, 1, 2, 3].map((index) =>
   sessionHasAnyData(draft.sessions?.[index])
 );
 
-const primaryMenuItems = [
+const screeningMenuItems = [
   {
     key: "general",
     icon: "ID",
@@ -3910,6 +3910,9 @@ const primaryMenuItems = [
     done: !parqRisk,
     onClick: () => setTab("parq"),
   },
+];
+
+const carePlanMenuItems = [
   {
     key: "program",
     icon: "PG",
@@ -3949,7 +3952,11 @@ const sessionMenuItems = [0, 1, 2, 3].map((index) => ({
   },
 }));
 
-const allMenuItems = [...primaryMenuItems, ...sessionMenuItems];
+const allMenuItems = [
+  ...screeningMenuItems,
+  ...carePlanMenuItems,
+  ...sessionMenuItems,
+];
 const menuDoneCount = allMenuItems.filter((item) => item.done).length;
 const menuProgress = Math.round((menuDoneCount / allMenuItems.length) * 100);
   
@@ -3997,8 +4004,23 @@ const menuProgress = Math.round((menuDoneCount / allMenuItems.length) * 100);
               </div>
             </div>
         
-            <SidebarMenuGroup title="ข้อมูลตั้งต้น">
-              {primaryMenuItems.map((item) => (
+            <SidebarMenuGroup title="ข้อมูลและการคัดกรอง">
+              {screeningMenuItems.map((item) => (
+                <SidebarMenuButton
+                  key={item.key}
+                  active={item.active}
+                  icon={item.icon}
+                  title={item.title}
+                  subtitle={item.subtitle}
+                  badge={item.badge}
+                  tone={item.tone}
+                  onClick={item.onClick}
+                />
+              ))}
+            </SidebarMenuGroup>
+            
+            <SidebarMenuGroup title="แผนการดูแล / ออกกำลังกาย">
+              {carePlanMenuItems.map((item) => (
                 <SidebarMenuButton
                   key={item.key}
                   active={item.active}
