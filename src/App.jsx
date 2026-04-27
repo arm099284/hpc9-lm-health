@@ -4854,68 +4854,58 @@ function LmAssessmentForm({ draft, update }) {
         </div>
 
         <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-          <div className="grid gap-4 xl:grid-cols-[180px_1fr] xl:items-center">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div>
               <div className="text-sm font-bold text-slate-500">
                 คะแนนครั้งนี้
               </div>
-
-              <div className="mt-1 flex items-end gap-2">
+        
+              <div className="mt-1 flex flex-wrap items-end gap-2">
                 <div className="text-3xl font-black text-slate-900">
                   {totalForDisplay === null ? "-" : totalForDisplay} / 50
                 </div>
+        
                 <div className="pb-1 text-xs font-bold text-slate-400">
                   คะแนน
                 </div>
-              </div>
-
-              <div className="mt-2">
-                <Pill tone={interpretation.tone}>{interpretation.label}</Pill>
+        
+                <div className="pb-0.5">
+                  <Pill tone={interpretation.tone}>{interpretation.label}</Pill>
+                </div>
               </div>
             </div>
-
-            <div className="min-w-0">
-              <div className="mb-2 flex items-center justify-between gap-3">
-                <div className="text-sm font-bold text-slate-500">
-                  คะแนน 4 ครั้ง
-                </div>
-
-                <Pill tone={isComplete ? "good" : "warn"}>
-                  ตอบแล้ว {answeredCount}/16 ข้อ
-                </Pill>
-              </div>
-
-              <div className="grid gap-2 sm:grid-cols-4">
-                {roundScores.map((item, index) => (
-                  <button
-                    key={item.no}
-                    type="button"
-                    onClick={() => setRound(index)}
-                    className={`rounded-xl border px-3 py-2 text-left transition ${
-                      round === index
-                        ? "border-slate-900 bg-slate-900 text-white"
-                        : "border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100"
-                    }`}
-                  >
-                    <div className="text-xs font-bold opacity-70">
-                      ครั้งที่ {item.no}
-                    </div>
-
-                    <div className="mt-0.5 text-base font-black">
-                      {item.total === null ? "- / 50" : `${item.total} / 50`}
-                    </div>
-
-                    <div className="mt-0.5 text-[10px] font-semibold opacity-60">
-                      {item.answered}/16 ข้อ
-                    </div>
-                  </button>
-                ))}
-              </div>
+        
+            <div className="shrink-0">
+              <Pill tone={isComplete ? "good" : "warn"}>
+                ตอบแล้ว {answeredCount}/16 ข้อ
+              </Pill>
             </div>
           </div>
-
+        
           <div className="mt-3 rounded-xl border border-slate-100 bg-slate-50 px-3 py-2 text-xs font-semibold leading-5 text-slate-500">
             {interpretation.text}
+          </div>
+        
+          <div className="mt-3 border-t border-slate-100 pt-3">
+            <div className="mb-2 text-xs font-black uppercase tracking-wide text-slate-400">
+              ประวัติคะแนน 4 ครั้ง
+            </div>
+        
+            <div className="flex flex-wrap gap-2">
+              {roundScores.map((item) => (
+                <span
+                  key={item.no}
+                  className="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-bold text-slate-600"
+                >
+                  <span className="mr-1 text-slate-400">
+                    ครั้ง {item.no}:
+                  </span>
+                  <span className="text-slate-900">
+                    {item.total === null ? "-/50" : `${item.total}/50`}
+                  </span>
+                </span>
+              ))}
+            </div>
           </div>
         </div>
 
