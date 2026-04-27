@@ -197,6 +197,8 @@ export async function loadAllRecords() {
         medication: p.medication || "",
         injury: p.injury || "",
 
+        lmAssessments: Array.isArray(p.lm_assessments) ? p.lm_assessments : [],
+
         updatedBy: latestAudit?.admin_name || "",
         updatedById: latestAudit?.admin_code || "",
         updatedAt: latestAudit?.created_at || p.updated_at || "",
@@ -280,6 +282,11 @@ export async function saveRecord(record, adminUser) {
     disease: record.disease || "",
     medication: record.medication || "",
     injury: record.injury || "",
+
+    lm_assessments: Array.isArray(record.lmAssessments)
+      ? record.lmAssessments
+      : [],
+        
     updated_by: adminUser?.dbId || null,
   };
 
