@@ -2547,7 +2547,7 @@ function Dashboard({ record, back }) {
           <div>
             <div className="mb-2 flex flex-wrap gap-2">
               <Pill tone="dark">HN {record.hn}</Pill>
-              <Pill>บันทึก 4 ครั้ง</Pill>
+              <Pill>บันทึก {completedSessions(record).length}/4 ครั้ง</Pill>
               <Pill tone={risk ? "bad" : "good"}>
                 {risk ? "PAR-Q ควรประเมินเพิ่ม" : "PAR-Q ผ่าน"}
               </Pill>
