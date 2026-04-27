@@ -3882,25 +3882,26 @@ const lmRoundStats = [0, 1, 2, 3].map((index) => {
   };
 });
 
-const bestLmRound = lmRoundStats.reduce(
-  (best, item) => (item.answered > best.answered ? item : best),
-  { answered: 0, total: null }
-);
+const latestLmRound =
+  [...lmRoundStats].reverse().find((item) => item.answered > 0) || {
+    answered: 0,
+    total: null,
+  };
 
 const lmMenuTone =
-  bestLmRound.answered === 0
+  latestLmRound.answered === 0
     ? "gray"
-    : bestLmRound.answered < 16
+    : latestLmRound.answered < 16
       ? "warn"
       : "good";
 
 const lmMenuBadge =
-  bestLmRound.answered === 0
+  latestLmRound.answered === 0
     ? "รอกรอก"
-    : bestLmRound.answered < 16
-      ? `${bestLmRound.answered}/16`
-      : `${bestLmRound.total}/50`;
-
+    : latestLmRound.answered < 16
+      ? `${latestLmRound.answered}/16`
+      : `${latestLmRound.total}/50`;
+  
 const sessionDone = [0, 1, 2, 3].map((index) =>
   sessionHasAnyData(draft.sessions?.[index])
 );
@@ -3925,7 +3926,7 @@ const screeningMenuItems = [
     badge: lmMenuBadge,
     tone: lmMenuTone,
     active: tab === "lm",
-    done: bestLmRound.answered === 16,
+    done: latestLmRound.answered === 16,
     onClick: () => setTab("lm"),
   },
   {
