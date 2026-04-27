@@ -393,6 +393,19 @@ function normalizeRecord(record) {
     : clone(blankRecord.parq);
 
   merged.program = { ...clone(blankRecord.program), ...(record.program || {}) };
+  merged.lmAssessments = [0, 1, 2, 3].map((i) => ({
+    ...blankLmAssessment(i + 1),
+    ...(record.lmAssessments?.[i] || {}),
+    no: i + 1,
+    answers: {
+      ...blankLmAssessment(i + 1).answers,
+      ...(record.lmAssessments?.[i]?.answers || {}),
+    },
+    scores: {
+      ...blankLmAssessment(i + 1).scores,
+      ...(record.lmAssessments?.[i]?.scores || {}),
+    },
+  }));
 
   const defaultExerciseLog = {
     ...clone(blankRecord.exerciseLog),
@@ -896,6 +909,13 @@ const blankRecord = {
     },
     history: [],
   },
+    lmAssessments: [
+    blankLmAssessment(1),
+    blankLmAssessment(2),
+    blankLmAssessment(3),
+    blankLmAssessment(4),
+  ],
+  
   sessions: [session(1), session(2), session(3), session(4)],
 };
 
@@ -1014,6 +1034,25 @@ const initialRecords = {
     ],
   },
 };
+
+function blankLmAssessment(no) {
+  return {
+    no,
+    date: "",
+    answers: {},
+    scores: {
+      nutrition: null,
+      physical: null,
+      sleep: null,
+      stress: null,
+      substances: null,
+      relationship: null,
+    },
+    total: null,
+    updatedAt: "",
+    updatedBy: "",
+  };
+}
 
 function valueOf(s, key) {
   if (!s) return null;
@@ -3953,6 +3992,265 @@ ${quality.issues.slice(0, 8).join("\n")}
       </section>
     </main>
   );
+}
+
+const LM_SCORE_OPTIONS = {
+  count0to10: ["<1", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10+"],
+  aerobicTime: [
+    "<30 นาที",
+    "30 นาที",
+    "45 นาที",
+    "1 ชม.",
+    "1.5 ชม.",
+    "2 ชม.",
+    "2.5 ชม.",
+    "3 ชม.",
+    "3.5 ชม.",
+    "4 ชม.",
+    "4.5 ชม.",
+    "5+ ชม.",
+  ],
+  yesNo: ["ใช่", "ไม่ใช่"],
+};
+
+const LM_QUESTIONS = [
+  {
+    id: "n1",
+    category: "nutrition",
+    categoryLabel: "Nutrition / โภชนาการ",
+    maxCategoryScore: 10,
+    text: "จำนวนมื้ออาหารนอกบ้านหรืออาหารกล่อง/ถุงนอกบ้าน ใน 1 สัปดาห์",
+    options: LM_SCORE_OPTIONS.count0to10,
+    scores: [1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0],
+  },
+  {
+    id: "n2",
+    category: "nutrition",
+    categoryLabel: "Nutrition / โภชนาการ",
+    maxCategoryScore: 10,
+    text: "จำนวนแก้วที่ดื่มเครื่องดื่มรสหวานใน 1 สัปดาห์",
+    options: LM_SCORE_OPTIONS.count0to10,
+    scores: [3, 3, 1, 0, 0, 0, 0, 0, 0, 0, 0],
+  },
+  {
+    id: "n3",
+    category: "nutrition",
+    categoryLabel: "Nutrition / โภชนาการ",
+    maxCategoryScore: 10,
+    text: "กินผลไม้กี่ส่วนต่อวัน",
+    options: LM_SCORE_OPTIONS.count0to10,
+    scores: [0, 0, 0, 2, 3, 2, 2, 0, 0, 0, 0],
+  },
+  {
+    id: "n4",
+    category: "nutrition",
+    categoryLabel: "Nutrition / โภชนาการ",
+    maxCategoryScore: 10,
+    text: "กินผักกี่ส่วนต่อวัน",
+    options: LM_SCORE_OPTIONS.count0to10,
+    scores: [0, 0, 1, 1, 2, 2, 3, 3, 3, 2, 2],
+  },
+
+  {
+    id: "pa5",
+    category: "physical",
+    categoryLabel: "Physical Activity / กิจกรรมทางกาย",
+    maxCategoryScore: 10,
+    text: "จำนวนวันที่ออกกำลังกายแบบแรงต้านใน 1 สัปดาห์",
+    options: LM_SCORE_OPTIONS.count0to10,
+    scores: [0, 1, 2, 2, 2, 2, 2, 2, null, null, null],
+  },
+  {
+    id: "pa6",
+    category: "physical",
+    categoryLabel: "Physical Activity / กิจกรรมทางกาย",
+    maxCategoryScore: 10,
+    text: "จำนวนชั่วโมงที่นั่งอยู่กับที่ต่อวัน",
+    options: LM_SCORE_OPTIONS.count0to10,
+    scores: [3, 3, 3, 3, 3, 3, 1, 1, 0, 0, 0],
+  },
+  {
+    id: "pa7",
+    category: "physical",
+    categoryLabel: "Physical Activity / กิจกรรมทางกาย",
+    maxCategoryScore: 10,
+    text: "จำนวนชั่วโมงต่อสัปดาห์ที่ออกกำลังกายชนิดแอโรบิก",
+    options: LM_SCORE_OPTIONS.aerobicTime,
+    scores: [0, 1, 1, 2, 3, 4, 5, 5, 5, 5, 5, 5],
+  },
+
+  {
+    id: "s8",
+    category: "sleep",
+    categoryLabel: "Sleep / การนอน",
+    maxCategoryScore: 10,
+    text: "จำนวนชั่วโมงการนอนต่อวัน",
+    options: LM_SCORE_OPTIONS.count0to10,
+    scores: [0, 0, 0, 0, 0, 0, 0, 5, 6, 6, 6],
+  },
+  {
+    id: "s9",
+    category: "sleep",
+    categoryLabel: "Sleep / การนอน",
+    maxCategoryScore: 10,
+    text: "ส่วนใหญ่ตื่นเช้ามาด้วยความรู้สึกสดชื่นกระปรี้กระเปร่า",
+    options: LM_SCORE_OPTIONS.yesNo,
+    scores: [2, 1],
+  },
+  {
+    id: "s10",
+    category: "sleep",
+    categoryLabel: "Sleep / การนอน",
+    maxCategoryScore: 10,
+    text: "มักมีอาการหลับ ๆ ตื่น ๆ",
+    options: LM_SCORE_OPTIONS.yesNo,
+    scores: [1, 2],
+  },
+
+  {
+    id: "st11",
+    category: "stress",
+    categoryLabel: "Stress / ความเครียด",
+    maxCategoryScore: 5,
+    text: "มีกิจกรรมส่งเสริม ฝึกจิตใจ ฝึกสมาธิ อย่างน้อย 2 ครั้ง",
+    options: LM_SCORE_OPTIONS.yesNo,
+    scores: [2, 0],
+  },
+  {
+    id: "st12",
+    category: "stress",
+    categoryLabel: "Stress / ความเครียด",
+    maxCategoryScore: 5,
+    text: "รู้สึกว่าโดยปกติสามารถจัดการความเครียดได้อย่างดี",
+    options: LM_SCORE_OPTIONS.yesNo,
+    scores: [3, 0],
+  },
+
+  {
+    id: "sub13",
+    category: "substances",
+    categoryLabel: "Substances / สุรา บุหรี่ และสารเสพติด",
+    maxCategoryScore: 10,
+    text: "จำนวนดื่มมาตรฐานของเครื่องดื่มแอลกอฮอล์ต่อวัน",
+    options: LM_SCORE_OPTIONS.count0to10,
+    scores: [4, 4, "sexBased", 0, 0, 0, 0, 0, 0, 0, 0],
+  },
+  {
+    id: "sub14",
+    category: "substances",
+    categoryLabel: "Substances / สุรา บุหรี่ และสารเสพติด",
+    maxCategoryScore: 10,
+    text: "สูบบุหรี่ บุหรี่ไฟฟ้า หรือสารเสพติด",
+    options: LM_SCORE_OPTIONS.yesNo,
+    scores: [0, 6],
+  },
+
+  {
+    id: "rel15",
+    category: "relationship",
+    categoryLabel: "Relationship & Health Literacy / ความสัมพันธ์และความรอบรู้สุขภาพ",
+    maxCategoryScore: 5,
+    text: "สามารถรับฟังความเห็นต่างของผู้อื่นเป็นส่วนใหญ่",
+    options: LM_SCORE_OPTIONS.yesNo,
+    scores: [2, 0],
+  },
+  {
+    id: "rel16",
+    category: "relationship",
+    categoryLabel: "Relationship & Health Literacy / ความสัมพันธ์และความรอบรู้สุขภาพ",
+    maxCategoryScore: 5,
+    text: "พูดคุย หรือพบปะกับเพื่อนสนิท คนในครอบครัว ≥ 3 ครั้ง",
+    options: LM_SCORE_OPTIONS.yesNo,
+    scores: [3, 0],
+  },
+];
+
+function lmQuestionScore(question, answerIndex, record = {}) {
+  if (answerIndex === "" || answerIndex === null || answerIndex === undefined) {
+    return null;
+  }
+
+  const index = Number(answerIndex);
+  const rawScore = question.scores?.[index];
+
+  if (rawScore === null || rawScore === undefined) return null;
+
+  if (rawScore === "sexBased") {
+    const isFemale = String(record.sex || "").includes("หญิง");
+    return isFemale ? 0 : 4;
+  }
+
+  const score = Number(rawScore);
+  return Number.isFinite(score) ? score : null;
+}
+
+function calculateLmAssessment(assessment = {}, record = {}) {
+  const answers = assessment.answers || {};
+
+  const scores = {
+    nutrition: 0,
+    physical: 0,
+    sleep: 0,
+    stress: 0,
+    substances: 0,
+    relationship: 0,
+  };
+
+  LM_QUESTIONS.forEach((question) => {
+    const score = lmQuestionScore(question, answers[question.id], record);
+    if (score !== null) {
+      scores[question.category] += score;
+    }
+  });
+
+  const total = Object.values(scores).reduce((sum, value) => sum + value, 0);
+
+  return {
+    scores,
+    total,
+  };
+}
+
+function lmScoreInterpret(total) {
+  const score = Number(total);
+
+  if (!Number.isFinite(score)) {
+    return {
+      label: "ยังไม่มีข้อมูล",
+      tone: "gray",
+      text: "ยังไม่มีข้อมูลเพียงพอสำหรับแปลผล",
+    };
+  }
+
+  if (score <= 20) {
+    return {
+      label: "ต่ำกว่าค่าเฉลี่ย",
+      tone: "bad",
+      text: "เป็นโอกาสดีที่จะได้รับคำแนะนำเพื่อปรับวิถีชีวิตให้ดีขึ้น",
+    };
+  }
+
+  if (score <= 30) {
+    return {
+      label: "เท่าค่าเฉลี่ย",
+      tone: "warn",
+      text: "มีวิถีชีวิตที่เหมาะสมในบางเรื่อง และยังมีบางส่วนที่ปรับเพิ่มได้",
+    };
+  }
+
+  if (score <= 40) {
+    return {
+      label: "ดีมาก",
+      tone: "good",
+      text: "มีพฤติกรรมสุขภาพที่ดีหลายด้าน แต่ยังมีบางเรื่องที่พัฒนาเพิ่มได้",
+    };
+  }
+
+  return {
+    label: "ดีเยี่ยม",
+    tone: "good",
+    text: "มีวิถีชีวิตที่ดีเยี่ยม มีเพียงจุดเล็กน้อยที่อาจเพิ่มเติมให้ดียิ่งขึ้น",
+  };
 }
 
 function LmAssessmentForm({ draft }) {
