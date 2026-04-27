@@ -4909,55 +4909,75 @@ function LmAssessmentForm({ draft, update }) {
           </div>
         </div>
 
-        <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-sm">
-          <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
-            <div className="min-w-0">
-              <div className="flex flex-wrap items-center gap-2">
-                <div className="text-sm font-black text-slate-900">
-                  สรุปอัตโนมัติ
+        <div className="grid gap-3 md:grid-cols-2">
+          <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-4 shadow-sm">
+            <div className="mb-3 flex items-center justify-between gap-3">
+              <div>
+                <div className="text-sm font-black text-emerald-800">
+                  จุดเด่น
                 </div>
-        
-                <Pill tone={isComplete ? "good" : "warn"}>
-                  {isComplete ? "พร้อมแปลผล" : `ยังไม่ครบ ${answeredCount}/16 ข้อ`}
-                </Pill>
+                <div className="text-xs font-semibold text-emerald-700/80">
+                  ด้านที่ทำได้ดี
+                </div>
               </div>
         
-              <div className="mt-2 flex flex-wrap items-center gap-2 text-sm">
-                <span className="font-bold text-slate-500">
-                  จุดเด่น:
-                </span>
+              <span className="rounded-full border border-emerald-200 bg-white/80 px-2.5 py-1 text-xs font-black text-emerald-700">
+                ดี
+              </span>
+            </div>
         
-                {strengths.length ? (
-                  strengths.map((item) => (
-                    <Pill key={item.key} tone="good">
-                      {item.thai} {item.score}/{item.max}
-                    </Pill>
-                  ))
-                ) : (
-                  <span className="font-semibold text-slate-400">
-                    รอกรอกครบหมวด
+            <div className="flex flex-wrap gap-2">
+              {strengths.length ? (
+                strengths.map((item) => (
+                  <span
+                    key={`strength-${item.key}`}
+                    className="inline-flex items-center rounded-full border border-emerald-300 bg-white px-3 py-1.5 text-sm font-bold text-emerald-800"
+                  >
+                    {item.thai} {item.score}/{item.max}
                   </span>
-                )}
-        
-                <span className="ml-0 font-bold text-slate-500 sm:ml-3">
-                  ควรปรับ:
-                </span>
-        
-                {improvements.length ? (
-                  improvements.map((item) => (
-                    <Pill key={item.key} tone="bad">
-                      {item.thai} {item.score}/{item.max}
-                    </Pill>
-                  ))
-                ) : (
-                  <span className="font-semibold text-slate-400">
-                    รอกรอกครบหมวด
-                  </span>
-                )}
-              </div>
+                ))
+              ) : (
+                <div className="text-sm font-semibold text-emerald-800/70">
+                  รอกรอกครบหมวด
+                </div>
+              )}
             </div>
           </div>
-        </div>      
+        
+          <div className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-4 shadow-sm">
+            <div className="mb-3 flex items-center justify-between gap-3">
+              <div>
+                <div className="text-sm font-black text-rose-800">
+                  ควรปรับ
+                </div>
+                <div className="text-xs font-semibold text-rose-700/80">
+                  ด้านที่ควรให้คำแนะนำเพิ่มเติม
+                </div>
+              </div>
+        
+              <span className="rounded-full border border-rose-200 bg-white/80 px-2.5 py-1 text-xs font-black text-rose-700">
+                ปรับเพิ่ม
+              </span>
+            </div>
+        
+            <div className="flex flex-wrap gap-2">
+              {improvements.length ? (
+                improvements.map((item) => (
+                  <span
+                    key={`improve-${item.key}`}
+                    className="inline-flex items-center rounded-full border border-rose-300 bg-white px-3 py-1.5 text-sm font-bold text-rose-800"
+                  >
+                    {item.thai} {item.score}/{item.max}
+                  </span>
+                ))
+              ) : (
+                <div className="text-sm font-semibold text-rose-800/70">
+                  ยังไม่มีข้อมูลที่ควรปรับ
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
         <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
           <div className="mb-4 rounded-2xl border border-slate-100 bg-gradient-to-r from-slate-50 to-white px-4 py-3">
             <div className="flex items-center justify-between gap-3">
