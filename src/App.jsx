@@ -4909,24 +4909,55 @@ function LmAssessmentForm({ draft, update }) {
           </div>
         </div>
 
-        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-          <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-            <div>
-              <div className="text-sm font-bold text-slate-500">
-                สรุปอัตโนมัติ
+        <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-sm">
+          <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
+            <div className="min-w-0">
+              <div className="flex flex-wrap items-center gap-2">
+                <div className="text-sm font-black text-slate-900">
+                  สรุปอัตโนมัติ
+                </div>
+        
+                <Pill tone={isComplete ? "good" : "warn"}>
+                  {isComplete ? "พร้อมแปลผล" : `ยังไม่ครบ ${answeredCount}/16 ข้อ`}
+                </Pill>
               </div>
-
-              <div className="mt-1 text-lg font-black text-slate-900">
-                {answeredCount > 0
-                  ? `ตอบแล้ว ${answeredCount}/16 ข้อ`
-                  : "ยังไม่มีข้อมูลสำหรับแปลผล"}
+        
+              <div className="mt-2 flex flex-wrap items-center gap-2 text-sm">
+                <span className="font-bold text-slate-500">
+                  จุดเด่น:
+                </span>
+        
+                {strengths.length ? (
+                  strengths.map((item) => (
+                    <Pill key={item.key} tone="good">
+                      {item.thai} {item.score}/{item.max}
+                    </Pill>
+                  ))
+                ) : (
+                  <span className="font-semibold text-slate-400">
+                    รอกรอกครบหมวด
+                  </span>
+                )}
+        
+                <span className="ml-0 font-bold text-slate-500 sm:ml-3">
+                  ควรปรับ:
+                </span>
+        
+                {improvements.length ? (
+                  improvements.map((item) => (
+                    <Pill key={item.key} tone="bad">
+                      {item.thai} {item.score}/{item.max}
+                    </Pill>
+                  ))
+                ) : (
+                  <span className="font-semibold text-slate-400">
+                    รอกรอกครบหมวด
+                  </span>
+                )}
               </div>
             </div>
-
-            <Pill tone={isComplete ? "good" : "warn"}>
-              {isComplete ? "ครบแล้ว" : "ยังไม่ครบ"}
-            </Pill>
           </div>
+        </div>
 
           <div className="mt-3 rounded-xl border border-slate-100 bg-slate-50 p-3">
             <div className="flex flex-wrap items-center gap-2">
@@ -4966,17 +4997,22 @@ function LmAssessmentForm({ draft, update }) {
         </div>
 
         <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-          <div className="mb-3 flex items-center justify-between gap-3">
-            <div>
-              <div className="text-sm font-bold text-slate-500">
-                หมวดแบบประเมิน
+          <div className="mb-4 rounded-2xl border border-slate-100 bg-gradient-to-r from-slate-50 to-white px-4 py-3">
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <div className="text-sm font-black text-slate-900">
+                  หมวดแบบประเมิน
+                </div>
+          
+                <div className="mt-0.5 text-xs font-semibold text-slate-400">
+                  กดเปิดทีละหมวดเพื่อลดความรก
+                </div>
               </div>
-              <div className="text-sm font-semibold text-slate-400">
-                กดเปิดทีละหมวดเพื่อลดความรก
-              </div>
+          
+              <Pill tone={answeredCount === 16 ? "good" : "gray"}>
+                {answeredCount}/16 ข้อ
+              </Pill>
             </div>
-
-            <Pill>{answeredCount}/16 ข้อ</Pill>
           </div>
 
           <div className="space-y-2">
@@ -4996,10 +5032,10 @@ function LmAssessmentForm({ draft, update }) {
               return (
                 <div
                   key={section.key}
-                  className={`rounded-2xl border transition ${
+                  className={`overflow-hidden rounded-2xl border transition ${
                     isOpen
-                      ? "border-slate-300 bg-slate-50"
-                      : "border-slate-200 bg-white"
+                      ? "border-slate-300 bg-white shadow-sm ring-1 ring-slate-100"
+                      : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/60"
                   }`}
                 >
                   <button
@@ -5007,11 +5043,13 @@ function LmAssessmentForm({ draft, update }) {
                     onClick={() =>
                       setOpenSection(isOpen ? "" : section.key)
                     }
-                    className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left"
+                    className={`flex w-full items-center justify-between gap-3 px-4 py-3 text-left transition ${
+                      isOpen ? "bg-slate-50" : "bg-white"
+                    }`}
                   >
                     <div className="flex min-w-0 items-center gap-3">
                       <span
-                        className={`h-3 w-3 shrink-0 rounded-full ${color.dot}`}
+                        className={`h-10 w-1.5 shrink-0 rounded-full ${color.dot}`}
                       />
 
                       <div className="min-w-0">
