@@ -4957,45 +4957,7 @@ function LmAssessmentForm({ draft, update }) {
               </div>
             </div>
           </div>
-        </div>
-
-          <div className="mt-3 rounded-xl border border-slate-100 bg-slate-50 p-3">
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="text-sm font-bold text-slate-500">
-                จุดเด่น:
-              </span>
-
-              {strengths.length ? (
-                strengths.map((item) => (
-                  <Pill key={item.key} tone="good">
-                    {item.thai} {item.score}/{item.max}
-                  </Pill>
-                ))
-              ) : (
-                <span className="text-sm font-semibold text-slate-400">
-                  รอกรอกครบหมวด
-                </span>
-              )}
-
-              <span className="ml-0 text-sm font-bold text-slate-500 sm:ml-3">
-                ควรปรับ:
-              </span>
-
-              {improvements.length ? (
-                improvements.map((item) => (
-                  <Pill key={item.key} tone="bad">
-                    {item.thai} {item.score}/{item.max}
-                  </Pill>
-                ))
-              ) : (
-                <span className="text-sm font-semibold text-slate-400">
-                  รอกรอกครบหมวด
-                </span>
-              )}
-            </div>
-          </div>
-        </div>
-
+        </div>      
         <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
           <div className="mb-4 rounded-2xl border border-slate-100 bg-gradient-to-r from-slate-50 to-white px-4 py-3">
             <div className="flex items-center justify-between gap-3">
@@ -5201,7 +5163,7 @@ function LmAssessmentForm({ draft, update }) {
                   )}
                 </div>
               );
-            })
+            })}
           </div>
         </div>
 
