@@ -4253,7 +4253,7 @@ function lmScoreInterpret(total) {
   };
 }
 
-function LmAssessmentForm({ draft }) {
+function LmAssessmentForm({ draft, update }) {
   const [round, setRound] = useState(0);
   const [openSection, setOpenSection] = useState("nutrition");
 
@@ -4267,7 +4267,6 @@ function LmAssessmentForm({ draft }) {
       max: 10,
       tone: "emerald",
       desc: "อาหารนอกบ้าน เครื่องดื่มหวาน ผัก และผลไม้",
-      questions: 4,
     },
     {
       key: "physical",
@@ -4276,7 +4275,6 @@ function LmAssessmentForm({ draft }) {
       max: 10,
       tone: "sky",
       desc: "แรงต้าน การนั่งนาน และแอโรบิกต่อสัปดาห์",
-      questions: 3,
     },
     {
       key: "sleep",
@@ -4285,7 +4283,6 @@ function LmAssessmentForm({ draft }) {
       max: 10,
       tone: "indigo",
       desc: "ชั่วโมงนอน ความสดชื่น และคุณภาพการนอน",
-      questions: 3,
     },
     {
       key: "stress",
@@ -4294,7 +4291,6 @@ function LmAssessmentForm({ draft }) {
       max: 5,
       tone: "violet",
       desc: "สมาธิ/ฝึกจิตใจ และการจัดการความเครียด",
-      questions: 2,
     },
     {
       key: "substances",
@@ -4303,7 +4299,6 @@ function LmAssessmentForm({ draft }) {
       max: 10,
       tone: "amber",
       desc: "แอลกอฮอล์ บุหรี่ บุหรี่ไฟฟ้า หรือสารเสพติด",
-      questions: 2,
     },
     {
       key: "relationship",
@@ -4312,7 +4307,6 @@ function LmAssessmentForm({ draft }) {
       max: 5,
       tone: "rose",
       desc: "การรับฟังผู้อื่น และการพบปะคนใกล้ชิด",
-      questions: 2,
     },
   ];
 
@@ -4320,30 +4314,165 @@ function LmAssessmentForm({ draft }) {
     emerald: {
       soft: "border-emerald-200 bg-emerald-50 text-emerald-700",
       dot: "bg-emerald-500",
+      button: "border-emerald-600 bg-emerald-600 text-white",
+      selectedSoft: "border-emerald-200 bg-emerald-50 text-emerald-700",
     },
     sky: {
       soft: "border-sky-200 bg-sky-50 text-sky-700",
       dot: "bg-sky-500",
+      button: "border-sky-600 bg-sky-600 text-white",
+      selectedSoft: "border-sky-200 bg-sky-50 text-sky-700",
     },
     indigo: {
       soft: "border-indigo-200 bg-indigo-50 text-indigo-700",
       dot: "bg-indigo-500",
+      button: "border-indigo-600 bg-indigo-600 text-white",
+      selectedSoft: "border-indigo-200 bg-indigo-50 text-indigo-700",
     },
     violet: {
       soft: "border-violet-200 bg-violet-50 text-violet-700",
       dot: "bg-violet-500",
+      button: "border-violet-600 bg-violet-600 text-white",
+      selectedSoft: "border-violet-200 bg-violet-50 text-violet-700",
     },
     amber: {
       soft: "border-amber-200 bg-amber-50 text-amber-700",
       dot: "bg-amber-500",
+      button: "border-amber-600 bg-amber-600 text-white",
+      selectedSoft: "border-amber-200 bg-amber-50 text-amber-700",
     },
     rose: {
       soft: "border-rose-200 bg-rose-50 text-rose-700",
       dot: "bg-rose-500",
+      button: "border-rose-600 bg-rose-600 text-white",
+      selectedSoft: "border-rose-200 bg-rose-50 text-rose-700",
     },
   };
 
-  const activeSection = sections.find((section) => section.key === openSection);
+  const lmAssessments = Array.isArray(draft.lmAssessments)
+    ? draft.lmAssessments
+    : [
+        blankLmAssessment(1),
+        blankLmAssessment(2),
+        blankLmAssessment(3),
+        blankLmAssessment(4),
+      ];
+
+  const currentAssessment =
+    lmAssessments[round] || blankLmAssessment(round + 1);
+
+  const currentCalculated = calculateLmAssessment(currentAssessment, draft);
+
+  const answeredCount = LM_QUESTIONS.filter(
+    (question) =>
+      currentAssessment.answers?.[question.id] !== undefined &&
+      currentAssessment.answers?.[question.id] !== null &&
+      currentAssessment.answers?.[question.id] !== ""
+  ).length;
+
+  const totalForDisplay = answeredCount > 0 ? currentCalculated.total : null;
+  const interpretation = lmScoreInterpret(totalForDisplay);
+
+  const roundScores = rounds.map((item, index) => {
+    const assessment = lmAssessments[index] || blankLmAssessment(index + 1);
+    const answered = LM_QUESTIONS.some(
+      (question) =>
+        assessment.answers?.[question.id] !== undefined &&
+        assessment.answers?.[question.id] !== null &&
+        assessment.answers?.[question.id] !== ""
+    );
+
+    const calculated = calculateLmAssessment(assessment, draft);
+
+    return {
+      no: item,
+      total: answered ? calculated.total : null,
+    };
+  });
+
+  function categoryQuestions(categoryKey) {
+    return LM_QUESTIONS.filter((question) => question.category === categoryKey);
+  }
+
+  function categoryAnsweredCount(categoryKey) {
+    return categoryQuestions(categoryKey).filter(
+      (question) =>
+        currentAssessment.answers?.[question.id] !== undefined &&
+        currentAssessment.answers?.[question.id] !== null &&
+        currentAssessment.answers?.[question.id] !== ""
+    ).length;
+  }
+
+  function categoryScore(categoryKey) {
+    return currentCalculated.scores?.[categoryKey] ?? 0;
+  }
+
+  function categoryTone(score, max, answered) {
+    if (!answered) return "gray";
+    const percent = (Number(score) / max) * 100;
+    if (percent >= 80) return "good";
+    if (percent >= 60) return "warn";
+    return "bad";
+  }
+
+  function scoreLabel(question, optionIndex) {
+    const raw = question.scores?.[optionIndex];
+
+    if (raw === null || raw === undefined) return "-";
+    if (raw === "sexBased") return "หญิง 0 / ชาย 4";
+
+    return `${raw}`;
+  }
+
+  function chooseAnswer(question, optionIndex) {
+    const base = currentAssessment || blankLmAssessment(round + 1);
+
+    const nextAnswers = {
+      ...(base.answers || {}),
+      [question.id]: optionIndex,
+    };
+
+    const nextBase = {
+      ...base,
+      no: round + 1,
+      date: base.date || todayThaiDateText(),
+      answers: nextAnswers,
+      updatedAt: todayThai(),
+      updatedBy: draft.updatedBy || "",
+    };
+
+    const nextCalculated = calculateLmAssessment(nextBase, draft);
+
+    const nextAssessment = {
+      ...nextBase,
+      scores: nextCalculated.scores,
+      total: nextCalculated.total,
+    };
+
+    update(["lmAssessments", round], nextAssessment);
+  }
+
+  const categorySummary = sections.map((section) => {
+    const score = categoryScore(section.key);
+    const answered = categoryAnsweredCount(section.key);
+    const totalQuestions = categoryQuestions(section.key).length;
+
+    return {
+      ...section,
+      score,
+      answered,
+      totalQuestions,
+      tone: categoryTone(score, section.max, answered > 0),
+    };
+  });
+
+  const strengths = categorySummary
+    .filter((item) => item.answered > 0 && item.tone === "good")
+    .slice(0, 3);
+
+  const improvements = categorySummary
+    .filter((item) => item.answered > 0 && item.tone === "bad")
+    .slice(0, 3);
 
   return (
     <Card title="แบบประเมินพฤติกรรมสุขภาพ LM" icon={FileIcon}>
@@ -4392,7 +4521,7 @@ function LmAssessmentForm({ draft }) {
 
               <div className="mt-2 flex items-end gap-2">
                 <div className="text-3xl font-black text-slate-900">
-                  - / 50
+                  {totalForDisplay === null ? "-" : totalForDisplay} / 50
                 </div>
                 <div className="pb-1 text-sm font-bold text-slate-400">
                   คะแนน
@@ -4400,7 +4529,11 @@ function LmAssessmentForm({ draft }) {
               </div>
 
               <div className="mt-3">
-                <Pill>รอกรอกข้อมูล</Pill>
+                <Pill tone={interpretation.tone}>{interpretation.label}</Pill>
+              </div>
+
+              <div className="mt-3 rounded-2xl border border-slate-100 bg-slate-50 p-3 text-sm font-semibold leading-6 text-slate-500">
+                {interpretation.text}
               </div>
             </div>
 
@@ -4410,9 +4543,9 @@ function LmAssessmentForm({ draft }) {
               </div>
 
               <div className="mt-3 grid gap-2">
-                {rounds.map((item, index) => (
+                {roundScores.map((item, index) => (
                   <button
-                    key={item}
+                    key={item.no}
                     type="button"
                     onClick={() => setRound(index)}
                     className={`flex items-center justify-between rounded-xl border px-3 py-2 text-left transition ${
@@ -4422,10 +4555,10 @@ function LmAssessmentForm({ draft }) {
                     }`}
                   >
                     <span className="text-sm font-bold">
-                      ครั้งที่ {item}
+                      ครั้งที่ {item.no}
                     </span>
                     <span className="text-sm font-black">
-                      - / 50
+                      {item.total === null ? "- / 50" : `${item.total} / 50`}
                     </span>
                   </button>
                 ))}
@@ -4442,16 +4575,15 @@ function LmAssessmentForm({ draft }) {
                   </div>
 
                   <div className="mt-1 text-lg font-black text-slate-900">
-                    ยังไม่มีข้อมูลสำหรับแปลผล
+                    {answeredCount > 0
+                      ? `ตอบแล้ว ${answeredCount}/16 ข้อ`
+                      : "ยังไม่มีข้อมูลสำหรับแปลผล"}
                   </div>
                 </div>
 
-                <button
-                  type="button"
-                  className="rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-bold text-white hover:bg-slate-800"
-                >
-                  บันทึกครั้งที่ {round + 1}
-                </button>
+                <Pill tone={answeredCount === 16 ? "good" : "warn"}>
+                  {answeredCount === 16 ? "ครบแล้ว" : "ยังไม่ครบ"}
+                </Pill>
               </div>
 
               <div className="mt-3 grid gap-3 md:grid-cols-2">
@@ -4459,8 +4591,19 @@ function LmAssessmentForm({ draft }) {
                   <div className="text-sm font-bold text-emerald-700">
                     จุดเด่น
                   </div>
-                  <div className="mt-1 text-sm font-semibold text-slate-600">
-                    จะแสดงหมวดที่ได้คะแนนดีหลังกรอกข้อมูล
+
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {strengths.length ? (
+                      strengths.map((item) => (
+                        <Pill key={item.key} tone="good">
+                          {item.label} {item.score}/{item.max}
+                        </Pill>
+                      ))
+                    ) : (
+                      <div className="text-sm font-semibold text-slate-500">
+                        ยังไม่มีหมวดที่เด่นชัด
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -4468,8 +4611,19 @@ function LmAssessmentForm({ draft }) {
                   <div className="text-sm font-bold text-amber-700">
                     ควรปรับเพิ่ม
                   </div>
-                  <div className="mt-1 text-sm font-semibold text-slate-600">
-                    จะแสดงหมวดที่ควรปรับปรุงหลังกรอกข้อมูล
+
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {improvements.length ? (
+                      improvements.map((item) => (
+                        <Pill key={item.key} tone="bad">
+                          {item.label} {item.score}/{item.max}
+                        </Pill>
+                      ))
+                    ) : (
+                      <div className="text-sm font-semibold text-slate-500">
+                        ยังไม่พบหมวดต่ำกว่า 60%
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -4486,13 +4640,17 @@ function LmAssessmentForm({ draft }) {
                   </div>
                 </div>
 
-                <Pill>6 หมวด</Pill>
+                <Pill>{answeredCount}/16 ข้อ</Pill>
               </div>
 
               <div className="space-y-2">
                 {sections.map((section) => {
                   const isOpen = openSection === section.key;
                   const color = toneClass[section.tone];
+                  const questions = categoryQuestions(section.key);
+                  const score = categoryScore(section.key);
+                  const answered = categoryAnsweredCount(section.key);
+                  const sectionTone = categoryTone(score, section.max, answered > 0);
 
                   return (
                     <div
@@ -4526,11 +4684,9 @@ function LmAssessmentForm({ draft }) {
                         </div>
 
                         <div className="flex shrink-0 items-center gap-2">
-                          <span
-                            className={`rounded-full border px-3 py-1 text-xs font-black ${color.soft}`}
-                          >
-                            - / {section.max}
-                          </span>
+                          <Pill tone={sectionTone}>
+                            {answered > 0 ? `${score}/${section.max}` : `-/${section.max}`}
+                          </Pill>
 
                           <span className="text-lg font-black text-slate-400">
                             {isOpen ? "−" : "+"}
@@ -4540,24 +4696,105 @@ function LmAssessmentForm({ draft }) {
 
                       {isOpen && (
                         <div className="border-t border-slate-200 px-4 py-4">
-                          <div className="rounded-2xl border border-slate-200 bg-white p-4">
-                            <div className="text-sm font-bold text-slate-500">
-                              รายละเอียดหมวด
-                            </div>
+                          <div className="mb-4 rounded-2xl border border-slate-200 bg-white p-4">
+                            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                              <div>
+                                <div className="text-sm font-bold text-slate-500">
+                                  รายละเอียดหมวด
+                                </div>
 
-                            <div className="mt-1 text-base font-bold text-slate-900">
-                              {section.desc}
-                            </div>
+                                <div className="mt-1 text-base font-bold text-slate-900">
+                                  {section.desc}
+                                </div>
+                              </div>
 
-                            <div className="mt-3 flex flex-wrap gap-2">
-                              <Pill>{section.questions} ข้อ</Pill>
-                              <Pill>คะแนนเต็ม {section.max}</Pill>
-                              <Pill>สถานะ: รอกรอก</Pill>
+                              <div className="flex flex-wrap gap-2">
+                                <Pill>{answered}/{questions.length} ข้อ</Pill>
+                                <Pill>เต็ม {section.max}</Pill>
+                              </div>
                             </div>
+                          </div>
 
-                            <div className="mt-4 rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-4 text-sm font-semibold text-slate-500">
-                              ขั้นถัดไปจะเพิ่มคำถาม ตัวเลือก และคะแนนอัตโนมัติในหมวดนี้
-                            </div>
+                          <div className="space-y-4">
+                            {questions.map((question, questionIndex) => {
+                              const selectedAnswer =
+                                currentAssessment.answers?.[question.id];
+
+                              const selectedScore = lmQuestionScore(
+                                question,
+                                selectedAnswer,
+                                draft
+                              );
+
+                              return (
+                                <div
+                                  key={question.id}
+                                  className="rounded-2xl border border-slate-200 bg-white p-4"
+                                >
+                                  <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                                    <div>
+                                      <div className="text-xs font-bold uppercase tracking-wide text-slate-400">
+                                        ข้อ {questionIndex + 1}
+                                      </div>
+
+                                      <div className="mt-1 text-base font-bold leading-6 text-slate-900">
+                                        {question.text}
+                                      </div>
+                                    </div>
+
+                                    <Pill>
+                                      คะแนน{" "}
+                                      {selectedScore === null
+                                        ? "-"
+                                        : selectedScore}
+                                    </Pill>
+                                  </div>
+
+                                  <div className="mt-4 flex flex-wrap gap-2">
+                                    {question.options.map((option, optionIndex) => {
+                                      const optionScore =
+                                        question.scores?.[optionIndex];
+                                      const disabled =
+                                        optionScore === null ||
+                                        optionScore === undefined;
+                                      const selected =
+                                        Number(selectedAnswer) === optionIndex;
+
+                                      return (
+                                        <button
+                                          key={`${question.id}-${option}`}
+                                          type="button"
+                                          disabled={disabled}
+                                          onClick={() =>
+                                            chooseAnswer(question, optionIndex)
+                                          }
+                                          className={`rounded-xl border px-3 py-2 text-sm font-bold transition ${
+                                            disabled
+                                              ? "cursor-not-allowed border-slate-100 bg-slate-50 text-slate-300"
+                                              : selected
+                                                ? color.button
+                                                : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
+                                          }`}
+                                        >
+                                          <div>{option}</div>
+                                          <div
+                                            className={`mt-0.5 text-[10px] font-bold ${
+                                              selected
+                                                ? "text-white/80"
+                                                : "text-slate-400"
+                                            }`}
+                                          >
+                                            {disabled
+                                              ? "-"
+                                              : `${scoreLabel(question, optionIndex)} คะแนน`}
+                                          </div>
+                                        </button>
+                                      );
+                                    })}
+                                  </div>
+                                </div>
+                              );
+                            })}
                           </div>
                         </div>
                       )}
@@ -4567,13 +4804,9 @@ function LmAssessmentForm({ draft }) {
               </div>
             </div>
 
-            <div className="flex justify-end">
-              <button
-                type="button"
-                className="rounded-xl bg-slate-900 px-5 py-3 text-base font-bold text-white hover:bg-slate-800"
-              >
-                บันทึกแบบประเมิน LM
-              </button>
+            <div className="rounded-2xl border border-sky-200 bg-sky-50 p-4 text-sm font-semibold text-sky-800">
+              เลือกคำตอบแล้วระบบจะคำนวณคะแนนทันที จากนั้นกดปุ่ม
+              “บันทึกข้อมูล” ด้านบนขวา เพื่อบันทึกลงระบบ
             </div>
           </div>
         </div>
