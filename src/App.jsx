@@ -2218,69 +2218,81 @@ function ExercisePlanCard({ record }) {
     : "";
   return (
     <Card title="โปรแกรมออกกำลังกายของฉัน" icon={ActivityIcon}>
-      <div className="rounded-3xl border border-blue-200 bg-blue-50 p-4 md:p-5">
-        <div className="grid gap-4 lg:grid-cols-[1fr_250px]">
+      <div className="rounded-3xl border border-sky-200 bg-gradient-to-br from-sky-50 to-white p-5 shadow-sm">
+        <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
           <div>
             <div className="text-sm font-bold text-slate-500">
               My Exercise Plan
             </div>
-
-            <div className="mt-1 text-2xl font-black text-slate-900 md:text-3xl">
-              {log.split || "ยังไม่ได้กำหนดโปรแกรม"}{" "}
-              {log.daysPerWeek ? `${log.daysPerWeek} วัน/สัปดาห์` : ""}
-            </div>
-            
-            {record.goal && (
-              <div className="mt-2 inline-flex w-fit rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-700">
-                เป้าหมาย: {record.goal}
-              </div>
-            )}
-            
-            {(setsRepsSummary || cardioSummary) && (
-              <div className="mt-3 inline-block w-fit max-w-full rounded-xl border border-slate-200 bg-white/70 px-2.5 py-1.5 shadow-sm">
-                <div className="mb-1.5 text-[10px] font-bold uppercase tracking-wide text-slate-400">
-                  สรุปแผน / Plan Summary
-                </div>
-            
-                <div className="flex flex-wrap gap-1.5">
-                  {setsRepsSummary && (
-                    <span className="inline-flex items-center rounded-full border border-blue-100 bg-blue-50 px-3 py-1.5 text-xs font-bold text-blue-700">
-                      <span className="mr-1 text-blue-500">Strength:</span>
-                      <span className="text-slate-900">{setsRepsSummary}</span>
-                    </span>
-                  )}
-                
-                  {cardioSummary && (
-                    <span className="inline-flex items-center rounded-full border border-emerald-100 bg-emerald-50 px-3 py-1.5 text-xs font-bold text-emerald-700">
-                      <span className="mr-1 text-emerald-600">Cardio:</span>
-                      <span className="text-slate-900">{cardioSummary}</span>
-                    </span>
-                  )}
-                </div>
-              </div>
-            )}
-            
-            <div className="mt-4 border-t border-slate-200 pt-3">
-              <div className="mb-2 text-xs font-bold uppercase tracking-wide text-slate-400">
-                วันฝึก / Training Days
-              </div>
-            
-              <div className="flex flex-wrap gap-2">
-                {exercisePlanPills(planText).map((item, index) => (
-                  <span
-                    key={`${item.text}-${index}`}
-                    className={`inline-flex rounded-full border px-3 py-1.5 text-sm font-bold ${dayPillClass(item.dayKey)}`}
-                  >
-                    {item.text}
-                  </span>
-                ))}
-              </div>
-            </div>
-
-            <div className="mt-2 text-sm font-semibold text-slate-500">
-              ให้ทำตามลำดับท่าที่แสดงจากบนลงล่าง
+      
+            <div className="mt-1 text-3xl font-black tracking-tight text-slate-900">
+              {log.split || "ยังไม่ได้กำหนดโปรแกรม"}
+              {log.daysPerWeek ? ` ${log.daysPerWeek} วัน/สัปดาห์` : ""}
             </div>
           </div>
+      
+          {record.goal && (
+            <div className="inline-flex w-fit rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-bold text-emerald-700">
+              เป้าหมาย: {record.goal}
+            </div>
+          )}
+        </div>
+      
+        {(setsRepsSummary || cardioSummary) && (
+          <div className="mt-5 rounded-2xl border border-slate-200 bg-white/80 p-4 shadow-sm">
+            <div className="mb-3 text-xs font-black uppercase tracking-wide text-slate-400">
+              สรุปแผน / Plan Summary
+            </div>
+      
+            <div className="flex flex-wrap gap-2">
+              {setsRepsSummary && (
+                <span className="inline-flex items-center rounded-full border border-blue-100 bg-blue-50 px-3 py-1.5 text-xs font-bold text-blue-700">
+                  Strength:{" "}
+                  <span className="ml-1 text-slate-900">
+                    {setsRepsSummary}
+                  </span>
+                </span>
+              )}
+      
+              {cardioSummary && (
+                <span className="inline-flex items-center rounded-full border border-emerald-100 bg-emerald-50 px-3 py-1.5 text-xs font-bold text-emerald-700">
+                  Cardio:{" "}
+                  <span className="ml-1 text-slate-900">
+                    {cardioSummary}
+                  </span>
+                </span>
+              )}
+            </div>
+          </div>
+        )}
+      
+        <div className="mt-5 border-t border-sky-100 pt-4">
+          <div className="mb-3 text-xs font-black uppercase tracking-wide text-slate-400">
+            วันฝึก / Training Days
+          </div>
+      
+          <div className="flex flex-wrap gap-2">
+            {daySummaries.length ? (
+              daySummaries.map((item) => (
+                <span
+                  key={item}
+                  className="inline-flex rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-700 shadow-sm"
+                >
+                  {item}
+                </span>
+              ))
+            ) : (
+              <span className="text-sm font-semibold text-slate-400">
+                ยังไม่ได้กำหนดวันฝึก
+              </span>
+            )}
+          </div>
+      
+          <div className="mt-3 text-sm font-semibold text-slate-500">
+            ให้ทำตามลำดับท่าที่แสดงจากบนลงล่าง
+          </div>
+        </div>
+      </div>
 
           <div className="self-start rounded-2xl border border-sky-100 bg-white p-3 shadow-sm">
             <div className="flex items-center justify-between gap-2">
