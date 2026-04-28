@@ -4305,167 +4305,100 @@ function LmAdminDashboard({ records }) {
   );
 }
 
-function Staff({ records = {}, setRecords, adminUser, addAuditLog, refreshData }) {
-  const first = Object.keys(records || {})[0] || "";
-
+function Staff({ records, setRecords, adminUser, addAuditLog, refreshData }) {
+  const first = Object.keys(records)[0] || "";
   const [hn, setHn] = useState(first);
-  const [draft, setDraft] = useState(() =>
-    normalizeRecord(first && records[first] ? records[first] : blankRecord)
-  );
+  const [draft, setDraft] = useState(clone(records[first] || blankRecord));
   const [tab, setTab] = useState("general");
   const [idx, setIdx] = useState(0);
   const [exerciseDay, setExerciseDay] = useState("Full Body");
   const [staffSearch, setStaffSearch] = useState("");
   const [staffPage, setStaffPage] = useState(1);
   const [deletedBackup, setDeletedBackup] = useState(null);
-  useEffect(() => {
-    if (!hn && first && records[first]) {
-      const normalized = normalizeRecord(records[first]);
-      setHn(first);
-      setDraft(clone(normalized));
-    }
-  }, [first, hn, records]);
-
   const staffSearchText = staffSearch.trim().toLowerCase();
-
-  const filteredPatients = Object.values(records || {}).filter((record) => {
+  const filteredPatients = Object.values(records).filter((r) => {
     if (!staffSearchText) return true;
-    return `${record.hn} ${record.name}`.toLowerCase().includes(staffSearchText);
+    return `${r.hn} ${r.name}`.toLowerCase().includes(staffSearchText);
   });
-
-  const staffPageCount = Math.max(
-    1,
-    Math.ceil(filteredPatients.length / PAGE_SIZE)
-  );
-
+  const staffPageCount = Math.max(1, Math.ceil(filteredPatients.length / PAGE_SIZE));
   const safeStaffPage = Math.min(staffPage, staffPageCount);
+  const pagedPatients = filteredPatients.slice((safeStaffPage - 1) * PAGE_SIZE, safeStaffPage * PAGE_SIZE);
 
-  const pagedPatients = filteredPatients.slice(
-    (safeStaffPage - 1) * PAGE_SIZE,
-    safeStaffPage * PAGE_SIZE
-  );
-
-  function selectRecord(selectedHn) {
-    const selected = normalizeRecord(records[selectedHn] || blankRecord);
-
-    setHn(selectedHn);
+  function selectRecord(x) {
+    const selected = normalizeRecord(records[x]);
+  
+    setHn(x);
     setDraft(clone(selected));
     setIdx(0);
     setTab("general");
-    setExerciseDay("Full Body");
   }
 
   function update(path, value) {
     let next = setDeep(draft, path, value);
-
-    if (
-      path[0] === "sessions" &&
-      path[2] === "inbody" &&
-      path[3] === "weight"
-    ) {
+    if (path[0] === "sessions" && path[2] === "inbody" && path[3] === "weight") {
       next.sessions[path[1]].inbody.bmi = bmi(value, next.height);
     }
-
     if (path[0] === "height") {
-      next.sessions = next.sessions.map((sessionItem) => ({
-        ...sessionItem,
-        inbody: {
-          ...sessionItem.inbody,
-          bmi: bmi(sessionItem.inbody.weight, value) || sessionItem.inbody.bmi,
-        },
-      }));
+      next.sessions = next.sessions.map((s) => ({ ...s, inbody: { ...s.inbody, bmi: bmi(s.inbody.weight, value) || s.inbody.bmi } }));
     }
-
     setDraft(next);
   }
-
+  
   function updateProgramAndExerciseLog(path, value) {
     setDraft((old) => {
       const next = clone(old);
+  
       let target = next;
-
       for (let i = 0; i < path.length - 1; i += 1) {
-        if (!target[path[i]] || typeof target[path[i]] !== "object") {
-          target[path[i]] = {};
-        }
         target = target[path[i]];
       }
-
       target[path[path.length - 1]] = value;
-
+  
       if (path.join(".") === "program.type") {
         next.exerciseLog = {
           ...(next.exerciseLog || {}),
           split: value,
         };
       }
-
+  
       if (path.join(".") === "program.strengthFrequency") {
         next.exerciseLog = {
           ...(next.exerciseLog || {}),
           daysPerWeek: value,
         };
       }
-
+  
       return next;
     });
   }
-
+  
   async function save() {
     if (!draft.hn) return alert("กรุณากรอก HN");
-
     const quality = recordQuality(draft);
-
     if (quality.issues.length > 0) {
-      const ok = window.confirm(
-        `พบข้อมูลที่ควรตรวจสอบ ${quality.issues.length} รายการ
+      const ok = window.confirm(`พบข้อมูลที่ควรตรวจสอบ ${quality.issues.length} รายการ
 
 ${quality.issues.slice(0, 8).join("\n")}
 
-ต้องการบันทึกต่อหรือไม่?`
-      );
-
+ต้องการบันทึกต่อหรือไม่?`);
       if (!ok) return;
     }
-
     const existed = Boolean(records[draft.hn]);
-
     const preparedDraft = {
       ...clone(draft),
-      sessions: draft.sessions.map((sessionItem) => ({
-        ...sessionItem,
-        date:
-          sessionItem.date ||
-          (sessionHasAnyData(sessionItem) ? todayThaiDateText() : ""),
+      sessions: draft.sessions.map((s) => ({
+        ...s,
+        date: s.date || (sessionHasAnyData(s) ? todayThaiDateText() : ""),
       })),
     };
-
-    const saved = {
-      ...preparedDraft,
-      updatedBy: adminUser?.name || "admin",
-      updatedById: adminUser?.id || "admin",
-      updatedAt: todayThai(),
-    };
-
+    const saved = { ...preparedDraft, updatedBy: adminUser?.name || "admin", updatedById: adminUser?.id || "admin", updatedAt: todayThai() };
     try {
       await saveRecordToSupabase(saved, adminUser);
-
-      setRecords((old) => ({
-        ...old,
-        [saved.hn]: saved,
-      }));
-
-      addAuditLog(
-        existed ? "แก้ไขข้อมูล" : "สร้าง HN ใหม่",
-        saved.hn,
-        existed ? "บันทึกการแก้ไขข้อมูลสุขภาพ" : "เพิ่มผู้รับบริการใหม่"
-      );
-
+      setRecords((old) => ({ ...old, [saved.hn]: saved }));
+      addAuditLog(existed ? "แก้ไขข้อมูล" : "สร้าง HN ใหม่", saved.hn, existed ? "บันทึกการแก้ไขข้อมูลสุขภาพ" : "เพิ่มผู้รับบริการใหม่");
       setDraft(saved);
       setHn(saved.hn);
-
       await refreshData?.();
-
       alert("บันทึกข้อมูลลง Supabase แล้ว");
     } catch (error) {
       console.error(error);
@@ -4475,59 +4408,43 @@ ${quality.issues.slice(0, 8).join("\n")}
 
   function createNew() {
     setHn("");
-    setDraft(normalizeRecord(blankRecord));
+    setDraft(clone(blankRecord));
     setTab("general");
     setIdx(0);
-    setExerciseDay("Full Body");
   }
 
   async function deleteCurrentRecord() {
     const targetHN = String(draft.hn || hn || "").trim();
-
     if (!targetHN) return alert("ยังไม่มี HN ให้ลบ");
-
     if (!records[targetHN]) {
       alert("HN นี้ยังไม่ได้ถูกบันทึกในระบบ จึงไม่มีข้อมูลให้ลบ");
       createNew();
       return;
     }
 
-    const ok = window.confirm(
-      `ยืนยันการลบข้อมูล HN ${targetHN}
+    const ok = window.confirm(`ยืนยันการลบข้อมูล HN ${targetHN}
 
 การลบนี้จะลบข้อมูลทั่วไป, PAR-Q, โปรแกรม และผลประเมินทั้ง 4 ครั้งของ HN นี้ออกจากระบบ
 
-ต้องการลบจริงหรือไม่?`
-    );
-
+ต้องการลบจริงหรือไม่?`);
     if (!ok) return;
 
     const nextRecords = { ...records };
     const deletedRecord = clone(nextRecords[targetHN]);
-
     delete nextRecords[targetHN];
-
     const firstHN = Object.keys(nextRecords)[0] || "";
 
     try {
       await deleteRecordFromSupabase(targetHN, adminUser);
-
       setRecords(nextRecords);
       setDeletedBackup(deletedRecord);
-
-      addAuditLog(
-        "ลบ HN",
-        targetHN,
-        "ลบข้อมูลผู้รับบริการทั้งชุดแบบ soft delete ใน Supabase"
-      );
-
+      addAuditLog("ลบ HN", targetHN, "ลบข้อมูลผู้รับบริการทั้งชุดแบบ soft delete ใน Supabase");
       setHn(firstHN);
-      setDraft(firstHN ? normalizeRecord(nextRecords[firstHN]) : normalizeRecord(blankRecord));
+      setDraft(firstHN ? clone(nextRecords[firstHN]) : clone(blankRecord));
       setTab("general");
       setIdx(0);
-      setExerciseDay("Full Body");
-
-      alert("ลบข้อมูล HN แล้ว");
+      await refreshData?.();
+      alert(`ลบข้อมูล HN ${targetHN} แล้ว`);
     } catch (error) {
       console.error(error);
       alert(`ลบข้อมูลไม่สำเร็จ: ${error.message || error}`);
@@ -4535,282 +4452,194 @@ ${quality.issues.slice(0, 8).join("\n")}
   }
 
   function restoreDeletedRecord() {
-    if (!deletedBackup?.hn) return;
-
-    const restored = normalizeRecord(deletedBackup);
-
-    setRecords((old) => ({
-      ...old,
-      [restored.hn]: restored,
-    }));
-
-    setHn(restored.hn);
-    setDraft(clone(restored));
+    if (!deletedBackup) return;
+    setRecords((old) => ({ ...old, [deletedBackup.hn]: clone(deletedBackup) }));
+    setHn(deletedBackup.hn);
+    setDraft(clone(deletedBackup));
+    addAuditLog("กู้คืน HN", deletedBackup.hn, "กู้คืนข้อมูลที่เพิ่งลบใน Prototype");
     setDeletedBackup(null);
-    setTab("general");
-    setIdx(0);
-    setExerciseDay("Full Body");
-
-    addAuditLog("กู้คืน HN", restored.hn, "กู้คืนข้อมูลจากรายการที่ลบล่าสุด");
+    alert(`กู้คืนข้อมูล HN ${deletedBackup.hn} แล้ว`);
   }
 
   const generalComplete = Boolean(
-    draft.hn && draft.name && draft.sex && draft.age && draft.height && draft.goal
-  );
+  draft.hn &&
+  draft.name &&
+  draft.sex &&
+  draft.age &&
+  draft.height &&
+  draft.goal
+);
 
-  const parqRisk = Array.isArray(draft.parq) && draft.parq.some(Boolean);
+const parqRisk = Array.isArray(draft.parq) && draft.parq.some(Boolean);
 
-  const programComplete = Boolean(
-    draft.program?.type &&
-      draft.program?.strengthFrequency &&
-      draft.program?.cardioDuration &&
-      draft.program?.intensity
-  );
+const programComplete = Boolean(
+  draft.program?.type &&
+  draft.program?.strengthFrequency &&
+  draft.program?.cardioDuration &&
+  draft.program?.intensity
+);
 
-  const exerciseDays = draft.exerciseLog?.days || {};
+const exerciseDays = draft.exerciseLog?.days || {};
+const exerciseDayCount = Object.values(exerciseDays).filter(
+  (list) => Array.isArray(list) && list.length > 0
+).length;
 
-  const exerciseDayCount = Object.values(exerciseDays).filter(
-    (list) => Array.isArray(list) && list.length > 0
+const exerciseLogComplete = Boolean(
+  draft.exerciseLog?.split &&
+  draft.exerciseLog?.daysPerWeek &&
+  exerciseDayCount > 0
+);
+
+const lmRounds = Array.isArray(draft.lmAssessments)
+  ? draft.lmAssessments
+  : [];
+
+const lmRoundStats = [0, 1, 2, 3].map((index) => {
+  const assessment = lmRounds[index] || blankLmAssessment(index + 1);
+
+  const answered = LM_QUESTIONS.filter(
+    (question) =>
+      assessment.answers?.[question.id] !== undefined &&
+      assessment.answers?.[question.id] !== null &&
+      assessment.answers?.[question.id] !== ""
   ).length;
 
-  const exerciseLogComplete = Boolean(
-    draft.exerciseLog?.split && draft.exerciseLog?.daysPerWeek && exerciseDayCount > 0
-  );
+  const calculated = calculateLmAssessment(assessment, draft);
 
-  const lmRounds = Array.isArray(draft.lmAssessments)
-    ? draft.lmAssessments
-    : [];
+  return {
+    answered,
+    total: answered > 0 ? calculated.total : null,
+  };
+});
 
-  const lmRoundStats = [0, 1, 2, 3].map((index) => {
-    const assessment = lmRounds[index] || blankLmAssessment(index + 1);
+const latestLmRound =
+  [...lmRoundStats].reverse().find((item) => item.answered > 0) || {
+    answered: 0,
+    total: null,
+  };
 
-    const answered = LM_QUESTIONS.filter(
-      (question) =>
-        assessment.answers?.[question.id] !== undefined &&
-        assessment.answers?.[question.id] !== null &&
-        assessment.answers?.[question.id] !== ""
-    ).length;
+const lmMenuTone =
+  latestLmRound.answered === 0
+    ? "gray"
+    : latestLmRound.answered < 16
+      ? "warn"
+      : "good";
 
-    const calculated = calculateLmAssessment(assessment, draft);
+const lmMenuBadge =
+  latestLmRound.answered === 0
+    ? "รอกรอก"
+    : latestLmRound.answered < 16
+      ? `${latestLmRound.answered}/16`
+      : `${latestLmRound.total}/50`;
+  
+const sessionDone = [0, 1, 2, 3].map((index) =>
+  sessionHasAnyData(draft.sessions?.[index])
+);
 
-    return {
-      answered,
-      total: answered > 0 ? calculated.total : null,
-    };
-  });
+const screeningMenuItems = [
+  {
+    key: "general",
+    icon: "ID",
+    title: "ข้อมูลทั่วไป",
+    subtitle: "HN / ประวัติพื้นฐาน",
+    badge: generalComplete ? "ครบ" : "ยังไม่ครบ",
+    tone: generalComplete ? "good" : "warn",
+    active: tab === "general",
+    done: generalComplete,
+    onClick: () => setTab("general"),
+  },
+  {
+    key: "lm",
+    icon: "LM",
+    title: "แบบประเมิน LM",
+    subtitle: "พฤติกรรมสุขภาพ 6 หมวด",
+    badge: lmMenuBadge,
+    tone: lmMenuTone,
+    active: tab === "lm",
+    done: latestLmRound.answered === 16,
+    onClick: () => setTab("lm"),
+  },
+  {
+    key: "parq",
+    icon: "PQ",
+    title: "PAR-Q",
+    subtitle: "คัดกรองก่อนออกกำลังกาย",
+    badge: parqRisk ? "ต้องประเมิน" : "ผ่าน",
+    tone: parqRisk ? "bad" : "good",
+    active: tab === "parq",
+    done: !parqRisk,
+    onClick: () => setTab("parq"),
+  },
+];
 
-  const latestLmRound =
-    [...lmRoundStats].reverse().find((item) => item.answered > 0) || {
-      answered: 0,
-      total: null,
-    };
+const carePlanMenuItems = [
+  {
+    key: "program",
+    icon: "PG",
+    title: "โปรแกรม",
+    subtitle: "Exercise Prescription",
+    badge: programComplete ? "ครบ" : "ยังไม่ครบ",
+    tone: programComplete ? "good" : "warn",
+    active: tab === "program",
+    done: programComplete,
+    onClick: () => setTab("program"),
+  },
+  {
+    key: "exerciseLog",
+    icon: "EX",
+    title: "Trainer Exercise Log",
+    subtitle: exerciseDayCount ? `${exerciseDayCount} รูปแบบวันฝึก` : "ยังไม่เลือกท่า",
+    badge: exerciseLogComplete ? "ครบ" : "ยังไม่ครบ",
+    tone: exerciseLogComplete ? "good" : "warn",
+    active: tab === "exerciseLog",
+    done: exerciseLogComplete,
+    onClick: () => setTab("exerciseLog"),
+  },
+];
 
-  const lmMenuTone =
-    latestLmRound.answered === 0
-      ? "gray"
-      : latestLmRound.answered < 16
-        ? "warn"
-        : "good";
+const sessionMenuItems = [0, 1, 2, 3].map((index) => ({
+  key: `session-${index}`,
+  icon: `${index + 1}`,
+  title: `บันทึกครั้งที่ ${index + 1}`,
+  subtitle: sessionDone[index] ? "มีข้อมูลแล้ว" : "ยังไม่เริ่ม",
+  badge: sessionDone[index] ? "มีข้อมูล" : "ว่าง",
+  tone: sessionDone[index] ? "good" : "gray",
+  active: tab === "session" && idx === index,
+  done: sessionDone[index],
+  onClick: () => {
+    setIdx(index);
+    setTab("session");
+  },
+}));
 
-  const lmMenuBadge =
-    latestLmRound.answered === 0
-      ? "รอกรอก"
-      : latestLmRound.answered < 16
-        ? `${latestLmRound.answered}/16`
-        : `${latestLmRound.total}/50`;
-
-  const sessionDone = [0, 1, 2, 3].map((index) =>
-    sessionHasAnyData(draft.sessions?.[index])
-  );
-
-  const screeningMenuItems = [
-    {
-      key: "general",
-      icon: "ID",
-      title: "ข้อมูลทั่วไป",
-      subtitle: "HN / ประวัติพื้นฐาน",
-      badge: generalComplete ? "ครบ" : "ยังไม่ครบ",
-      tone: generalComplete ? "good" : "warn",
-      active: tab === "general",
-      done: generalComplete,
-      onClick: () => setTab("general"),
-    },
-    {
-      key: "lm",
-      icon: "LM",
-      title: "แบบประเมิน LM",
-      subtitle: "พฤติกรรมสุขภาพ 6 หมวด",
-      badge: lmMenuBadge,
-      tone: lmMenuTone,
-      active: tab === "lm",
-      done: latestLmRound.answered === 16,
-      onClick: () => setTab("lm"),
-    },
-    {
-      key: "parq",
-      icon: "PQ",
-      title: "PAR-Q",
-      subtitle: "คัดกรองก่อนออกกำลังกาย",
-      badge: parqRisk ? "ต้องประเมิน" : "ผ่าน",
-      tone: parqRisk ? "bad" : "good",
-      active: tab === "parq",
-      done: !parqRisk,
-      onClick: () => setTab("parq"),
-    },
-  ];
-
-  const carePlanMenuItems = [
-    {
-      key: "program",
-      icon: "PG",
-      title: "โปรแกรม",
-      subtitle: "Exercise Prescription",
-      badge: programComplete ? "ครบ" : "ยังไม่ครบ",
-      tone: programComplete ? "good" : "warn",
-      active: tab === "program",
-      done: programComplete,
-      onClick: () => setTab("program"),
-    },
-    {
-      key: "exerciseLog",
-      icon: "EX",
-      title: "Trainer Exercise Log",
-      subtitle: exerciseDayCount
-        ? `${exerciseDayCount} รูปแบบวันฝึก`
-        : "ยังไม่เลือกท่า",
-      badge: exerciseLogComplete ? "ครบ" : "ยังไม่ครบ",
-      tone: exerciseLogComplete ? "good" : "warn",
-      active: tab === "exerciseLog",
-      done: exerciseLogComplete,
-      onClick: () => setTab("exerciseLog"),
-    },
-  ];
-
-  const sessionMenuItems = [0, 1, 2, 3].map((index) => ({
-    key: `session-${index}`,
-    icon: `${index + 1}`,
-    title: `บันทึกครั้งที่ ${index + 1}`,
-    subtitle: sessionDone[index] ? "มีข้อมูลแล้ว" : "ยังไม่เริ่ม",
-    badge: sessionDone[index] ? "มีข้อมูล" : "ว่าง",
-    tone: sessionDone[index] ? "good" : "gray",
-    active: tab === "session" && idx === index,
-    done: sessionDone[index],
-    onClick: () => {
-      setIdx(index);
-      setTab("session");
-    },
-  }));
-
-  const allMenuItems = [
-    ...screeningMenuItems,
-    ...carePlanMenuItems,
-    ...sessionMenuItems,
-  ];
-
-  const menuDoneCount = allMenuItems.filter((item) => item.done).length;
-  const menuProgress = Math.round((menuDoneCount / allMenuItems.length) * 100);
-
-  const availableExerciseDays =
-    draft.exerciseLog?.split === "Full Body"
-      ? ["Full Body"]
-      : draft.exerciseLog?.split === "Upper / Lower"
-        ? ["Upper Day", "Lower Day"]
-        : draft.exerciseLog?.split === "PPL"
-          ? ["Push Day", "Pull Day", "Legs Day"]
-          : ["Full Body", "Upper Day", "Lower Day", "Push Day", "Pull Day", "Legs Day"];
-
-  const activeExerciseDay = availableExerciseDays.includes(exerciseDay)
-    ? exerciseDay
-    : availableExerciseDays[0];
-
-  const activeExerciseDayKey = dayKeyFromLabel(activeExerciseDay);
-
+const allMenuItems = [
+  ...screeningMenuItems,
+  ...carePlanMenuItems,
+  ...sessionMenuItems,
+];
+const menuDoneCount = allMenuItems.filter((item) => item.done).length;
+const menuProgress = Math.round((menuDoneCount / allMenuItems.length) * 100);
+  
   return (
     <main className="mx-auto grid max-w-7xl gap-5 px-4 py-6 lg:grid-cols-[280px_1fr]">
-      <aside className="space-y-5">
+      <aside className="space-y-4">
         <Card title="รายชื่อ HN" icon={UserIcon}>
-          <button
-            type="button"
-            onClick={createNew}
-            className="mb-4 w-full rounded-xl bg-slate-900 px-4 py-3 text-base font-bold text-white hover:bg-slate-800"
-          >
-            + เพิ่ม HN ใหม่
-          </button>
-
-          <label className="mb-3 block">
-            <div className="mb-1 text-sm font-semibold text-slate-500">
-              ค้นหา HN / ชื่อ
-            </div>
-            <input
-              value={staffSearch}
-              onChange={(event) => {
-                setStaffSearch(event.target.value);
-                setStaffPage(1);
-              }}
-              className="h-12 w-full rounded-xl border border-slate-200 bg-white px-3 text-base outline-none focus:border-slate-700"
-            />
-          </label>
-
-          <div className="space-y-2">
-            {pagedPatients.map((record) => (
-              <button
-                key={record.hn}
-                type="button"
-                onClick={() => selectRecord(record.hn)}
-                className={`w-full rounded-xl border px-3 py-3 text-left ${
-                  record.hn === hn
-                    ? "border-slate-900 bg-slate-900 text-white"
-                    : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
-                }`}
-              >
-                <div className="font-black">HN {record.hn}</div>
-                <div
-                  className={`text-xs font-semibold ${
-                    record.hn === hn ? "text-white/70" : "text-slate-500"
-                  }`}
-                >
-                  {record.name || "-"}
-                </div>
-              </button>
-            ))}
-          </div>
-
-          <div className="mt-4 flex items-center justify-between gap-2 text-sm text-slate-500">
-            <div>
-              {filteredPatients.length} รายการ • หน้า {safeStaffPage}/{staffPageCount}
-            </div>
-
+          <button onClick={createNew} className="mb-3 w-full rounded-xl bg-slate-900 px-4 py-3 text-lg font-bold text-white">+ เพิ่ม HN ใหม่</button>
+          <div className="mb-3"><Field label="ค้นหา HN / ชื่อ" value={staffSearch} onChange={(v) => { setStaffSearch(v); setStaffPage(1); }} /></div>
+          <div className="space-y-2">{pagedPatients.map((r) => <button key={r.hn} onClick={() => selectRecord(r.hn)} className={`w-full rounded-xl border px-3 py-3 text-left text-base ${hn === r.hn ? "border-slate-900 bg-slate-900 text-white" : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"}`}><div className="font-bold">HN {r.hn}</div><div className="truncate text-sm opacity-70">{r.name}</div></button>)}</div>
+          <div className="mt-3 flex items-center justify-between gap-2 text-sm text-slate-500">
+            <span>{filteredPatients.length} รายการ • หน้า {safeStaffPage}/{staffPageCount}</span>
             <div className="flex gap-1">
-              <button
-                type="button"
-                disabled={safeStaffPage <= 1}
-                onClick={() => setStaffPage((page) => Math.max(1, page - 1))}
-                className="rounded-lg border border-slate-200 bg-white px-3 py-2 font-semibold disabled:opacity-40"
-              >
-                ก่อนหน้า
-              </button>
-
-              <button
-                type="button"
-                disabled={safeStaffPage >= staffPageCount}
-                onClick={() =>
-                  setStaffPage((page) => Math.min(staffPageCount, page + 1))
-                }
-                className="rounded-lg border border-slate-200 bg-white px-3 py-2 font-semibold disabled:opacity-40"
-              >
-                ถัดไป
-              </button>
+              <button onClick={() => setStaffPage(Math.max(1, safeStaffPage - 1))} disabled={safeStaffPage <= 1} className="rounded-lg border border-slate-200 bg-white px-3 py-1 font-semibold disabled:opacity-40">ก่อนหน้า</button>
+              <button onClick={() => setStaffPage(Math.min(staffPageCount, safeStaffPage + 1))} disabled={safeStaffPage >= staffPageCount} className="rounded-lg border border-slate-200 bg-white px-3 py-1 font-semibold disabled:opacity-40">ถัดไป</button>
             </div>
           </div>
         </Card>
-
         <Card
           title="เมนู"
           icon={ClipboardIcon}
           right={
-            <SidebarStatusBadge
-              tone={menuDoneCount === allMenuItems.length ? "good" : "info"}
-            >
+            <SidebarStatusBadge tone={menuDoneCount === allMenuItems.length ? "good" : "info"}>
               {menuDoneCount}/{allMenuItems.length}
             </SidebarStatusBadge>
           }
@@ -4821,12 +4650,12 @@ ${quality.issues.slice(0, 8).join("\n")}
                 <div className="text-xs font-black text-slate-500">
                   ความครบถ้วนข้อมูล
                 </div>
-
+        
                 <div className="text-xs font-black text-slate-700">
                   {menuProgress}%
                 </div>
               </div>
-
+        
               <div className="h-2 overflow-hidden rounded-full bg-white">
                 <div
                   className="h-full rounded-full bg-slate-900 transition-all"
@@ -4834,7 +4663,7 @@ ${quality.issues.slice(0, 8).join("\n")}
                 />
               </div>
             </div>
-
+        
             <SidebarMenuGroup title="ข้อมูลและการคัดกรอง" tone="sky">
               {screeningMenuItems.map((item) => (
                 <SidebarMenuButton
@@ -4849,7 +4678,7 @@ ${quality.issues.slice(0, 8).join("\n")}
                 />
               ))}
             </SidebarMenuGroup>
-
+            
             <SidebarMenuGroup title="แผนการดูแล / ออกกำลังกาย" tone="indigo">
               {carePlanMenuItems.map((item) => (
                 <SidebarMenuButton
@@ -4864,7 +4693,7 @@ ${quality.issues.slice(0, 8).join("\n")}
                 />
               ))}
             </SidebarMenuGroup>
-
+        
             <SidebarMenuGroup title="การติดตามผล" tone="emerald">
               {sessionMenuItems.map((item) => (
                 <SidebarMenuButton
@@ -4879,7 +4708,7 @@ ${quality.issues.slice(0, 8).join("\n")}
                 />
               ))}
             </SidebarMenuGroup>
-
+        
             <div className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold leading-5 text-slate-500">
               ดู badge ด้านขวาเพื่อเช็กว่าส่วนไหนกรอกครบแล้วหรือยังต้องตรวจ
             </div>
@@ -4888,151 +4717,97 @@ ${quality.issues.slice(0, 8).join("\n")}
       </aside>
 
       <section className="space-y-5">
-        <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-            <div className="min-w-0">
-              <h1 className="text-2xl font-black tracking-tight text-slate-900">
-                บันทึกข้อมูลสุขภาพ
-              </h1>
-
-              <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm font-semibold text-slate-500">
-                <span>
-                  ผู้บันทึก:{" "}
-                  <span className="font-bold text-slate-700">
-                    {show(adminUser?.name || draft.updatedBy)}
-                  </span>
-                </span>
-
-                <span className="hidden text-slate-300 md:inline">•</span>
-
-                <span>
-                  แก้ไขล่าสุด:{" "}
-                  <span className="font-bold text-slate-700">
-                    {formatDateTimeThai(draft.updatedAt)}
-                  </span>
-                </span>
-              </div>
-            </div>
-
-            <div className="flex shrink-0 flex-wrap items-center gap-2">
-              {deletedBackup && (
-                <button
-                  type="button"
-                  onClick={restoreDeletedRecord}
-                  className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-2.5 text-sm font-bold text-amber-700 transition hover:bg-amber-100"
-                >
-                  กู้คืน HN ที่ลบล่าสุด
-                </button>
-              )}
-
-              <button
-                type="button"
-                onClick={deleteCurrentRecord}
-                className="rounded-xl border border-rose-200 bg-white px-4 py-2.5 text-sm font-bold text-rose-600 transition hover:bg-rose-50"
-              >
-                ลบ HN นี้
-              </button>
-
-              <button
-                type="button"
-                onClick={save}
-                className="rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-emerald-700"
-              >
-                บันทึกข้อมูล
-              </button>
+        <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+          <div className="flex flex-col justify-between gap-3 md:flex-row md:items-center">
+            <div className="space-y-3"><div><h2 className="text-3xl font-bold text-slate-900">บันทึกข้อมูลสุขภาพ</h2><p className="text-base text-slate-500">กรอกข้อมูลตัวเลข/ตัวเลือก ระบบจะทำตารางและกราฟ 4 ครั้งให้อัตโนมัติ</p></div><div className="grid gap-3 sm:grid-cols-2"><div className="rounded-xl border border-sky-200 bg-sky-50 p-3"><div className="text-sm font-semibold text-sky-700">ผู้ที่กำลังบันทึกข้อมูล</div><div className="text-2xl font-bold text-slate-900">{show(adminUser?.name)}</div><div className="text-sm text-slate-500">Admin ID: {show(adminUser?.id)}</div></div><div className="rounded-xl border border-slate-200 bg-slate-50 p-3"><div className="text-sm font-semibold text-slate-500">แก้ไขล่าสุด</div><div className="text-lg font-bold text-slate-900">{formatDateTimeThai(draft.updatedAt)}</div><div className="text-sm text-slate-500">โดย {show(draft.updatedBy)}</div></div></div></div>
+            <div className="flex flex-wrap gap-2">
+              {deletedBackup && <button onClick={restoreDeletedRecord} className="rounded-xl border border-amber-200 bg-amber-50 px-5 py-3 text-lg font-bold text-amber-700 hover:bg-amber-100">กู้คืน HN ที่ลบล่าสุด</button>}
+              <button onClick={deleteCurrentRecord} className="rounded-xl border border-rose-200 bg-rose-50 px-5 py-3 text-lg font-bold text-rose-700 hover:bg-rose-100">ลบ HN นี้</button>
+              <button onClick={save} className="rounded-xl bg-emerald-600 px-5 py-3 text-lg font-bold text-white shadow-sm hover:bg-emerald-700">บันทึกข้อมูล</button>
             </div>
           </div>
         </section>
-
         <DataQualityPanel record={draft} />
-
-        {tab === "general" && <GeneralForm draft={draft} update={update} />}
-
+        {tab === "general" && <GeneralForm draft={draft} update={update} />}     
         {tab === "lm" && <LmAssessmentForm draft={draft} update={update} />}
-
         {tab === "parq" && <ParqForm draft={draft} update={update} />}
-
         {tab === "program" && (
           <ProgramForm draft={draft} update={updateProgramAndExerciseLog} />
         )}
-
+        
         {tab === "exerciseLog" && (
           <Card title="Trainer Exercise Log" icon={ActivityIcon}>
             <div className="grid gap-4 md:grid-cols-3">
               <Select
                 label="Split"
                 value={draft.exerciseLog?.split || "Full Body"}
-                onChange={(value) => update(["exerciseLog", "split"], value)}
+                onChange={(v) => update(["exerciseLog", "split"], v)}
                 options={["Full Body", "Upper / Lower", "PPL", "Hybrid / Mixed"]}
               />
-
+        
               <Select
                 label="วัน/สัปดาห์"
                 value={draft.exerciseLog?.daysPerWeek || "3"}
-                onChange={(value) => update(["exerciseLog", "daysPerWeek"], value)}
+                onChange={(v) => update(["exerciseLog", "daysPerWeek"], v)}
                 options={["2", "3", "4", "5", "6"]}
               />
-
+        
               <Select
                 label="เหตุผลการปรับ"
                 value={draft.exerciseLog?.updateReason || ""}
-                onChange={(value) => update(["exerciseLog", "updateReason"], value)}
-                options={[
-                  "",
-                  "เพิ่มระดับการฝึก",
-                  "ลดระดับการฝึก",
-                  "เปลี่ยนตามเวลา",
-                  "มีอาการเจ็บ",
-                  "เปลี่ยนเป้าหมาย",
-                ]}
+                onChange={(v) => update(["exerciseLog", "updateReason"], v)}
+                options={["", "เพิ่มระดับการฝึก", "ลดระดับการฝึก", "เปลี่ยนตามเวลา", "มีอาการเจ็บ", "เปลี่ยนเป้าหมาย"]}
               />
             </div>
-
-            <div className="mt-5 rounded-2xl border border-sky-200 bg-sky-50 p-4">
-              <div className="text-sm font-bold text-sky-700">
-                คำอธิบายโปรแกรมอัตโนมัติ
-              </div>
-
-              {exercisePlanWarning(
-                draft.exerciseLog?.split || "Full Body",
-                draft.exerciseLog?.daysPerWeek || "3",
-                draft.exerciseLog?.days
-              ) && (
-                <div className="mt-3 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-bold text-amber-800">
+              <div className="mt-5 rounded-2xl border border-sky-200 bg-sky-50 p-4">
+                <div className="text-sm font-bold text-sky-700">
+                  คำอธิบายโปรแกรมอัตโนมัติ
+                </div>
                   {exercisePlanWarning(
+                    draft.exerciseLog?.split || "Full Body",
+                    draft.exerciseLog?.daysPerWeek || "3",
+                    draft.exerciseLog?.days
+                  ) && (
+                    <div className="mt-3 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-bold text-amber-800">
+                      {exercisePlanWarning(
+                        draft.exerciseLog?.split || "Full Body",
+                        draft.exerciseLog?.daysPerWeek || "3",
+                        draft.exerciseLog?.days
+                      )}
+                    </div>
+                  )}
+                <div className="mt-1 text-lg font-black text-slate-900">
+                  {exercisePlanDescription(
                     draft.exerciseLog?.split || "Full Body",
                     draft.exerciseLog?.daysPerWeek || "3",
                     draft.exerciseLog?.days
                   )}
                 </div>
-              )}
-
-              <div className="mt-1 text-lg font-black text-slate-900">
-                {exercisePlanDescription(
-                  draft.exerciseLog?.split || "Full Body",
-                  draft.exerciseLog?.daysPerWeek || "3",
-                  draft.exerciseLog?.days
-                )}
+              
+                <div className="mt-2 text-sm font-semibold text-slate-500">
+                  ระบบจะนำข้อความนี้ไปแสดงในหน้า HN เพื่อให้ผู้รับบริการเข้าใจง่าย
+                </div>
               </div>
-
-              <div className="mt-2 text-sm font-semibold text-slate-500">
-                ระบบจะนำข้อความนี้ไปแสดงในหน้า HN เพื่อให้ผู้รับบริการเข้าใจง่าย
-              </div>
-            </div>
-
             <div className="mt-5 rounded-2xl border border-slate-200 bg-slate-50 p-4">
               <div className="mb-3 text-base font-bold text-slate-700">
                 เลือกวันฝึก
               </div>
-
+        
               <div className="flex flex-wrap gap-2">
-                {availableExerciseDays.map((day) => (
+                {(draft.exerciseLog?.split === "Full Body"
+                  ? ["Full Body"]
+                  : draft.exerciseLog?.split === "Upper / Lower"
+                  ? ["Upper Day", "Lower Day"]
+                  : draft.exerciseLog?.split === "PPL"
+                  ? ["Push Day", "Pull Day", "Legs Day"]
+                  : ["Full Body", "Upper Day", "Lower Day", "Push Day", "Pull Day", "Legs Day"]
+                ).map((day) => (
                   <button
                     key={day}
                     type="button"
                     onClick={() => setExerciseDay(day)}
                     className={`rounded-xl px-4 py-3 text-base font-bold shadow-sm ${
-                      activeExerciseDay === day
+                      exerciseDay === day
                         ? "bg-slate-900 text-white"
                         : "bg-white text-slate-700 hover:bg-slate-100"
                     }`}
@@ -5042,71 +4817,64 @@ ${quality.issues.slice(0, 8).join("\n")}
                 ))}
               </div>
             </div>
-
-            <div className="mt-5 rounded-2xl border border-slate-200 bg-white p-4">
-              <div className="mb-3 text-base font-bold text-slate-700">
-                เลือกท่าออกกำลังกาย
-              </div>
-
-              <div className="grid gap-4 md:grid-cols-2">
-                {groupsForExerciseDay(activeExerciseDay).map((group) => (
-                  <div
-                    key={group}
-                    className="rounded-2xl border border-slate-200 bg-slate-50 p-4"
-                  >
-                    <div className="mb-3 text-sm font-black uppercase text-slate-500">
-                      {group}
-                    </div>
-
-                    <div className="flex flex-wrap gap-2">
-                      {exerciseOptions[group].map((exercise) => {
-                        const selectedExercises =
-                          draft.exerciseLog?.days?.[activeExerciseDayKey] || [];
-                        const isSelected = selectedExercises.includes(exercise);
-
-                        return (
-                          <button
-                            key={exercise}
-                            type="button"
-                            onClick={() =>
-                              update(
-                                ["exerciseLog", "days", activeExerciseDayKey],
-                                toggleExercise(selectedExercises, exercise)
-                              )
-                            }
-                            className={`rounded-full border px-4 py-2 text-sm font-semibold ${
-                              isSelected
-                                ? "border-slate-900 bg-slate-900 text-white"
-                                : "border-slate-200 bg-white text-slate-700 hover:bg-slate-100"
-                            }`}
-                          >
-                            {exercise}
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              <div className="mt-5 rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
-                <div className="mb-3 text-base font-bold text-emerald-800">
-                  ลำดับท่าที่เลือก
+              <div className="mt-5 rounded-2xl border border-slate-200 bg-white p-4">
+                <div className="mb-3 text-base font-bold text-slate-700">
+                  เลือกท่าออกกำลังกาย
                 </div>
-
-                <ol className="list-decimal space-y-1 pl-5 text-base font-semibold text-slate-800">
-                  {(draft.exerciseLog?.days?.[activeExerciseDayKey] || [])
-                    .length ? (
-                    (draft.exerciseLog?.days?.[activeExerciseDayKey] || []).map(
-                      (exercise) => <li key={exercise}>{exercise}</li>
-                    )
-                  ) : (
-                    <li>ยังไม่ได้เลือกท่า</li>
-                  )}
-                </ol>
+              
+                <div className="grid gap-4 md:grid-cols-2">
+                  {groupsForExerciseDay(exerciseDay).map((group) => (
+                    <div key={group} className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                      <div className="mb-3 text-sm font-black uppercase text-slate-500">
+                        {group}
+                      </div>
+              
+                      <div className="flex flex-wrap gap-2">
+                        {exerciseOptions[group].map((exercise) => {
+                          const dayKey = dayKeyFromLabel(exerciseDay);
+                          const selectedExercises = draft.exerciseLog?.days?.[dayKey] || [];
+                          const isSelected = selectedExercises.includes(exercise);
+                        
+                          return (
+                            <button
+                              key={exercise}
+                              type="button"
+                              onClick={() =>
+                                update(
+                                  ["exerciseLog", "days", dayKey],
+                                  toggleExercise(selectedExercises, exercise)
+                                )
+                              }
+                              className={`rounded-full border px-4 py-2 text-sm font-semibold ${
+                                isSelected
+                                  ? "border-slate-900 bg-slate-900 text-white"
+                                  : "border-slate-200 bg-white text-slate-700 hover:bg-slate-100"
+                              }`}
+                            >
+                              {exercise}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-5 rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
+                  <div className="mb-3 text-base font-bold text-emerald-800">
+                    ลำดับท่าที่เลือก
+                  </div>
+                
+                  <ol className="list-decimal space-y-1 pl-5 text-base font-semibold text-slate-800">
+                    {(draft.exerciseLog?.days?.[dayKeyFromLabel(exerciseDay)] || []).length ? (
+                      (draft.exerciseLog?.days?.[dayKeyFromLabel(exerciseDay)] || []).map((exercise) => (
+                        <li key={exercise}>{exercise}</li>
+                      ))
+                    ) : (
+                      <li>ยังไม่ได้เลือกท่า</li>
+                    )}
+                  </ol>
+                </div>
               </div>
-            </div>
-
             <div className="mt-5 flex justify-end">
               <button
                 type="button"
@@ -5117,28 +4885,25 @@ ${quality.issues.slice(0, 8).join("\n")}
                     currentLog.daysPerWeek || "3",
                     currentLog.days
                   );
-
+                
                   if (warning) {
                     alert(warning);
                     return;
                   }
-
+                  
                   const oldProgram =
                     currentLog.updatedTo ||
-                    `${currentLog.split || "Full Body"} ${
-                      currentLog.daysPerWeek || "3"
-                    } วัน/สัปดาห์`;
+                    `${currentLog.split || "Full Body"} ${currentLog.daysPerWeek || "3"} วัน/สัปดาห์`;
 
                   const planDescription = exercisePlanDescription(
                     currentLog.split || "Full Body",
                     currentLog.daysPerWeek || "3",
                     currentLog.days || {}
                   );
-
-                  const newProgram = `${currentLog.split || "Full Body"} ${
-                    currentLog.daysPerWeek || "3"
-                  } วัน/สัปดาห์`;
-
+                  
+                  const newProgram =
+                    `${currentLog.split || "Full Body"} ${currentLog.daysPerWeek || "3"} วัน/สัปดาห์`;
+                  
                   const historyItem = {
                     from: oldProgram,
                     to: newProgram,
@@ -5146,7 +4911,7 @@ ${quality.issues.slice(0, 8).join("\n")}
                     at: new Date().toISOString(),
                     reason: currentLog.updateReason || "",
                   };
-
+                  
                   update(["exerciseLog"], {
                     ...currentLog,
                     description: planDescription,
@@ -5154,12 +4919,9 @@ ${quality.issues.slice(0, 8).join("\n")}
                     updatedTo: newProgram,
                     updatedBy: historyItem.by,
                     updatedAt: historyItem.at,
-                    history: [historyItem, ...(currentLog.history || [])].slice(
-                      0,
-                      4
-                    ),
+                    history: [historyItem, ...(currentLog.history || [])].slice(0, 4),
                   });
-
+            
                   alert("บันทึกโปรแกรมแล้ว");
                 }}
                 className="rounded-xl bg-emerald-600 px-5 py-3 text-base font-bold text-white hover:bg-emerald-700"
@@ -5169,81 +4931,909 @@ ${quality.issues.slice(0, 8).join("\n")}
             </div>
           </Card>
         )}
-
-        {tab === "session" && (
-          <SessionForm draft={draft} update={update} idx={idx} />
-        )}
+        
+        {tab === "session" && <SessionForm draft={draft} update={update} idx={idx} />}
       </section>
     </main>
   );
 }
 
-function DataQualityPanel({ record }) {
-  const normalizedRecord = {
-    ...record,
-    sessions: record.sessions.map((s) => ({
-      ...s,
-      date: s.date || (sessionHasAnyData(s) ? todayThaiDateText() : ""),
-    })),
+const LM_SCORE_OPTIONS = {
+  count0to10: ["<1", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10+"],
+  aerobicTime: [
+    "<30 นาที",
+    "30 นาที",
+    "45 นาที",
+    "1 ชม.",
+    "1.5 ชม.",
+    "2 ชม.",
+    "2.5 ชม.",
+    "3 ชม.",
+    "3.5 ชม.",
+    "4 ชม.",
+    "4.5 ชม.",
+    "5+ ชม.",
+  ],
+  yesNo: ["ใช่", "ไม่ใช่"],
+};
+
+const LM_QUESTIONS = [
+  {
+    id: "n1",
+    category: "nutrition",
+    categoryLabel: "Nutrition / โภชนาการ",
+    maxCategoryScore: 10,
+    text: "จำนวนมื้ออาหารนอกบ้านหรืออาหารกล่อง/ถุงนอกบ้าน ใน 1 สัปดาห์",
+    options: LM_SCORE_OPTIONS.count0to10,
+    scores: [1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0],
+  },
+  {
+    id: "n2",
+    category: "nutrition",
+    categoryLabel: "Nutrition / โภชนาการ",
+    maxCategoryScore: 10,
+    text: "จำนวนแก้วที่ดื่มเครื่องดื่มรสหวานใน 1 สัปดาห์",
+    options: LM_SCORE_OPTIONS.count0to10,
+    scores: [3, 3, 1, 0, 0, 0, 0, 0, 0, 0, 0],
+  },
+  {
+    id: "n3",
+    category: "nutrition",
+    categoryLabel: "Nutrition / โภชนาการ",
+    maxCategoryScore: 10,
+    text: "กินผลไม้กี่ส่วนต่อวัน",
+    options: LM_SCORE_OPTIONS.count0to10,
+    scores: [0, 0, 0, 2, 3, 2, 2, 0, 0, 0, 0],
+  },
+  {
+    id: "n4",
+    category: "nutrition",
+    categoryLabel: "Nutrition / โภชนาการ",
+    maxCategoryScore: 10,
+    text: "กินผักกี่ส่วนต่อวัน",
+    options: LM_SCORE_OPTIONS.count0to10,
+    scores: [0, 0, 1, 1, 2, 2, 3, 3, 3, 2, 2],
+  },
+
+  {
+    id: "pa5",
+    category: "physical",
+    categoryLabel: "Physical Activity / กิจกรรมทางกาย",
+    maxCategoryScore: 10,
+    text: "จำนวนวันที่ออกกำลังกายแบบแรงต้านใน 1 สัปดาห์",
+    options: LM_SCORE_OPTIONS.count0to10,
+    scores: [0, 1, 2, 2, 2, 2, 2, 2, null, null, null],
+  },
+  {
+    id: "pa6",
+    category: "physical",
+    categoryLabel: "Physical Activity / กิจกรรมทางกาย",
+    maxCategoryScore: 10,
+    text: "จำนวนชั่วโมงที่นั่งอยู่กับที่ต่อวัน",
+    options: LM_SCORE_OPTIONS.count0to10,
+    scores: [3, 3, 3, 3, 3, 3, 1, 1, 0, 0, 0],
+  },
+  {
+    id: "pa7",
+    category: "physical",
+    categoryLabel: "Physical Activity / กิจกรรมทางกาย",
+    maxCategoryScore: 10,
+    text: "จำนวนชั่วโมงต่อสัปดาห์ที่ออกกำลังกายชนิดแอโรบิก",
+    options: LM_SCORE_OPTIONS.aerobicTime,
+    scores: [0, 1, 1, 2, 3, 4, 5, 5, 5, 5, 5, 5],
+  },
+
+  {
+    id: "s8",
+    category: "sleep",
+    categoryLabel: "Sleep / การนอน",
+    maxCategoryScore: 10,
+    text: "จำนวนชั่วโมงการนอนต่อวัน",
+    options: LM_SCORE_OPTIONS.count0to10,
+    scores: [0, 0, 0, 0, 0, 0, 0, 5, 6, 6, 6],
+  },
+  {
+    id: "s9",
+    category: "sleep",
+    categoryLabel: "Sleep / การนอน",
+    maxCategoryScore: 10,
+    text: "ส่วนใหญ่ตื่นเช้ามาด้วยความรู้สึกสดชื่นกระปรี้กระเปร่า",
+    options: LM_SCORE_OPTIONS.yesNo,
+    scores: [2, 1],
+  },
+  {
+    id: "s10",
+    category: "sleep",
+    categoryLabel: "Sleep / การนอน",
+    maxCategoryScore: 10,
+    text: "มักมีอาการหลับ ๆ ตื่น ๆ",
+    options: LM_SCORE_OPTIONS.yesNo,
+    scores: [1, 2],
+  },
+
+  {
+    id: "st11",
+    category: "stress",
+    categoryLabel: "Stress / ความเครียด",
+    maxCategoryScore: 5,
+    text: "มีกิจกรรมส่งเสริม ฝึกจิตใจ ฝึกสมาธิ อย่างน้อย 2 ครั้ง",
+    options: LM_SCORE_OPTIONS.yesNo,
+    scores: [2, 0],
+  },
+  {
+    id: "st12",
+    category: "stress",
+    categoryLabel: "Stress / ความเครียด",
+    maxCategoryScore: 5,
+    text: "รู้สึกว่าโดยปกติสามารถจัดการความเครียดได้อย่างดี",
+    options: LM_SCORE_OPTIONS.yesNo,
+    scores: [3, 0],
+  },
+
+  {
+    id: "sub13",
+    category: "substances",
+    categoryLabel: "Substances / สุรา บุหรี่ และสารเสพติด",
+    maxCategoryScore: 10,
+    text: "จำนวนดื่มมาตรฐานของเครื่องดื่มแอลกอฮอล์ต่อวัน",
+    options: LM_SCORE_OPTIONS.count0to10,
+    scores: [4, 4, "sexBased", 0, 0, 0, 0, 0, 0, 0, 0],
+  },
+  {
+    id: "sub14",
+    category: "substances",
+    categoryLabel: "Substances / สุรา บุหรี่ และสารเสพติด",
+    maxCategoryScore: 10,
+    text: "สูบบุหรี่ บุหรี่ไฟฟ้า หรือสารเสพติด",
+    options: LM_SCORE_OPTIONS.yesNo,
+    scores: [0, 6],
+  },
+
+  {
+    id: "rel15",
+    category: "relationship",
+    categoryLabel: "Relationship & Health Literacy / ความสัมพันธ์และความรอบรู้สุขภาพ",
+    maxCategoryScore: 5,
+    text: "สามารถรับฟังความเห็นต่างของผู้อื่นเป็นส่วนใหญ่",
+    options: LM_SCORE_OPTIONS.yesNo,
+    scores: [2, 0],
+  },
+  {
+    id: "rel16",
+    category: "relationship",
+    categoryLabel: "Relationship & Health Literacy / ความสัมพันธ์และความรอบรู้สุขภาพ",
+    maxCategoryScore: 5,
+    text: "พูดคุย หรือพบปะกับเพื่อนสนิท คนในครอบครัว ≥ 3 ครั้ง",
+    options: LM_SCORE_OPTIONS.yesNo,
+    scores: [3, 0],
+  },
+];
+
+function lmQuestionScore(question, answerIndex, record = {}) {
+  if (answerIndex === "" || answerIndex === null || answerIndex === undefined) {
+    return null;
+  }
+
+  const index = Number(answerIndex);
+  const rawScore = question.scores?.[index];
+
+  if (rawScore === null || rawScore === undefined) return null;
+
+  if (rawScore === "sexBased") {
+    const isFemale = String(record.sex || "").includes("หญิง");
+    return isFemale ? 0 : 4;
+  }
+
+  const score = Number(rawScore);
+  return Number.isFinite(score) ? score : null;
+}
+
+function calculateLmAssessment(assessment = {}, record = {}) {
+  const answers = assessment.answers || {};
+
+  const scores = {
+    nutrition: 0,
+    physical: 0,
+    sleep: 0,
+    stress: 0,
+    substances: 0,
+    relationship: 0,
   };
 
-  const quality = recordQuality(normalizedRecord);
+  LM_QUESTIONS.forEach((question) => {
+    const score = lmQuestionScore(question, answers[question.id], record);
+    if (score !== null) {
+      scores[question.category] += score;
+    }
+  });
 
-  const issueList = quality.issues || [];
-  const missingList = quality.missingLatest || [];
+  const total = Object.values(scores).reduce((sum, value) => sum + value, 0);
 
-  const warningList = [
-    ...issueList,
-    ...missingList.map((item) => `ยังไม่มี${item}`),
-  ].slice(0, 6);
+  return {
+    scores,
+    total,
+  };
+}
 
-  const statusText = quality.complete
-    ? "ครบพร้อมใช้"
-    : warningList.length > 0
-      ? "ควรตรวจสอบ"
-      : "ยังไม่ครบ";
+function lmScoreInterpret(total) {
+  const score = Number(total);
 
-  const statusClass = quality.complete
-    ? "border-emerald-200 bg-emerald-50 text-emerald-700"
-    : warningList.length > 0
-      ? "border-amber-200 bg-amber-50 text-amber-700"
-      : "border-slate-200 bg-slate-50 text-slate-600";
+  if (!Number.isFinite(score)) {
+    return {
+      label: "ยังไม่มีข้อมูล",
+      tone: "gray",
+      text: "ยังไม่มีข้อมูลเพียงพอสำหรับแปลผล",
+    };
+  }
+
+  if (score <= 20) {
+    return {
+      label: "ต่ำกว่าค่าเฉลี่ย",
+      tone: "bad",
+      text: "เป็นโอกาสดีที่จะได้รับคำแนะนำเพื่อปรับวิถีชีวิตให้ดีขึ้น",
+    };
+  }
+
+  if (score <= 30) {
+    return {
+      label: "เท่าค่าเฉลี่ย",
+      tone: "warn",
+      text: "มีวิถีชีวิตที่เหมาะสมในบางเรื่อง และยังมีบางส่วนที่ปรับเพิ่มได้",
+    };
+  }
+
+  if (score <= 40) {
+    return {
+      label: "ดีมาก",
+      tone: "good",
+      text: "มีพฤติกรรมสุขภาพที่ดีหลายด้าน แต่ยังมีบางเรื่องที่พัฒนาเพิ่มได้",
+    };
+  }
+
+  return {
+    label: "ดีเยี่ยม",
+    tone: "good",
+    text: "มีวิถีชีวิตที่ดีเยี่ยม มีเพียงจุดเล็กน้อยที่อาจเพิ่มเติมให้ดียิ่งขึ้น",
+  };
+}
+
+function LmAssessmentForm({ draft, update }) {
+  const [round, setRound] = useState(0);
+  const [openSection, setOpenSection] = useState("nutrition");
+
+  const rounds = [1, 2, 3, 4];
+
+  const sections = [
+    {
+      key: "nutrition",
+      label: "Nutrition",
+      thai: "โภชนาการ",
+      max: 10,
+      tone: "emerald",
+      desc: "อาหารนอกบ้าน เครื่องดื่มหวาน ผัก และผลไม้",
+    },
+    {
+      key: "physical",
+      label: "Physical Activity",
+      thai: "กิจกรรมทางกาย",
+      max: 10,
+      tone: "sky",
+      desc: "แรงต้าน การนั่งนาน และแอโรบิกต่อสัปดาห์",
+    },
+    {
+      key: "sleep",
+      label: "Sleep",
+      thai: "การนอน",
+      max: 10,
+      tone: "indigo",
+      desc: "ชั่วโมงนอน ความสดชื่น และคุณภาพการนอน",
+    },
+    {
+      key: "stress",
+      label: "Stress",
+      thai: "ความเครียด",
+      max: 5,
+      tone: "violet",
+      desc: "สมาธิ/ฝึกจิตใจ และการจัดการความเครียด",
+    },
+    {
+      key: "substances",
+      label: "Substances",
+      thai: "สุรา บุหรี่ และสารเสพติด",
+      max: 10,
+      tone: "amber",
+      desc: "แอลกอฮอล์ บุหรี่ บุหรี่ไฟฟ้า หรือสารเสพติด",
+    },
+    {
+      key: "relationship",
+      label: "Relationship & Health Literacy",
+      thai: "ความสัมพันธ์และความรอบรู้สุขภาพ",
+      max: 5,
+      tone: "rose",
+      desc: "การรับฟังผู้อื่น และการพบปะคนใกล้ชิด",
+    },
+  ];
+
+  const toneClass = {
+    emerald: {
+      dot: "bg-emerald-500",
+      button: "border-emerald-600 bg-emerald-600 text-white",
+      panel: "border-emerald-200 bg-emerald-50",
+      panelText: "text-emerald-700",
+    },
+    sky: {
+      dot: "bg-sky-500",
+      button: "border-sky-600 bg-sky-600 text-white",
+      panel: "border-sky-200 bg-sky-50",
+      panelText: "text-sky-700",
+    },
+    indigo: {
+      dot: "bg-indigo-500",
+      button: "border-indigo-600 bg-indigo-600 text-white",
+      panel: "border-indigo-200 bg-indigo-50",
+      panelText: "text-indigo-700",
+    },
+    violet: {
+      dot: "bg-violet-500",
+      button: "border-violet-600 bg-violet-600 text-white",
+      panel: "border-violet-200 bg-violet-50",
+      panelText: "text-violet-700",
+    },
+    amber: {
+      dot: "bg-amber-500",
+      button: "border-amber-600 bg-amber-600 text-white",
+      panel: "border-amber-200 bg-amber-50",
+      panelText: "text-amber-700",
+    },
+    rose: {
+      dot: "bg-rose-500",
+      button: "border-rose-600 bg-rose-600 text-white",
+      panel: "border-rose-200 bg-rose-50",
+      panelText: "text-rose-700",
+    },
+  };
+  
+  const lmAssessments = Array.isArray(draft.lmAssessments)
+    ? draft.lmAssessments
+    : [
+        blankLmAssessment(1),
+        blankLmAssessment(2),
+        blankLmAssessment(3),
+        blankLmAssessment(4),
+      ];
+
+  const currentAssessment =
+    lmAssessments[round] || blankLmAssessment(round + 1);
+
+  const currentCalculated = calculateLmAssessment(currentAssessment, draft);
+
+  const answeredCount = LM_QUESTIONS.filter(
+    (question) =>
+      currentAssessment.answers?.[question.id] !== undefined &&
+      currentAssessment.answers?.[question.id] !== null &&
+      currentAssessment.answers?.[question.id] !== ""
+  ).length;
+
+  const isComplete = answeredCount === LM_QUESTIONS.length;
+  const totalForDisplay = answeredCount > 0 ? currentCalculated.total : null;
+
+  const interpretation = isComplete
+    ? lmScoreInterpret(totalForDisplay)
+    : {
+        label: answeredCount > 0 ? "ยังไม่ครบ" : "รอกรอก",
+        tone: answeredCount > 0 ? "warn" : "gray",
+        text: "ตอบให้ครบ 16 ข้อก่อนแปลผลคะแนนรวม",
+      };
+
+  const roundScores = rounds.map((item, index) => {
+    const assessment = lmAssessments[index] || blankLmAssessment(index + 1);
+
+    const answered = LM_QUESTIONS.filter(
+      (question) =>
+        assessment.answers?.[question.id] !== undefined &&
+        assessment.answers?.[question.id] !== null &&
+        assessment.answers?.[question.id] !== ""
+    ).length;
+
+    const calculated = calculateLmAssessment(assessment, draft);
+
+    return {
+      no: item,
+      answered,
+      total: answered > 0 ? calculated.total : null,
+    };
+  });
+
+  function categoryQuestions(categoryKey) {
+    return LM_QUESTIONS.filter((question) => question.category === categoryKey);
+  }
+
+  function categoryAnsweredCount(categoryKey) {
+    return categoryQuestions(categoryKey).filter(
+      (question) =>
+        currentAssessment.answers?.[question.id] !== undefined &&
+        currentAssessment.answers?.[question.id] !== null &&
+        currentAssessment.answers?.[question.id] !== ""
+    ).length;
+  }
+
+  function categoryScore(categoryKey) {
+    return currentCalculated.scores?.[categoryKey] ?? 0;
+  }
+
+  function categoryTone(score, max, answered) {
+    if (!answered) return "gray";
+
+    const percent = (Number(score) / max) * 100;
+
+    if (percent >= 80) return "good";
+    if (percent >= 60) return "warn";
+    return "bad";
+  }
+
+  function categoryStatus(answered, total) {
+    if (answered === 0) return { text: "รอกรอก", tone: "gray" };
+    if (answered < total) return { text: "ยังไม่ครบ", tone: "warn" };
+    return { text: "ครบแล้ว", tone: "good" };
+  }
+
+  function scoreLabel(question, optionIndex) {
+    const raw = question.scores?.[optionIndex];
+
+    if (raw === null || raw === undefined) return "-";
+    if (raw === "sexBased") return "หญิง 0 / ชาย 4";
+
+    return `${raw}`;
+  }
+
+  function chooseAnswer(question, optionIndex) {
+    const base = currentAssessment || blankLmAssessment(round + 1);
+
+    const nextAnswers = {
+      ...(base.answers || {}),
+      [question.id]: optionIndex,
+    };
+
+    const nextBase = {
+      ...base,
+      no: round + 1,
+      date: base.date || todayThaiDateText(),
+      answers: nextAnswers,
+      updatedAt: todayThai(),
+      updatedBy: draft.updatedBy || "",
+    };
+
+    const nextCalculated = calculateLmAssessment(nextBase, draft);
+
+    const nextAssessment = {
+      ...nextBase,
+      scores: nextCalculated.scores,
+      total: nextCalculated.total,
+    };
+
+    update(["lmAssessments", round], nextAssessment);
+  }
+
+  const categorySummary = sections.map((section) => {
+    const score = categoryScore(section.key);
+    const answered = categoryAnsweredCount(section.key);
+    const totalQuestions = categoryQuestions(section.key).length;
+    const status = categoryStatus(answered, totalQuestions);
+
+    return {
+      ...section,
+      score,
+      answered,
+      totalQuestions,
+      tone: categoryTone(score, section.max, answered > 0),
+      status,
+    };
+  });
+
+  const strengths = categorySummary
+    .filter(
+      (item) =>
+        item.answered === item.totalQuestions && item.tone === "good"
+    )
+    .sort((a, b) => (b.score / b.max) - (a.score / a.max));
+  
+  const improvements = categorySummary
+    .filter(
+      (item) =>
+        item.answered === item.totalQuestions && item.tone === "bad"
+    )
+    .sort((a, b) => (a.score / a.max) - (b.score / b.max));
 
   return (
-    <Card
-      title="สถานะข้อมูล"
-      icon={ClipboardIcon}
-      right={
-        <span
-          className={`inline-flex items-center rounded-full border px-3 py-1 text-xs font-bold ${statusClass}`}
-        >
-          {statusText}
-        </span>
-      }
-    >
-      <div className="space-y-3">
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-sm font-bold text-slate-700">
-            บันทึกแล้ว {quality.filled}/4 ครั้ง
-          </span>
+    <Card title="แบบประเมินพฤติกรรมสุขภาพ LM" icon={FileIcon}>
+      <div className="space-y-4">
+        <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+          <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
+            <div>
+              <div className="text-sm font-bold text-slate-500">
+                Lifestyle Medicine Assessment
+              </div>
 
-          <span
-            className={`inline-flex items-center rounded-full border px-3 py-1.5 text-sm font-bold ${statusClass}`}
-          >
-            ต้องตรวจสอบ {warningList.length} รายการ
-          </span>
-        </div>
+              <div className="mt-1 text-2xl font-black text-slate-900">
+                ครั้งที่ {round + 1}
+              </div>
 
-        {warningList.length > 0 && (
-          <div className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2">
-            <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm font-semibold text-amber-900">
-              {warningList.map((item, index) => (
-                <span key={index}>• {item}</span>
+              <div className="mt-1 text-sm font-semibold text-slate-500">
+                เลือกคำตอบตามพฤติกรรมจริง ระบบจะคำนวณคะแนนให้อัตโนมัติ
+              </div>
+            </div>
+
+            <div className="flex flex-wrap gap-2">
+              {rounds.map((item, index) => (
+                <button
+                  key={item}
+                  type="button"
+                  onClick={() => setRound(index)}
+                  className={`rounded-xl border px-4 py-2.5 text-sm font-black transition ${
+                    round === index
+                      ? "border-slate-900 bg-slate-900 text-white shadow-sm"
+                      : "border-slate-200 bg-white text-slate-600 hover:bg-slate-100"
+                  }`}
+                >
+                  ครั้งที่ {item}
+                </button>
               ))}
             </div>
           </div>
-        )}
+        </div>
+
+        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+            <div>
+              <div className="text-sm font-bold text-slate-500">
+                คะแนนครั้งนี้
+              </div>
+        
+              <div className="mt-1 flex flex-wrap items-end gap-2">
+                <div className="text-3xl font-black text-slate-900">
+                  {totalForDisplay === null ? "-" : totalForDisplay} / 50
+                </div>
+        
+                <div className="pb-1 text-xs font-bold text-slate-400">
+                  คะแนน
+                </div>
+        
+                <div className="pb-0.5">
+                  <Pill tone={interpretation.tone}>{interpretation.label}</Pill>
+                </div>
+              </div>
+            </div>
+        
+            <div className="shrink-0">
+              <Pill tone={isComplete ? "good" : "warn"}>
+                ตอบแล้ว {answeredCount}/16 ข้อ
+              </Pill>
+            </div>
+          </div>
+        
+          <div className="mt-3 rounded-xl border border-slate-100 bg-slate-50 px-3 py-2 text-xs font-semibold leading-5 text-slate-500">
+            {interpretation.text}
+          </div>
+        
+          <div className="mt-3 border-t border-slate-100 pt-3">
+            <div className="mb-2 text-xs font-black uppercase tracking-wide text-slate-400">
+              ประวัติคะแนน 4 ครั้ง
+            </div>
+        
+            <div className="flex flex-wrap gap-2">
+              {roundScores.map((item) => (
+                <span
+                  key={item.no}
+                  className="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-bold text-slate-600"
+                >
+                  <span className="mr-1 text-slate-400">
+                    ครั้ง {item.no}:
+                  </span>
+                  <span className="text-slate-900">
+                    {item.total === null ? "-/50" : `${item.total}/50`}
+                  </span>
+                </span>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div className="grid gap-3 md:grid-cols-2">
+          <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-4 shadow-sm">
+            <div className="mb-3 flex items-center justify-between gap-3">
+              <div>
+                <div className="text-sm font-black text-emerald-800">
+                  จุดเด่น
+                </div>
+                <div className="text-xs font-semibold text-emerald-700/80">
+                  ด้านที่ทำได้ดี
+                </div>
+              </div>
+        
+              <span className="rounded-full border border-emerald-200 bg-white/80 px-2.5 py-1 text-xs font-black text-emerald-700">
+                ดี
+              </span>
+            </div>
+        
+            <div className="flex flex-wrap gap-2">
+              {strengths.length ? (
+                strengths.map((item) => (
+                  <span
+                    key={`strength-${item.key}`}
+                    className="inline-flex items-center rounded-full border border-emerald-300 bg-white px-3 py-1.5 text-sm font-bold text-emerald-800"
+                  >
+                    {item.thai} {item.score}/{item.max}
+                  </span>
+                ))
+              ) : (
+                <div className="text-sm font-semibold text-emerald-800/70">
+                  รอกรอกครบหมวด
+                </div>
+              )}
+            </div>
+          </div>
+        
+          <div className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-4 shadow-sm">
+            <div className="mb-3 flex items-center justify-between gap-3">
+              <div>
+                <div className="text-sm font-black text-rose-800">
+                  ควรปรับ
+                </div>
+                <div className="text-xs font-semibold text-rose-700/80">
+                  ด้านที่ควรให้คำแนะนำเพิ่มเติม
+                </div>
+              </div>
+        
+              <span className="rounded-full border border-rose-200 bg-white/80 px-2.5 py-1 text-xs font-black text-rose-700">
+                ปรับเพิ่ม
+              </span>
+            </div>
+        
+            <div className="flex flex-wrap gap-2">
+              {improvements.length ? (
+                improvements.map((item) => (
+                  <span
+                    key={`improve-${item.key}`}
+                    className="inline-flex items-center rounded-full border border-rose-300 bg-white px-3 py-1.5 text-sm font-bold text-rose-800"
+                  >
+                    {item.thai} {item.score}/{item.max}
+                  </span>
+                ))
+              ) : (
+                <div className="text-sm font-semibold text-rose-800/70">
+                  ยังไม่มีข้อมูลที่ควรปรับ
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+          <div className="mb-4 rounded-2xl border border-slate-100 bg-gradient-to-r from-slate-50 to-white px-4 py-3">
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <div className="text-sm font-black text-slate-900">
+                  หมวดแบบประเมิน
+                </div>
+          
+                <div className="mt-0.5 text-xs font-semibold text-slate-400">
+                </div>
+              </div>
+          
+              <Pill tone={answeredCount === 16 ? "good" : "gray"}>
+                {answeredCount}/16 ข้อ
+              </Pill>
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            {sections.map((section) => {
+              const isOpen = openSection === section.key;
+              const color = toneClass[section.tone];
+              const questions = categoryQuestions(section.key);
+              const score = categoryScore(section.key);
+              const answered = categoryAnsweredCount(section.key);
+              const sectionTone = categoryTone(
+                score,
+                section.max,
+                answered > 0
+              );
+              const status = categoryStatus(answered, questions.length);
+
+              return (
+                <div
+                  key={section.key}
+                  className={`overflow-hidden rounded-2xl border transition ${
+                    isOpen
+                      ? "border-slate-300 bg-white shadow-sm ring-1 ring-slate-100"
+                      : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/60"
+                  }`}
+                >
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setOpenSection(isOpen ? "" : section.key)
+                    }
+                    className={`flex w-full items-center justify-between gap-3 px-4 py-3 text-left transition ${
+                      isOpen ? "bg-slate-50" : "bg-white"
+                    }`}
+                  >
+                    <div className="flex min-w-0 items-center gap-3">
+                      <span
+                        className={`h-10 w-1.5 shrink-0 rounded-full ${color.dot}`}
+                      />
+
+                      <div className="min-w-0">
+                        <div className="truncate text-base font-black text-slate-900">
+                          {section.thai}
+                        </div>
+                        <div className="truncate text-xs font-bold text-slate-400">
+                          {section.label}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex shrink-0 items-center gap-2">
+                      <Pill tone={sectionTone}>
+                        {answered > 0
+                          ? `${score}/${section.max}`
+                          : `-/${section.max}`}
+                      </Pill>
+
+                      <Pill tone={status.tone}>{status.text}</Pill>
+
+                      <span className="text-lg font-black text-slate-400">
+                        {isOpen ? "−" : "+"}
+                      </span>
+                    </div>
+                  </button>
+
+                  {isOpen && (
+                    <div className="border-t border-slate-200 px-4 py-4">
+                      <div className={`mb-4 rounded-xl border p-4 ${color.panel}`}>
+                        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                          <div>
+                            <div className={`text-sm font-black ${color.panelText}`}>
+                              รายละเอียดหมวด
+                            </div>
+                      
+                            <div className="mt-1 text-base font-black text-slate-900">
+                              {section.desc}
+                            </div>
+                          </div>
+                      
+                          <div className="flex flex-wrap gap-2">
+                            <Pill>{answered}/{questions.length} ข้อ</Pill>
+                            <Pill>เต็ม {section.max}</Pill>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="space-y-4">
+                        {questions.map((question) => {
+                          const questionNo =
+                            LM_QUESTIONS.findIndex(
+                              (item) => item.id === question.id
+                            ) + 1;
+
+                          const selectedAnswer =
+                            currentAssessment.answers?.[question.id];
+
+                          const selectedScore = lmQuestionScore(
+                            question,
+                            selectedAnswer,
+                            draft
+                          );
+
+                          return (
+                            <div
+                              key={question.id}
+                              className="rounded-2xl border border-slate-200 bg-white p-4"
+                            >
+                              <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                                <div>
+                                  <div className="inline-flex rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-[11px] font-black text-slate-500">
+                                    ข้อ {questionNo}
+                                  </div>
+
+                                  <div className="mt-1 text-base font-bold leading-6 text-slate-900">
+                                    {question.text}
+                                  </div>
+                                </div>
+
+                                <Pill>
+                                  คะแนน{" "}
+                                  {selectedScore === null
+                                    ? "-"
+                                    : selectedScore}
+                                </Pill>
+                              </div>
+
+                              <div className="mt-4 flex flex-wrap gap-2">
+                                {question.options.map(
+                                  (option, optionIndex) => {
+                                    const optionScore =
+                                      question.scores?.[optionIndex];
+
+                                    const disabled =
+                                      optionScore === null ||
+                                      optionScore === undefined;
+
+                                    const selected =
+                                      Number(selectedAnswer) === optionIndex;
+
+                                    return (
+                                      <button
+                                        key={`${question.id}-${option}`}
+                                        type="button"
+                                        disabled={disabled}
+                                        onClick={() =>
+                                          chooseAnswer(
+                                            question,
+                                            optionIndex
+                                          )
+                                        }
+                                        className={`min-w-[64px] rounded-2xl border px-3.5 py-2.5 text-center transition ${
+                                          disabled
+                                            ? "cursor-not-allowed border-slate-100 bg-slate-50 text-slate-300"
+                                            : selected
+                                              ? `${color.button} shadow-sm`
+                                              : "border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50"
+                                        }`}
+                                      >
+                                        <div className="text-sm font-black leading-5">
+                                          {option}
+                                        </div>
+
+                                        <div
+                                          className={`mt-0.5 text-[9px] font-semibold leading-3 ${
+                                            selected
+                                              ? "text-white/60"
+                                              : "text-slate-300"
+                                          }`}
+                                        >
+                                          {disabled
+                                            ? "-"
+                                            : `${scoreLabel(
+                                                question,
+                                                optionIndex
+                                              )} คะแนน`}
+                                        </div>
+                                      </button>
+                                    );
+                                  }
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-semibold text-slate-500">
+          เลือกคำตอบให้ครบ แล้วกด “บันทึกข้อมูล” ด้านบนขวา
+        </div>
       </div>
+    </Card>
+  );
+}
+
+function DataQualityPanel({ record }) {
+  const normalizedRecord = { ...record, sessions: record.sessions.map((s) => ({ ...s, date: s.date || (sessionHasAnyData(s) ? todayThaiDateText() : "") })) };
+  const quality = recordQuality(normalizedRecord);
+  return (
+    <Card title="สถานะข้อมูล" icon={ClipboardIcon} right={<Pill tone={quality.complete ? "good" : quality.issues.length ? "bad" : "warn"}>{quality.complete ? "ครบพร้อมใช้" : "ควรตรวจสอบ"}</Pill>}>
+      <div className="grid gap-3 md:grid-cols-3">
+        <Info label="จำนวนครั้งที่มีข้อมูล" value={`${quality.filled}/4 ครั้ง`} />
+        <Info label="ข้อมูลล่าสุด" value={quality.missingLatest.length ? quality.missingLatest.join(" / ") : "ครบสำหรับสรุปหลัก"} tone={quality.missingLatest.length ? "fat" : "default"} />
+        <Info label="ค่าที่ควรตรวจสอบ" value={`${quality.issues.length} รายการ`} tone={quality.issues.length ? "fat" : "default"} />
+      </div>
+      {quality.issues.length > 0 && <div className="mt-3 rounded-xl border border-amber-200 bg-amber-50 p-3 text-base text-amber-900">{quality.issues.slice(0, 6).map((x) => <div key={x}>• {x}</div>)}</div>}
     </Card>
   );
 }
@@ -5609,16 +6199,7 @@ export default function App() {
       <Header mode={mode} setMode={goMode} isAdmin={isAdmin} adminUser={adminUser} onLogout={logout} />
       {mode === "client" && !active && <Login records={records} openRecord={setActiveHN} openAdminLogin={() => goMode("admin")} />}
       {mode === "client" && active && <Dashboard record={active} back={() => setActiveHN(null)} />}
-      {mode === "adminLogin" && (
-        <AdminLogin
-          onSuccess={(admin) => {
-            setIsAdmin(true);
-            setAdminUser(admin);
-            setMode("staff");
-          }}
-          onCancel={() => setMode("client")}
-        />
-      )}
+      {mode === "adminLogin" && <AdminLogin onSuccess={(admin) => { setIsAdmin(true); setAdminUser(admin); setMode("admin"); }} onCancel={() => setMode("client")} />}
       {mode === "admin" && isAdmin && <AdminSummary records={records} auditLogs={auditLogs} onFullBackup={() => exportFullBackup(records, auditLogs)} onRestoreBackup={restoreFullBackup} />}
       {mode === "staff" && isAdmin && (
         <>
