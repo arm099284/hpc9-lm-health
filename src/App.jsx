@@ -6112,6 +6112,7 @@ function ProgramForm({ draft, update }) {
               value={program.strengthDose || "สุขภาพทั่วไป: 2–3 เซต × 8–12 ครั้ง"}
               onChange={(v) => update(["program", "strengthDose"], v)}
               options={[
+                { value: "", label: "ยังไม่มีข้อมูล" },
                 "เริ่มต้น/ผู้สูงอายุ: 1–2 เซต × 10–15 ครั้ง",
                 "สุขภาพทั่วไป: 2–3 เซต × 10–15 ครั้ง",
                 "สุขภาพทั่วไป: 2–3 เซต × 8–12 ครั้ง",
