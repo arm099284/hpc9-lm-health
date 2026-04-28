@@ -2782,7 +2782,7 @@ function Dashboard({ record, back }) {
       
       <NutritionPlanCard record={record} />
 
-      {/* <ExercisePlanCard record={record} /> */}
+      <ExercisePlanCard record={record} /> 
       
       <CompareTable record={record} title="ตารางเปรียบเทียบ InBody / Body Composition" icon={HeartIcon} list={metrics.inbody} />
       
