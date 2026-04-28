@@ -2463,58 +2463,73 @@ if (!hasProgramData) {
     program.strengthPlan ||
     "";
 
-  return (
-    <Card title="โปรแกรมที่ได้รับ" icon={ClipboardIcon}>
-      <div className="space-y-4">
-        <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-          <div className="text-sm font-bold text-slate-500">
-            โปรแกรมหลัก
+return (
+  <Card title="โปรแกรมที่ได้รับ" icon={ClipboardIcon}>
+    <div className="space-y-5">
+      <div className="rounded-2xl border border-slate-200 bg-gradient-to-br from-slate-50 to-white p-5">
+        <div className="text-sm font-bold text-slate-500">
+          โปรแกรมหลัก
+        </div>
+
+        <div className="mt-1 flex flex-wrap items-center gap-2">
+          <div className="text-3xl font-black tracking-tight text-slate-900">
+            {show(program.type)}
           </div>
 
-          <div className="mt-1 text-2xl font-black text-slate-900">
-            {show(program.type)}
-            {program.strengthFrequency && (
-              <span className="text-slate-500">
-                {" "}• {program.strengthFrequency} วัน/สัปดาห์
-              </span>
-            )}
-          </div>
-          
+          {program.strengthFrequency && (
+            <span className="text-2xl font-black text-slate-400">
+              •
+            </span>
+          )}
+
+          {program.strengthFrequency && (
+            <div className="text-2xl font-black text-slate-600">
+              {program.strengthFrequency} วัน/สัปดาห์
+            </div>
+          )}
+        </div>
+
         {record.goal && (
-          <div className="mt-2 inline-flex rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-700">
+          <div className="mt-3 inline-flex items-center rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-700">
             เป้าหมาย: {record.goal}
           </div>
         )}
-          
-        <div className="grid gap-4 md:grid-cols-2">
-          <div className="flex flex-col rounded-2xl border border-blue-200 bg-blue-50 p-4">
-            <div className="text-sm font-bold text-blue-700">
-              Strength Plan
-            </div>
+      </div>
 
-            <div className="mt-2 text-base font-black text-slate-900">
-              {program.strengthFrequency
-                ? `${program.strengthFrequency} วัน/สัปดาห์`
-                : "ยังไม่กำหนดวันฝึก"}
-            </div>
+      <div className="grid gap-4 md:grid-cols-2">
+        <div className="rounded-2xl border border-blue-200 bg-blue-50/70 p-5">
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <div className="text-sm font-black text-blue-700">
+                Strength Plan
+              </div>
 
-            <div className="mt-3 rounded-xl bg-white px-3 py-2 text-sm font-bold leading-6 text-slate-800">
-              {setsReps}
-            </div>
-
-            <div className="mt-3 flex flex-wrap gap-2">
-              <span className="rounded-full border border-blue-200 bg-white px-3 py-1 text-xs font-bold text-blue-700">
-                {show(program.intensity)}
-              </span>
+              <div className="mt-1 text-xl font-black text-slate-900">
+                {program.strengthFrequency
+                  ? `${program.strengthFrequency} วัน/สัปดาห์`
+                  : "ยังไม่กำหนดวันฝึก"}
+              </div>
             </div>
           </div>
 
-          <div className="flex flex-col rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
-            <div className="text-sm font-bold text-emerald-700">
+          <div className="mt-4 rounded-2xl border border-blue-100 bg-white px-4 py-3 text-sm font-bold leading-6 text-slate-800 shadow-sm">
+            {setsReps || "-"}
+          </div>
+
+          <div className="mt-3">
+            <span className="inline-flex rounded-full border border-blue-200 bg-white px-3 py-1 text-xs font-bold text-blue-700">
+              {show(program.intensity)}
+            </span>
+          </div>
+        </div>
+
+        <div className="rounded-2xl border border-emerald-200 bg-emerald-50/70 p-5">
+          <div>
+            <div className="text-sm font-black text-emerald-700">
               Cardio Plan
             </div>
 
-            <div className="mt-2 min-w-0 overflow-hidden text-ellipsis whitespace-nowrap text-base font-black text-slate-900">
+            <div className="mt-1 text-xl font-black text-slate-900">
               {show(program.cardioType)}
               {program.cardioDuration && (
                 <span className="text-slate-600">
@@ -2522,84 +2537,83 @@ if (!hasProgramData) {
                 </span>
               )}
             </div>
+          </div>
 
-            <div className="mt-3 flex flex-wrap gap-2">
-              <span className="rounded-full border border-emerald-200 bg-white px-3 py-1 text-xs font-bold text-emerald-700">
-                {show(program.intensity)}
-              </span>
+          <div className="mt-4 flex flex-wrap gap-2">
+            <span className="inline-flex rounded-full border border-emerald-200 bg-white px-3 py-1 text-xs font-bold text-emerald-700">
+              {show(program.intensity)}
+            </span>
 
-              <span className="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-bold text-slate-700">
-                RPE {show(program.rpe)}
-              </span>
+            <span className="inline-flex rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-bold text-slate-700">
+              RPE {show(program.rpe)}
+            </span>
+          </div>
+
+          <div className="mt-4 grid gap-2 text-sm font-bold text-slate-700">
+            <div className="rounded-2xl border border-emerald-100 bg-white px-4 py-3 shadow-sm">
+              Talk Test: {show(program.talk)}
             </div>
 
-            <div className="mt-3 grid gap-2 text-sm font-bold text-slate-700">
-              <div className="rounded-xl bg-white px-3 py-2">
-                Talk Test: {show(program.talk)}
-              </div>
-
-              <div className="rounded-xl bg-white px-3 py-2">
-                Target HR: {program.intensity ? targetHrText(record.age, program.intensity) : "-"}
-              </div>
+            <div className="rounded-2xl border border-emerald-100 bg-white px-4 py-3 shadow-sm">
+              Target HR: {program.intensity ? targetHrText(record.age, program.intensity) : "-"}
             </div>
           </div>
         </div>
-
-        <div className="rounded-2xl border border-slate-200 bg-white p-4">
-          <div className="text-sm font-bold text-slate-500">
-            Focus / จุดเน้น
-          </div>
-
-          <div className="mt-3 flex flex-wrap gap-2">
-            {focusItems.length ? (
-              focusItems.map((item) => (
-                <span
-                  key={item}
-                  className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-sm font-bold text-slate-700"
-                >
-                  {item}
-                </span>
-              ))
-            ) : (
-              <span className="text-sm font-semibold text-slate-500">
-                -
-              </span>
-            )}
-          </div>
-        </div>
-
-        {(program.precaution || program.followUp) && (
-          <div className="grid gap-3 md:grid-cols-2">
-            {program.precaution && (
-              <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4">
-                <div className="text-sm font-bold text-amber-700">
-                  ข้อควรระวัง
-                </div>
-
-                <div className="mt-2 text-base font-semibold text-slate-800">
-                  {program.precaution}
-                </div>
-              </div>
-            )}
-
-            {program.followUp && (
-              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                <div className="text-sm font-bold text-slate-500">
-                  คำแนะนำเพิ่มเติม
-                </div>
-
-                <div className="mt-2 text-base font-semibold text-slate-800">
-                  {program.followUp}
-                </div>
-              </div>
-            )}
-          </div>
-        )}
-       </div>   
       </div>
-    </Card>
-  );
-}
+
+      <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div className="text-sm font-black text-slate-500">
+          Focus / จุดเน้น
+        </div>
+
+        <div className="mt-3 flex flex-wrap gap-2">
+          {focusItems.length ? (
+            focusItems.map((item) => (
+              <span
+                key={item}
+                className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-sm font-bold text-slate-700"
+              >
+                {item}
+              </span>
+            ))
+          ) : (
+            <span className="text-sm font-semibold text-slate-400">
+              -
+            </span>
+          )}
+        </div>
+      </div>
+
+      {(program.precaution || program.followUp) && (
+        <div className="grid gap-4 md:grid-cols-2">
+          {program.precaution && (
+            <div className="rounded-2xl border border-amber-200 bg-amber-50 p-5">
+              <div className="text-sm font-black text-amber-700">
+                ข้อควรระวัง
+              </div>
+
+              <div className="mt-2 text-base font-bold leading-7 text-slate-800">
+                {program.precaution}
+              </div>
+            </div>
+          )}
+
+          {program.followUp && (
+            <div className="rounded-2xl border border-sky-200 bg-sky-50 p-5">
+              <div className="text-sm font-black text-sky-700">
+                คำแนะนำเพิ่มเติม
+              </div>
+
+              <div className="mt-2 text-base font-bold leading-7 text-slate-800">
+                {program.followUp}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  </Card>
+);
 
 function LmHnSummaryStrip({ record }) {
   const categories = [
