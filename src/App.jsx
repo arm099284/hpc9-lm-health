@@ -5609,7 +5609,16 @@ export default function App() {
       <Header mode={mode} setMode={goMode} isAdmin={isAdmin} adminUser={adminUser} onLogout={logout} />
       {mode === "client" && !active && <Login records={records} openRecord={setActiveHN} openAdminLogin={() => goMode("admin")} />}
       {mode === "client" && active && <Dashboard record={active} back={() => setActiveHN(null)} />}
-      {mode === "adminLogin" && <AdminLogin onSuccess={(admin) => { setIsAdmin(true); setAdminUser(admin); setMode("admin"); }} onCancel={() => setMode("client")} />}
+      {mode === "adminLogin" && (
+        <AdminLogin
+          onSuccess={(admin) => {
+            setIsAdmin(true);
+            setAdminUser(admin);
+            setMode("staff");
+          }}
+          onCancel={() => setMode("client")}
+        />
+      )}
       {mode === "admin" && isAdmin && <AdminSummary records={records} auditLogs={auditLogs} onFullBackup={() => exportFullBackup(records, auditLogs)} onRestoreBackup={restoreFullBackup} />}
       {mode === "staff" && isAdmin && (
         <>
