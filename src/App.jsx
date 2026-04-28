@@ -4306,9 +4306,10 @@ function LmAdminDashboard({ records }) {
 }
 
 function Staff({ records, setRecords, adminUser, addAuditLog, refreshData }) {
-  const first = Object.keys(records)[0] || "";
-  const [hn, setHn] = useState(first);
-  const [draft, setDraft] = useState(clone(records[first] || blankRecord));
+  const first = Object.keys(records || {})[0] || "";
+  
+  const [hn, setHn] = useState("");
+  const [draft, setDraft] = useState(() => normalizeRecord(blankRecord));
   const [tab, setTab] = useState("general");
   const [idx, setIdx] = useState(0);
   const [exerciseDay, setExerciseDay] = useState("Full Body");
@@ -4432,15 +4433,14 @@ ${quality.issues.slice(0, 8).join("\n")}
     const nextRecords = { ...records };
     const deletedRecord = clone(nextRecords[targetHN]);
     delete nextRecords[targetHN];
-    const firstHN = Object.keys(nextRecords)[0] || "";
 
     try {
       await deleteRecordFromSupabase(targetHN, adminUser);
       setRecords(nextRecords);
       setDeletedBackup(deletedRecord);
       addAuditLog("ลบ HN", targetHN, "ลบข้อมูลผู้รับบริการทั้งชุดแบบ soft delete ใน Supabase");
-      setHn(firstHN);
-      setDraft(firstHN ? clone(nextRecords[firstHN]) : clone(blankRecord));
+      setHn("");
+      setDraft(clone(blankRecord));
       setTab("general");
       setIdx(0);
       await refreshData?.();
