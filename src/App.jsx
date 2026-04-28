@@ -2529,7 +2529,10 @@ return (
               Cardio Plan
             </div>
 
-            <div className="mt-1 text-xl font-black text-slate-900">
+            <div
+              className="mt-1 truncate text-lg font-black text-slate-900"
+              title={`${show(program.cardioType)}${program.cardioDuration ? ` • ${program.cardioDuration} นาที/ครั้ง` : ""}`}
+            >
               {show(program.cardioType)}
               {program.cardioDuration && (
                 <span className="text-slate-600">
@@ -2549,12 +2552,18 @@ return (
             </span>
           </div>
 
-          <div className="mt-4 grid gap-2 text-sm font-bold text-slate-700">
-            <div className="rounded-2xl border border-emerald-100 bg-white px-4 py-3 shadow-sm">
+          <div className="mt-4 grid gap-2 text-xs font-bold text-slate-700">
+            <div
+              className="truncate rounded-2xl border border-emerald-100 bg-white px-4 py-3 shadow-sm"
+              title={`Talk Test: ${show(program.talk)}`}
+            >
               Talk Test: {show(program.talk)}
             </div>
 
-            <div className="rounded-2xl border border-emerald-100 bg-white px-4 py-3 shadow-sm">
+            <div
+              className="truncate rounded-2xl border border-emerald-100 bg-white px-4 py-3 shadow-sm"
+              title={`Target HR: ${program.intensity ? targetHrText(record.age, program.intensity) : "-"}`}
+            >
               Target HR: {program.intensity ? targetHrText(record.age, program.intensity) : "-"}
             </div>
           </div>
