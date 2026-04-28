@@ -4310,6 +4310,9 @@ function Staff({ records, setRecords, adminUser, addAuditLog, refreshData }) {
   
   const [hn, setHn] = useState("");
   const [draft, setDraft] = useState(() => normalizeRecord(blankRecord));
+
+  const isCreatingNewRecord = !hn && !draft.hn;
+  
   const [tab, setTab] = useState("general");
   const [idx, setIdx] = useState(0);
   const [exerciseDay, setExerciseDay] = useState("Full Body");
@@ -4624,7 +4627,17 @@ const menuProgress = Math.round((menuDoneCount / allMenuItems.length) * 100);
     <main className="mx-auto grid max-w-7xl gap-5 px-4 py-6 lg:grid-cols-[280px_1fr]">
       <aside className="space-y-4">
         <Card title="รายชื่อ HN" icon={UserIcon}>
-          <button onClick={createNew} className="mb-3 w-full rounded-xl bg-slate-900 px-4 py-3 text-lg font-bold text-white">+ เพิ่ม HN ใหม่</button>
+          <button
+            type="button"
+            onClick={createNew}
+            className={`mb-4 w-full rounded-xl border px-4 py-3 text-base font-bold transition ${
+              isCreatingNewRecord
+                ? "border-slate-900 bg-slate-900 text-white shadow-sm"
+                : "border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50"
+            }`}
+          >
+            + เพิ่ม HN ใหม่
+          </button>
           <div className="mb-3"><Field label="ค้นหา HN / ชื่อ" value={staffSearch} onChange={(v) => { setStaffSearch(v); setStaffPage(1); }} /></div>
           <div className="space-y-2">{pagedPatients.map((r) => <button key={r.hn} onClick={() => selectRecord(r.hn)} className={`w-full rounded-xl border px-3 py-3 text-left text-base ${hn === r.hn ? "border-slate-900 bg-slate-900 text-white" : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"}`}><div className="font-bold">HN {r.hn}</div><div className="truncate text-sm opacity-70">{r.name}</div></button>)}</div>
           <div className="mt-3 flex items-center justify-between gap-2 text-sm text-slate-500">
