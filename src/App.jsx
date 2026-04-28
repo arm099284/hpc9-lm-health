@@ -6203,9 +6203,32 @@ export default function App() {
       {mode === "admin" && isAdmin && <AdminSummary records={records} auditLogs={auditLogs} onFullBackup={() => exportFullBackup(records, auditLogs)} onRestoreBackup={restoreFullBackup} />}
       {mode === "staff" && isAdmin && (
         <>
-          <div className="mx-auto grid max-w-7xl gap-4 px-4 pt-6 md:grid-cols-2">
-            <Info label="จำนวน HN" value={total} />
-            <Info label="รูปแบบข้อมูล" value={syncStatus === "online" ? "Supabase Database" : syncStatus === "loading" ? "กำลังโหลด Supabase" : syncStatus === "error" ? "เชื่อมต่อผิดพลาด" : "Local fallback"} />
+          <div className="mx-auto max-w-7xl px-4 pt-6">
+            <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-sm">
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm font-semibold text-slate-500">
+                <span>
+                  HN ทั้งหมด:{" "}
+                  <span className="font-black text-slate-900">
+                    {total}
+                  </span>
+                </span>
+          
+                <span className="hidden text-slate-300 md:inline">•</span>
+          
+                <span>
+                  ฐานข้อมูล:{" "}
+                  <span className="font-black text-slate-900">
+                    {syncStatus === "online"
+                      ? "Supabase Database"
+                      : syncStatus === "loading"
+                        ? "กำลังโหลด Supabase"
+                        : syncStatus === "error"
+                          ? "เชื่อมต่อผิดพลาด"
+                          : "Local fallback"}
+                  </span>
+                </span>
+              </div>
+            </div>
           </div>
           <Staff records={records} setRecords={setRecords} adminUser={adminUser} addAuditLog={addAuditLog} refreshData={refreshData} />
         </>
