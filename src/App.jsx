@@ -3594,7 +3594,7 @@ function AdminSummary({ records, auditLogs, onFullBackup, onRestoreBackup }) {
                   <th className="px-3 py-2">เทียบได้</th>
                   <th className="px-3 py-2">ดีขึ้น</th>
                   <th className="px-3 py-2">แย่ลง</th>
-                  <th className="px-3 py-2"">คงเดิม</th>
+                  <th className="px-3 py-2">คงเดิม</th>
                   <th className="px-3 py-2">ข้อมูลไม่พอ</th>
                 </tr>
               </thead>
@@ -4194,12 +4194,10 @@ function LmAdminDashboard({ records }) {
             </div>
 
             <div className="overflow-x-auto rounded-xl border border-slate-200">
-              <table className="w-full min-w-[980px] text-left text-sm">
+              <table className="w-full min-w-[780px] text-left text-sm">
                 <thead className="bg-slate-50 text-xs font-bold text-slate-500">
                   <tr>
                     <th className="p-3">HN / ชื่อ</th>
-                    <th className="p-3">ครั้งแรก</th>
-                    <th className="p-3">ล่าสุด</th>
                     <th className="p-3">ครั้งที่ 1</th>
                     <th className="p-3">ครั้งที่ 2</th>
                     <th className="p-3">ครั้งที่ 3</th>
@@ -4220,18 +4218,6 @@ function LmAdminDashboard({ records }) {
                         <div className="text-xs font-semibold text-slate-500">
                           {row.name || "-"}
                         </div>
-                      </td>
-
-                      <td className="p-3">
-                        {row.firstComplete ? `${row.firstComplete.total}/50` : "-"}
-                      </td>
-
-                      <td className="p-3">
-                        {row.latestComplete
-                          ? `${row.latestComplete.total}/50`
-                          : row.latestAny
-                            ? `${row.latestAny.total}/50`
-                            : "-"}
                       </td>
 
                       {row.rounds.map((round) => (
@@ -4278,7 +4264,7 @@ function LmAdminDashboard({ records }) {
 
                   {pagedRows.length === 0 && (
                     <tr>
-                      <td colSpan="10" className="p-5 text-center text-slate-500">
+                      <td colSpan="8" className="p-5 text-center text-slate-500">
                         ยังไม่มีข้อมูล LM
                       </td>
                     </tr>
