@@ -870,7 +870,7 @@ const blankRecord = {
   sex: "ชาย",
   age: "",
   height: "",
-  goal: "สุขภาพทั่วไป",
+  goal: "",
   disease: "",
   medication: "",
   injury: "",
