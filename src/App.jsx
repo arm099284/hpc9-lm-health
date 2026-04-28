@@ -6051,7 +6051,7 @@ function ProgramForm({ draft, update }) {
 
           <Select
             label="Intensity"
-            value={program.intensity || "Moderate"}
+            value={program.intensity || ""}
             onChange={(v) => update(["program", "intensity"], v)}
             options={[{ value: "", label: "ยังไม่มีข้อมูล" },"Light", "Moderate", "Vigorous", "Individualized"]}
           />
@@ -6063,7 +6063,7 @@ function ProgramForm({ draft, update }) {
           <div className="grid gap-4 md:grid-cols-2">
             <Select
               label="ประเภท"
-              value={program.cardioType || "เดินเร็ว"}
+              value={program.cardioType || ""}
               onChange={(v) => update(["program", "cardioType"], v)}
               options={[{ value: "", label: "ยังไม่มีข้อมูล" },"เดินเร็ว", "เดินสะสม", "ปั่นจักรยาน", "วิ่งเบา", "ว่ายน้ำ", "อื่น ๆ"]}
             />
@@ -6078,14 +6078,14 @@ function ProgramForm({ draft, update }) {
           <div className="mt-4 grid gap-4 md:grid-cols-2">
             <Select
               label="RPE"
-              value={program.rpe || "4–6"}
+              value={program.rpe || ""}
               onChange={(v) => update(["program", "rpe"], v)}
               options={[{ value: "", label: "ยังไม่มีข้อมูล" },"2–3", "4–6", "7–8"]}
             />
 
             <Select
               label="Talk Test"
-              value={program.talk || "พูดเป็นประโยค"}
+              value={program.talk || ""}
               onChange={(v) => update(["program", "talk"], v)}
               options={[{ value: "", label: "ยังไม่มีข้อมูล" },"พูดสบาย", "พูดเป็นประโยค", "พูดเป็นคำ ๆ"]}
             />
@@ -6109,7 +6109,7 @@ function ProgramForm({ draft, update }) {
 
             <Select
               label="Sets × Reps"
-              value={program.strengthDose || "สุขภาพทั่วไป: 2–3 เซต × 8–12 ครั้ง"}
+              value={program.strengthDose || ""}
               onChange={(v) => update(["program", "strengthDose"], v)}
               options={[
                 { value: "", label: "ยังไม่มีข้อมูล" },
