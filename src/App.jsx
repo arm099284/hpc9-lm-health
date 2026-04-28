@@ -2614,6 +2614,7 @@ return (
     </div>
   </Card>
 );
+}
 
 function LmHnSummaryStrip({ record }) {
   const categories = [
