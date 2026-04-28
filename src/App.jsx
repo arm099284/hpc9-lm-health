@@ -6093,7 +6093,7 @@ function ProgramForm({ draft, update }) {
 
           <div className="mt-4 grid gap-4 md:grid-cols-2">
             <Info label="HRmax" value={draft.age ? `${220 - num(draft.age)} bpm` : "กรอกอายุก่อน"} />
-            <Info label="Target HR" value={targetHrText(draft.age, program.intensity || "Moderate")} />
+            <Info label="Target HR" value={targetHrText(draft.age, program.intensity || "")} />
           </div>
         </Card>
 
