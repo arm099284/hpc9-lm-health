@@ -3545,19 +3545,19 @@ function AdminSummary({ records, auditLogs, onFullBackup, onRestoreBackup }) {
         </div>
       </Card>
 
-      <div className="grid gap-5 lg:grid-cols-2">
+      <div className="grid gap-4 lg:grid-cols-2 lg:items-start">
         <Card title="สรุปตามเพศ" icon={UserIcon}>
           <div className="overflow-x-auto rounded-xl border border-slate-200">
             <table className="w-full min-w-[620px] text-left text-base">
               <thead className="bg-slate-50 text-sm text-slate-500">
                 <tr>
-                  <th className="p-3">เพศ</th>
-                  <th className="p-3">ทั้งหมด</th>
-                  <th className="p-3">เทียบได้</th>
-                  <th className="p-3">ดีขึ้น</th>
-                  <th className="p-3">แย่ลง</th>
-                  <th className="p-3">คงเดิม</th>
-                  <th className="p-3">ข้อมูลไม่พอ</th>
+                  <th className="px-3 py-2">เพศ</th>
+                  <th className="px-3 py-2">ทั้งหมด</th>
+                  <th className="px-3 py-2">เทียบได้</th>
+                  <th className="px-3 py-2">ดีขึ้น</th>
+                  <th className="px-3 py-2">แย่ลง</th>
+                  <th className="px-3 py-2">คงเดิม</th>
+                  <th className="px-3 py-2">ข้อมูลไม่พอ</th>
                 </tr>
               </thead>
 
@@ -3565,18 +3565,18 @@ function AdminSummary({ records, auditLogs, onFullBackup, onRestoreBackup }) {
                 {sexSummaryRows.map((row) => (
                   <tr key={row.sex} className="border-t border-slate-100">
                     <td className="p-3 font-bold text-slate-900">{row.sex}</td>
-                    <td className="p-3">{row.total}</td>
-                    <td className="p-3">{row.comparable}</td>
-                    <td className="p-3">
+                    <td className="px-3 py-2">{row.total}</td>
+                    <td className="px-3 py-2">{row.comparable}</td>
+                    <td className="px-3 py-2">
                       <Pill tone="good">{row.improved}</Pill>
                     </td>
-                    <td className="p-3">
+                    <td className="px-3 py-2">
                       <Pill tone={row.worsened ? "bad" : "gray"}>{row.worsened}</Pill>
                     </td>
-                    <td className="p-3">
+                    <td className="px-3 py-2">
                       <Pill tone="gray">{row.unchanged}</Pill>
                     </td>
-                    <td className="p-3">{row.incomplete}</td>
+                    <td className="px-3 py-2">{row.incomplete}</td>
                   </tr>
                 ))}
               </tbody>
@@ -3589,13 +3589,13 @@ function AdminSummary({ records, auditLogs, onFullBackup, onRestoreBackup }) {
             <table className="w-full min-w-[700px] text-left text-base">
               <thead className="bg-slate-50 text-sm text-slate-500">
                 <tr>
-                  <th className="p-3">ช่วงอายุ</th>
-                  <th className="p-3">ทั้งหมด</th>
-                  <th className="p-3">เทียบได้</th>
-                  <th className="p-3">ดีขึ้น</th>
-                  <th className="p-3">แย่ลง</th>
-                  <th className="p-3">คงเดิม</th>
-                  <th className="p-3">ข้อมูลไม่พอ</th>
+                  <th className="px-3 py-2">ช่วงอายุ</th>
+                  <th className="px-3 py-2">ทั้งหมด</th>
+                  <th className="px-3 py-2">เทียบได้</th>
+                  <th className="px-3 py-2">ดีขึ้น</th>
+                  <th className="px-3 py-2">แย่ลง</th>
+                  <th className="px-3 py-2"">คงเดิม</th>
+                  <th className="px-3 py-2">ข้อมูลไม่พอ</th>
                 </tr>
               </thead>
 
@@ -3603,18 +3603,18 @@ function AdminSummary({ records, auditLogs, onFullBackup, onRestoreBackup }) {
                 {ageSummaryRows.map((row) => (
                   <tr key={row.age} className="border-t border-slate-100">
                     <td className="p-3 font-bold text-slate-900">{row.age}</td>
-                    <td className="p-3">{row.total}</td>
-                    <td className="p-3">{row.comparable}</td>
-                    <td className="p-3">
+                    <td className="px-3 py-2">{row.total}</td>
+                    <td className="px-3 py-2">{row.comparable}</td>
+                    <td className="px-3 py-2">
                       <Pill tone="good">{row.ดีขึ้น}</Pill>
                     </td>
-                    <td className="p-3">
+                    <td className="px-3 py-2">
                       <Pill tone={row.แย่ลง ? "bad" : "gray"}>{row.แย่ลง}</Pill>
                     </td>
-                    <td className="p-3">
+                    <td className="px-3 py-2">
                       <Pill tone="gray">{row.คงเดิม}</Pill>
                     </td>
-                    <td className="p-3">{row.ข้อมูลไม่พอ}</td>
+                    <td className="px-3 py-2">{row.ข้อมูลไม่พอ}</td>
                   </tr>
                 ))}
               </tbody>
@@ -4150,7 +4150,7 @@ function LmAdminDashboard({ records }) {
           </div>
         </div>
 
-        <div className="grid gap-5 xl:grid-cols-[360px_1fr]">
+        <div className="space-y-4">
           <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
             <div className="mb-3">
               <div className="text-sm font-black text-slate-900">
