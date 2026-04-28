@@ -2163,9 +2163,9 @@ function getSetsRepsText(program = {}, goal = "") {
 }
 
 function ExercisePlanCard({ record }) {
-  const log = record.exerciseLog || {};
+  const log = record?.exerciseLog || {};
   const days = log.days || {};
-  const program = record.program || {};
+  const program = record?.program || {};
 
   const dayNames = {
     fullBody: "Full Body",
@@ -2176,54 +2176,28 @@ function ExercisePlanCard({ record }) {
     legs: "Legs Day",
   };
 
-  const allowedDaysBySplit = {
-    "Full Body": ["fullBody"],
-    "Upper / Lower": ["upper", "lower"],
-    PPL: ["push", "pull", "legs"],
-    "Hybrid / Mixed": ["fullBody", "upper", "lower", "push", "pull", "legs"],
-  };
-
-  const allowedDays = allowedDaysBySplit[log.split] || [
-    "fullBody",
-    "upper",
-    "lower",
-    "push",
-    "pull",
-    "legs",
-  ];
-
-  const dayDisplayOrder = ["fullBody", "upper", "lower", "push", "pull", "legs"];
+  const dayOrder = ["fullBody", "upper", "lower", "push", "pull", "legs"];
 
   const activeDays = Object.entries(days)
-    .filter(
-      ([dayKey, list]) =>
-        allowedDays.includes(dayKey) &&
-        Array.isArray(list) &&
-        list.length > 0
-    )
-    .sort(
-      ([a], [b]) => dayDisplayOrder.indexOf(a) - dayDisplayOrder.indexOf(b)
-    );
+    .filter(([, list]) => Array.isArray(list) && list.length > 0)
+    .sort(([a], [b]) => dayOrder.indexOf(a) - dayOrder.indexOf(b));
 
-  const setsRepsSummary = shortSetsRepsText(
-    getSetsRepsText(program, record.goal)
-  );
+  const setsRepsSummary =
+    program.strengthDose ||
+    program.setsReps ||
+    program.strengthSetsReps ||
+    "";
 
   const cardioSummary = program.cardioDuration
     ? `${program.cardioDuration} นาที/ครั้ง`
     : "";
-
-  const trainingDaySummaries = activeDays.map(([dayKey, list]) => {
-    const label = dayNames[dayKey] || dayKey;
-    return `${label} ${list.length} ท่า`;
-  });
 
   return (
     <Card title="โปรแกรมออกกำลังกายของฉัน" icon={ActivityIcon}>
       <div className="space-y-5">
         <div className="rounded-3xl border border-sky-200 bg-gradient-to-br from-sky-50 to-white p-5 shadow-sm">
           <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
-            <div className="min-w-0">
+            <div>
               <div className="text-sm font-bold text-slate-500">
                 My Exercise Plan
               </div>
@@ -2234,7 +2208,7 @@ function ExercisePlanCard({ record }) {
               </div>
             </div>
 
-            {record.goal && (
+            {record?.goal && (
               <div className="inline-flex w-fit rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-bold text-emerald-700">
                 เป้าหมาย: {record.goal}
               </div>
@@ -2275,13 +2249,13 @@ function ExercisePlanCard({ record }) {
             </div>
 
             <div className="flex flex-wrap gap-2">
-              {trainingDaySummaries.length ? (
-                trainingDaySummaries.map((item) => (
+              {activeDays.length ? (
+                activeDays.map(([dayKey, list]) => (
                   <span
-                    key={item}
+                    key={dayKey}
                     className="inline-flex rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-700 shadow-sm"
                   >
-                    {item}
+                    {dayNames[dayKey] || dayKey} {list.length} ท่า
                   </span>
                 ))
               ) : (
@@ -2309,30 +2283,20 @@ function ExercisePlanCard({ record }) {
                 </div>
 
                 <ol className="space-y-2">
-                  {sortExercisesByDay(dayNames[dayKey], list).map(
-                    (exercise, index) => (
-                      <li
-                        key={exercise}
-                        className="flex items-start gap-3 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-800"
-                      >
-                        <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-slate-900 text-xs font-bold text-white">
-                          {String(index + 1).padStart(2, "0")}
-                        </span>
+                  {list.map((exercise, index) => (
+                    <li
+                      key={`${dayKey}-${exercise}-${index}`}
+                      className="flex items-start gap-3 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-800"
+                    >
+                      <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-slate-900 text-xs font-bold text-white">
+                        {String(index + 1).padStart(2, "0")}
+                      </span>
 
-                        <div className="min-w-0">
-                          <div className="font-bold text-slate-900">
-                            {exercise}
-                          </div>
-
-                          {exerciseMuscleText(exercise) && (
-                            <div className="mt-0.5 text-xs font-medium leading-5 text-slate-400">
-                              {exerciseMuscleText(exercise)}
-                            </div>
-                          )}
-                        </div>
-                      </li>
-                    )
-                  )}
+                      <div className="font-bold text-slate-900">
+                        {exercise}
+                      </div>
+                    </li>
+                  ))}
                 </ol>
               </div>
             ))
