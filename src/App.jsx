@@ -4968,7 +4968,6 @@ const menuProgress = Math.round((menuDoneCount / allMenuItems.length) * 100);
         )}
         
         {tab === "session" && <SessionForm draft={draft} update={update} idx={idx} />}
-      </section>
     </main>
   );
 }
