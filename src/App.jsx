@@ -4716,7 +4716,6 @@ const menuProgress = Math.round((menuDoneCount / allMenuItems.length) * 100);
         </Card>
       </aside>
 
-      <section className="space-y-5">
         <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
           <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             <div className="min-w-0">
@@ -4746,7 +4745,7 @@ const menuProgress = Math.round((menuDoneCount / allMenuItems.length) * 100);
             <div className="flex shrink-0 items-center gap-2">
               <button
                 type="button"
-                onClick={deleteRecord}
+                onClick={deleteCurrentRecord}
                 className="rounded-xl border border-rose-200 bg-white px-4 py-2.5 text-sm font-bold text-rose-600 transition hover:bg-rose-50"
               >
                 ลบ HN นี้
@@ -4762,6 +4761,7 @@ const menuProgress = Math.round((menuDoneCount / allMenuItems.length) * 100);
             </div>
           </div>
         </section>
+        
         <DataQualityPanel record={draft} />
         {tab === "general" && <GeneralForm draft={draft} update={update} />}     
         {tab === "lm" && <LmAssessmentForm draft={draft} update={update} />}
