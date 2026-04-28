@@ -2587,6 +2587,7 @@ if (!hasProgramData) {
             )}
           </div>
         )}
+       </div>   
       </div>
     </Card>
   );
