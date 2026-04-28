@@ -2229,7 +2229,13 @@ function ExercisePlanCard({ record }) {
               {log.split || "ยังไม่ได้กำหนดโปรแกรม"}{" "}
               {log.daysPerWeek ? `${log.daysPerWeek} วัน/สัปดาห์` : ""}
             </div>
-
+            
+            {record.goal && (
+              <div className="mt-2 inline-flex w-fit rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-700">
+                เป้าหมาย: {record.goal}
+              </div>
+            )}
+            
             {(setsRepsSummary || cardioSummary) && (
               <div className="mt-3 inline-block w-fit max-w-full rounded-xl border border-slate-200 bg-white/70 px-2.5 py-1.5 shadow-sm">
                 <div className="mb-1.5 text-[10px] font-bold uppercase tracking-wide text-slate-400">
