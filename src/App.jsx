@@ -2404,7 +2404,14 @@ function ExercisePlanCard({ record }) {
 
 function ProgramReceivedCard({ record }) {
   const program = record.program || {};
-  const programFields = [
+const emptyProgramValues = ["", "-", "ยังไม่มีข้อมูล", "ไม่ระบุ"];
+
+function hasRealProgramValue(value) {
+  const text = String(value ?? "").trim();
+  return !emptyProgramValues.includes(text);
+}
+
+const programFields = [
   program.type,
   program.cardioType,
   program.cardioFrequency,
@@ -2420,9 +2427,7 @@ function ProgramReceivedCard({ record }) {
   program.note,
 ];
 
-const hasProgramData = programFields.some(
-  (value) => String(value || "").trim() !== ""
-);
+const hasProgramData = programFields.some(hasRealProgramValue);
 
 if (!hasProgramData) {
   return (
