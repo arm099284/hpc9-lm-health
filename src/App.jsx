@@ -4150,7 +4150,7 @@ function LmAdminDashboard({ records }) {
           </div>
         </div>
 
-        <div className="space-y-4">
+        <div className="grid gap-4 xl:grid-cols-[300px_minmax(0,1fr)]">
           <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
             <div className="mb-3">
               <div className="text-sm font-black text-slate-900">
@@ -4174,7 +4174,7 @@ function LmAdminDashboard({ records }) {
             </div>
           </div>
 
-          <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+          <div className="min-w-0 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
             <div className="mb-3 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
               <div>
                 <div className="text-sm font-black text-slate-900">
@@ -4194,7 +4194,7 @@ function LmAdminDashboard({ records }) {
             </div>
 
             <div className="overflow-x-auto rounded-xl border border-slate-200">
-              <table className="w-full min-w-[780px] text-left text-sm">
+              <table className="w-full min-w-[760px] text-left text-sm">
                 <thead className="bg-slate-50 text-xs font-bold text-slate-500">
                   <tr>
                     <th className="p-3">HN / ชื่อ</th>
