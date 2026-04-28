@@ -4305,12 +4305,12 @@ function LmAdminDashboard({ records }) {
   );
 }
 
-function Staff({ records, setRecords, adminUser, addAuditLog, refreshData }) {
-  const first = Object.keys(records)[0] || "";
+function Staff({ records = {}, setRecords, adminUser, addAuditLog, refreshData }) {
+  const first = Object.keys(records || {})[0] || "";
 
   const [hn, setHn] = useState(first);
-  const [draft, setDraft] = useState(
-    normalizeRecord(records[first] || blankRecord)
+  const [draft, setDraft] = useState(() =>
+    normalizeRecord(first && records[first] ? records[first] : blankRecord)
   );
   const [tab, setTab] = useState("general");
   const [idx, setIdx] = useState(0);
@@ -4318,6 +4318,13 @@ function Staff({ records, setRecords, adminUser, addAuditLog, refreshData }) {
   const [staffSearch, setStaffSearch] = useState("");
   const [staffPage, setStaffPage] = useState(1);
   const [deletedBackup, setDeletedBackup] = useState(null);
+  useEffect(() => {
+    if (!hn && first && records[first]) {
+      const normalized = normalizeRecord(records[first]);
+      setHn(first);
+      setDraft(clone(normalized));
+    }
+  }, [first, hn, records]);
 
   const staffSearchText = staffSearch.trim().toLowerCase();
 
