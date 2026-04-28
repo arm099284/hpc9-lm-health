@@ -2478,13 +2478,6 @@ if (!hasProgramData) {
             )}
           </div>
 
-          <div className="mt-3 flex flex-wrap gap-2">
-            <span className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-700">
-              เป้าหมาย: {show(record.goal)}
-            </span>
-          </div>
-        </div>
-
         <div className="grid gap-4 md:grid-cols-2">
           <div className="flex flex-col rounded-2xl border border-blue-200 bg-blue-50 p-4">
             <div className="text-sm font-bold text-blue-700">
