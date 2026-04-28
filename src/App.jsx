@@ -876,23 +876,23 @@ const blankRecord = {
   injury: "",
   parq: [false, false, false, false, false, false, false],
   program: {
-    type: "Full Body",
-    cardioType: "เดินเร็ว",
-    cardioFrequency: "3",
-    cardioDuration: "30",
-    strengthFrequency: "2",
-    strengthDose: "สุขภาพทั่วไป: 2–3 เซต × 8–12 ครั้ง",
-    intensity: "Moderate",
-    rpe: "4–6",
-    talk: "พูดเป็นประโยค",
-    focus: "Core Stability / Hip Mobility / Ankle Mobility",
+    type: "",
+    cardioType: "",
+    cardioFrequency: "",
+    cardioDuration: "",
+    strengthFrequency: "",
+    strengthDose: "",
+    intensity: "",
+    rpe: "",
+    talk: "",
+    focus: "",
     precaution: "",
     followUp: "",
     note: "",
   },
-    exerciseLog: {
-    split: "Full Body",
-    daysPerWeek: "3",
+  exerciseLog: {
+    split: "",
+    daysPerWeek: "",
     updateReason: "",
     description: "",
     updatedFrom: "",
@@ -6046,14 +6046,14 @@ function ProgramForm({ draft, update }) {
             onChange={(v) => {
               update(["program", "type"], v);
             }}
-            options={["Full Body", "Upper / Lower", "PPL", "Hybrid / Mixed"]}
+            options={[{ value: "", label: "ยังไม่มีข้อมูล" },"Full Body", "Upper / Lower", "PPL", "Hybrid / Mixed"]}
           />
 
           <Select
             label="Intensity"
             value={program.intensity || "Moderate"}
             onChange={(v) => update(["program", "intensity"], v)}
-            options={["Light", "Moderate", "Vigorous", "Individualized"]}
+            options={[{ value: "", label: "ยังไม่มีข้อมูล" },"Light", "Moderate", "Vigorous", "Individualized"]}
           />
         </div>
       </Card>
@@ -6065,7 +6065,7 @@ function ProgramForm({ draft, update }) {
               label="ประเภท"
               value={program.cardioType || "เดินเร็ว"}
               onChange={(v) => update(["program", "cardioType"], v)}
-              options={["เดินเร็ว", "เดินสะสม", "ปั่นจักรยาน", "วิ่งเบา", "ว่ายน้ำ", "อื่น ๆ"]}
+              options={[{ value: "", label: "ยังไม่มีข้อมูล" },"เดินเร็ว", "เดินสะสม", "ปั่นจักรยาน", "วิ่งเบา", "ว่ายน้ำ", "อื่น ๆ"]}
             />
 
             <Field
@@ -6080,14 +6080,14 @@ function ProgramForm({ draft, update }) {
               label="RPE"
               value={program.rpe || "4–6"}
               onChange={(v) => update(["program", "rpe"], v)}
-              options={["2–3", "4–6", "7–8"]}
+              options={[{ value: "", label: "ยังไม่มีข้อมูล" },"2–3", "4–6", "7–8"]}
             />
 
             <Select
               label="Talk Test"
               value={program.talk || "พูดเป็นประโยค"}
               onChange={(v) => update(["program", "talk"], v)}
-              options={["พูดสบาย", "พูดเป็นประโยค", "พูดเป็นคำ ๆ"]}
+              options={[{ value: "", label: "ยังไม่มีข้อมูล" },"พูดสบาย", "พูดเป็นประโยค", "พูดเป็นคำ ๆ"]}
             />
           </div>
 
