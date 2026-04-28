@@ -5893,16 +5893,120 @@ function LmAssessmentForm({ draft, update }) {
 }
 
 function DataQualityPanel({ record }) {
-  const normalizedRecord = { ...record, sessions: record.sessions.map((s) => ({ ...s, date: s.date || (sessionHasAnyData(s) ? todayThaiDateText() : "") })) };
+  const safeRecord = record || blankRecord;
+
+  const safeSessions = Array.isArray(safeRecord.sessions)
+    ? safeRecord.sessions
+    : [session(1), session(2), session(3), session(4)];
+
+  const normalizedRecord = {
+    ...safeRecord,
+    sessions: safeSessions.map((s) => ({
+      ...s,
+      date: s.date || (sessionHasAnyData(s) ? todayThaiDateText() : ""),
+    })),
+  };
+
   const quality = recordQuality(normalizedRecord);
+
+  const issueList = Array.isArray(quality.issues) ? quality.issues : [];
+  const missingLatest = Array.isArray(quality.missingLatest)
+    ? quality.missingLatest
+    : [];
+
+  const warningList = [...issueList, ...missingLatest].slice(0, 6);
+
+  const latestText =
+    quality.filled === 0
+      ? "ยังไม่มีข้อมูล"
+      : missingLatest.length > 0
+        ? missingLatest.join(" / ")
+        : "ครบสำหรับสรุปหลัก";
+
+  const statusTone =
+    quality.filled === 0
+      ? "gray"
+      : warningList.length > 0
+        ? "warn"
+        : "good";
+
+  const statusText =
+    statusTone === "good"
+      ? "ครบพร้อมใช้"
+      : statusTone === "warn"
+        ? "ควรตรวจสอบ"
+        : "ยังไม่มีข้อมูล";
+
+  const statusClass = {
+    good: "border-emerald-200 bg-emerald-50 text-emerald-700",
+    warn: "border-amber-200 bg-amber-50 text-amber-700",
+    gray: "border-slate-200 bg-slate-50 text-slate-600",
+  }[statusTone];
+
   return (
-    <Card title="สถานะข้อมูล" icon={ClipboardIcon} right={<Pill tone={quality.complete ? "good" : quality.issues.length ? "bad" : "warn"}>{quality.complete ? "ครบพร้อมใช้" : "ควรตรวจสอบ"}</Pill>}>
-      <div className="grid gap-3 md:grid-cols-3">
-        <Info label="จำนวนครั้งที่มีข้อมูล" value={`${quality.filled}/4 ครั้ง`} />
-        <Info label="ข้อมูลล่าสุด" value={quality.missingLatest.length ? quality.missingLatest.join(" / ") : "ครบสำหรับสรุปหลัก"} tone={quality.missingLatest.length ? "fat" : "default"} />
-        <Info label="ค่าที่ควรตรวจสอบ" value={`${quality.issues.length} รายการ`} tone={quality.issues.length ? "fat" : "default"} />
+    <Card
+      title="สถานะข้อมูล"
+      icon={ClipboardIcon}
+      right={
+        <span
+          className={`inline-flex rounded-full border px-3 py-1 text-xs font-black ${statusClass}`}
+        >
+          {statusText}
+        </span>
+      }
+    >
+      <div className="rounded-2xl border border-slate-200 bg-gradient-to-r from-slate-50 to-white px-4 py-3">
+        <div className="grid gap-3 md:grid-cols-3">
+          <div className="min-w-0">
+            <div className="text-xs font-black text-slate-400">
+              จำนวนครั้งที่มีข้อมูล
+            </div>
+            <div className="mt-1 text-lg font-black text-slate-900">
+              {quality.filled}/4 ครั้ง
+            </div>
+          </div>
+
+          <div className="min-w-0 border-t border-slate-200 pt-3 md:border-l md:border-t-0 md:pl-4 md:pt-0">
+            <div className="text-xs font-black text-slate-400">
+              ข้อมูลล่าสุด
+            </div>
+            <div
+              className={`mt-1 truncate text-lg font-black ${
+                missingLatest.length > 0 ? "text-amber-800" : "text-slate-900"
+              }`}
+              title={latestText}
+            >
+              {latestText}
+            </div>
+          </div>
+
+          <div className="min-w-0 border-t border-slate-200 pt-3 md:border-l md:border-t-0 md:pl-4 md:pt-0">
+            <div className="text-xs font-black text-slate-400">
+              ค่าที่ควรตรวจสอบ
+            </div>
+            <div
+              className={`mt-1 text-lg font-black ${
+                warningList.length > 0 ? "text-amber-800" : "text-slate-900"
+              }`}
+            >
+              {warningList.length} รายการ
+            </div>
+          </div>
+        </div>
+
+        {warningList.length > 0 && (
+          <div className="mt-3 flex flex-wrap gap-2 border-t border-slate-200 pt-3">
+            {warningList.map((item, index) => (
+              <span
+                key={`${item}-${index}`}
+                className="inline-flex rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-xs font-bold text-amber-800"
+              >
+                • {item}
+              </span>
+            ))}
+          </div>
+        )}
       </div>
-      {quality.issues.length > 0 && <div className="mt-3 rounded-xl border border-amber-200 bg-amber-50 p-3 text-base text-amber-900">{quality.issues.slice(0, 6).map((x) => <div key={x}>• {x}</div>)}</div>}
     </Card>
   );
 }
