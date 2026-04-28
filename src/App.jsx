@@ -3622,7 +3622,9 @@ function AdminSummary({ records, auditLogs, onFullBackup, onRestoreBackup }) {
           </div>
         </Card>
       </div>
-
+      
+      <LmAdminDashboard records={records} />
+      
       <Card title="ตารางสรุปทุกคน สำหรับแอดมิน" icon={ClipboardIcon}>
         <div className="overflow-x-auto rounded-xl border border-slate-200">
           <table className="w-full min-w-[1380px] text-left text-base">
@@ -3860,6 +3862,460 @@ function SidebarMenuGroup({ title, tone = "slate", children }) {
         {children}
       </div>
     </div>
+  );
+}
+
+const LM_ADMIN_PAGE_SIZE = 10;
+
+const LM_ADMIN_CATEGORIES = [
+  { key: "nutrition", thai: "โภชนาการ", max: 10 },
+  { key: "physical", thai: "กิจกรรมทางกาย", max: 10 },
+  { key: "sleep", thai: "การนอน", max: 10 },
+  { key: "stress", thai: "ความเครียด", max: 5 },
+  { key: "substances", thai: "สุรา/บุหรี่", max: 10 },
+  { key: "relationship", thai: "ความสัมพันธ์", max: 5 },
+];
+
+function lmAnsweredCount(assessment = {}) {
+  return LM_QUESTIONS.filter(
+    (question) =>
+      assessment.answers?.[question.id] !== undefined &&
+      assessment.answers?.[question.id] !== null &&
+      assessment.answers?.[question.id] !== ""
+  ).length;
+}
+
+function lmRoundInfo(record, index) {
+  const assessment =
+    record.lmAssessments?.[index] || blankLmAssessment(index + 1);
+
+  const answered = lmAnsweredCount(assessment);
+  const calculated = calculateLmAssessment(assessment, record);
+
+  return {
+    no: index + 1,
+    assessment,
+    answered,
+    complete: answered === LM_QUESTIONS.length,
+    total: answered > 0 ? calculated.total : null,
+    scores: calculated.scores,
+  };
+}
+
+function lmCategoryQuestionCount(categoryKey) {
+  return LM_QUESTIONS.filter((question) => question.category === categoryKey)
+    .length;
+}
+
+function lmCategoryAnsweredCount(categoryKey, assessment = {}) {
+  return LM_QUESTIONS.filter(
+    (question) =>
+      question.category === categoryKey &&
+      assessment.answers?.[question.id] !== undefined &&
+      assessment.answers?.[question.id] !== null &&
+      assessment.answers?.[question.id] !== ""
+  ).length;
+}
+
+function lmAdminRow(record) {
+  const rounds = [0, 1, 2, 3].map((index) => lmRoundInfo(record, index));
+  const hasAny = rounds.some((round) => round.answered > 0);
+  const completeRounds = rounds.filter((round) => round.complete);
+
+  const latestAny =
+    [...rounds].reverse().find((round) => round.answered > 0) || null;
+
+  const firstComplete = completeRounds[0] || null;
+  const latestComplete = completeRounds[completeRounds.length - 1] || null;
+
+  const comparable = completeRounds.length >= 2;
+
+  const delta =
+    comparable && firstComplete && latestComplete
+      ? latestComplete.total - firstComplete.total
+      : null;
+
+  let status = "ยังไม่มีข้อมูล";
+  let tone = "gray";
+
+  if (hasAny && !latestAny?.complete) {
+    status = "ยังไม่ครบ";
+    tone = "warn";
+  } else if (completeRounds.length === 1) {
+    status = "รอติดตาม";
+    tone = "warn";
+  } else if (comparable && delta > 0) {
+    status = "ดีขึ้น";
+    tone = "good";
+  } else if (comparable && delta < 0) {
+    status = "ลดลง";
+    tone = "bad";
+  } else if (comparable && delta === 0) {
+    status = "คงเดิม";
+    tone = "gray";
+  }
+
+  const latestForCategory = latestComplete || latestAny;
+
+  const categorySummary = latestForCategory
+    ? LM_ADMIN_CATEGORIES.map((item) => {
+        const score = latestForCategory.scores?.[item.key] ?? 0;
+        const answered = lmCategoryAnsweredCount(
+          item.key,
+          latestForCategory.assessment
+        );
+        const totalQuestions = lmCategoryQuestionCount(item.key);
+        const percent = (score / item.max) * 100;
+
+        let catTone = "bad";
+        if (percent >= 80) catTone = "good";
+        else if (percent >= 60) catTone = "warn";
+
+        return {
+          ...item,
+          score,
+          answered,
+          totalQuestions,
+          tone: catTone,
+        };
+      })
+    : [];
+
+  const improvements = categorySummary
+    .filter(
+      (item) =>
+        item.answered === item.totalQuestions && item.tone === "bad"
+    )
+    .sort((a, b) => a.score / a.max - b.score / b.max);
+
+  return {
+    hn: record.hn || "",
+    name: record.name || "",
+    hasAny,
+    rounds,
+    latestAny,
+    latestComplete,
+    firstComplete,
+    completeRounds,
+    comparable,
+    delta,
+    status,
+    tone,
+    improvements,
+  };
+}
+
+function LmAdminDashboard({ records }) {
+  const [lmSearch, setLmSearch] = useState("");
+  const [lmPage, setLmPage] = useState(1);
+
+  const rows = useMemo(() => {
+    return Object.values(records || {})
+      .map((record) => lmAdminRow(record))
+      .filter((row) => row.hasAny)
+      .sort((a, b) => {
+        if (a.comparable !== b.comparable) return a.comparable ? -1 : 1;
+        return String(a.hn).localeCompare(String(b.hn));
+      });
+  }, [records]);
+
+  const comparableRows = rows.filter((row) => row.comparable);
+
+  const improvedCount = comparableRows.filter((row) => row.delta > 0).length;
+  const worsenedCount = comparableRows.filter((row) => row.delta < 0).length;
+  const unchangedCount = comparableRows.filter((row) => row.delta === 0).length;
+
+  const latestCompleteRows = rows.filter((row) => row.latestComplete);
+
+  const averageLatest =
+    latestCompleteRows.length > 0
+      ? (
+          latestCompleteRows.reduce(
+            (sum, row) => sum + row.latestComplete.total,
+            0
+          ) / latestCompleteRows.length
+        ).toFixed(1)
+      : "-";
+
+  const averageDelta =
+    comparableRows.length > 0
+      ? (
+          comparableRows.reduce((sum, row) => sum + row.delta, 0) /
+          comparableRows.length
+        ).toFixed(1)
+      : "-";
+
+  const chartData = [
+    { name: "ดีขึ้น", value: improvedCount },
+    { name: "คงเดิม", value: unchangedCount },
+    { name: "ลดลง", value: worsenedCount },
+  ];
+
+  const searchText = lmSearch.trim().toLowerCase();
+
+  const filteredRows = rows.filter((row) => {
+    if (!searchText) return true;
+    return `${row.hn} ${row.name}`.toLowerCase().includes(searchText);
+  });
+
+  const pageCount = Math.max(
+    1,
+    Math.ceil(filteredRows.length / LM_ADMIN_PAGE_SIZE)
+  );
+
+  const safePage = Math.min(lmPage, pageCount);
+
+  const pagedRows = filteredRows.slice(
+    (safePage - 1) * LM_ADMIN_PAGE_SIZE,
+    safePage * LM_ADMIN_PAGE_SIZE
+  );
+
+  useEffect(() => {
+    setLmPage(1);
+  }, [lmSearch]);
+
+  function deltaText(row) {
+    if (!row.comparable) return "-";
+    if (row.delta > 0) return `+${row.delta}`;
+    return `${row.delta}`;
+  }
+
+  function roundText(round) {
+    if (round.total === null) return "-";
+    return `${round.total}/50`;
+  }
+
+  return (
+    <Card title="สรุปพฤติกรรมสุขภาพ LM สำหรับแอดมิน" icon={FileIcon}>
+      <div className="space-y-5">
+        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-5">
+          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+            <div className="text-sm font-bold text-slate-500">
+              ผู้มีข้อมูล LM
+            </div>
+            <div className="mt-1 text-3xl font-black text-slate-900">
+              {rows.length}
+            </div>
+            <div className="mt-1 text-xs font-semibold text-slate-400">
+              จากทั้งหมด {Object.values(records || {}).length} คน
+            </div>
+          </div>
+
+          <div className="rounded-2xl border border-sky-200 bg-sky-50 p-4">
+            <div className="text-sm font-bold text-sky-700">
+              มีข้อมูลครบ ≥2 ครั้ง
+            </div>
+            <div className="mt-1 text-3xl font-black text-sky-900">
+              {comparableRows.length}
+            </div>
+            <div className="mt-1 text-xs font-semibold text-sky-700/70">
+              ใช้วิเคราะห์ดีขึ้น/ลดลง
+            </div>
+          </div>
+
+          <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
+            <div className="text-sm font-bold text-emerald-700">
+              คะแนนดีขึ้น
+            </div>
+            <div className="mt-1 text-3xl font-black text-emerald-900">
+              {improvedCount}
+            </div>
+            <div className="mt-1 text-xs font-semibold text-emerald-700/70">
+              เคส
+            </div>
+          </div>
+
+          <div className="rounded-2xl border border-rose-200 bg-rose-50 p-4">
+            <div className="text-sm font-bold text-rose-700">
+              คะแนนลดลง
+            </div>
+            <div className="mt-1 text-3xl font-black text-rose-900">
+              {worsenedCount}
+            </div>
+            <div className="mt-1 text-xs font-semibold text-rose-700/70">
+              เคส
+            </div>
+          </div>
+
+          <div className="rounded-2xl border border-indigo-200 bg-indigo-50 p-4">
+            <div className="text-sm font-bold text-indigo-700">
+              เฉลี่ยล่าสุด / เปลี่ยนแปลง
+            </div>
+            <div className="mt-1 text-2xl font-black text-indigo-900">
+              {averageLatest}/50
+            </div>
+            <div className="mt-1 text-xs font-semibold text-indigo-700/70">
+              เฉลี่ยเปลี่ยนแปลง {averageDelta === "-" ? "-" : `${averageDelta} คะแนน`}
+            </div>
+          </div>
+        </div>
+
+        <div className="grid gap-5 xl:grid-cols-[360px_1fr]">
+          <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+            <div className="mb-3">
+              <div className="text-sm font-black text-slate-900">
+                ผลการเปลี่ยนแปลงคะแนน LM
+              </div>
+              <div className="mt-0.5 text-xs font-semibold text-slate-400">
+                นับเฉพาะเคสที่มีข้อมูลครบอย่างน้อย 2 ครั้ง
+              </div>
+            </div>
+
+            <div className="h-64">
+              <ResponsiveContainer>
+                <BarChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                  <XAxis dataKey="name" tick={{ fontSize: 12 }} />
+                  <YAxis allowDecimals={false} tick={{ fontSize: 12 }} />
+                  <Tooltip formatter={(value) => [`${value} เคส`, "จำนวน"]} />
+                  <Bar dataKey="value" radius={[10, 10, 0, 0]} fill="#0f172a" />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+
+          <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+            <div className="mb-3 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+              <div>
+                <div className="text-sm font-black text-slate-900">
+                  ตารางสรุป LM รายบุคคล
+                </div>
+                <div className="mt-0.5 text-xs font-semibold text-slate-400">
+                  แสดง {LM_ADMIN_PAGE_SIZE} เคสต่อหน้า
+                </div>
+              </div>
+
+              <input
+                value={lmSearch}
+                onChange={(e) => setLmSearch(e.target.value)}
+                placeholder="ค้นหา HN / ชื่อ"
+                className="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm font-semibold outline-none focus:border-slate-700 lg:w-72"
+              />
+            </div>
+
+            <div className="overflow-x-auto rounded-xl border border-slate-200">
+              <table className="w-full min-w-[980px] text-left text-sm">
+                <thead className="bg-slate-50 text-xs font-bold text-slate-500">
+                  <tr>
+                    <th className="p-3">HN / ชื่อ</th>
+                    <th className="p-3">ครั้งแรก</th>
+                    <th className="p-3">ล่าสุด</th>
+                    <th className="p-3">ครั้งที่ 1</th>
+                    <th className="p-3">ครั้งที่ 2</th>
+                    <th className="p-3">ครั้งที่ 3</th>
+                    <th className="p-3">ครั้งที่ 4</th>
+                    <th className="p-3">เปลี่ยนแปลง</th>
+                    <th className="p-3">สถานะ</th>
+                    <th className="p-3">ควรปรับ</th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  {pagedRows.map((row) => (
+                    <tr key={row.hn} className="border-t border-slate-100">
+                      <td className="p-3">
+                        <div className="font-black text-slate-900">
+                          {row.hn}
+                        </div>
+                        <div className="text-xs font-semibold text-slate-500">
+                          {row.name || "-"}
+                        </div>
+                      </td>
+
+                      <td className="p-3">
+                        {row.firstComplete ? `${row.firstComplete.total}/50` : "-"}
+                      </td>
+
+                      <td className="p-3">
+                        {row.latestComplete
+                          ? `${row.latestComplete.total}/50`
+                          : row.latestAny
+                            ? `${row.latestAny.total}/50`
+                            : "-"}
+                      </td>
+
+                      {row.rounds.map((round) => (
+                        <td key={round.no} className="p-3">
+                          {roundText(round)}
+                        </td>
+                      ))}
+
+                      <td className="p-3">
+                        <Pill
+                          tone={
+                            row.delta > 0
+                              ? "good"
+                              : row.delta < 0
+                                ? "bad"
+                                : "gray"
+                          }
+                        >
+                          {deltaText(row)}
+                        </Pill>
+                      </td>
+
+                      <td className="p-3">
+                        <Pill tone={row.tone}>{row.status}</Pill>
+                      </td>
+
+                      <td className="p-3">
+                        <div className="flex flex-wrap gap-1.5">
+                          {row.improvements.length ? (
+                            row.improvements.map((item) => (
+                              <Pill key={`${row.hn}-${item.key}`} tone="bad">
+                                {item.thai} {item.score}/{item.max}
+                              </Pill>
+                            ))
+                          ) : (
+                            <span className="text-xs font-semibold text-slate-400">
+                              -
+                            </span>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+
+                  {pagedRows.length === 0 && (
+                    <tr>
+                      <td colSpan="10" className="p-5 text-center text-slate-500">
+                        ยังไม่มีข้อมูล LM
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+            <div className="mt-4 flex flex-wrap items-center justify-between gap-3 text-sm text-slate-500">
+              <div>
+                แสดง {pagedRows.length} รายการ จากทั้งหมด {filteredRows.length} รายการ • หน้า {safePage}/{pageCount}
+              </div>
+
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  disabled={safePage <= 1}
+                  onClick={() => setLmPage((p) => Math.max(1, p - 1))}
+                  className="rounded-xl border border-slate-200 bg-white px-4 py-2 font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-40"
+                >
+                  ก่อนหน้า
+                </button>
+
+                <button
+                  type="button"
+                  disabled={safePage >= pageCount}
+                  onClick={() => setLmPage((p) => Math.min(pageCount, p + 1))}
+                  className="rounded-xl border border-slate-200 bg-white px-4 py-2 font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-40"
+                >
+                  ถัดไป
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </Card>
   );
 }
 
