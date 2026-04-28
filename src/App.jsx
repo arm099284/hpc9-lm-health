@@ -5824,16 +5824,71 @@ function LmAssessmentForm({ draft, update }) {
 }
 
 function DataQualityPanel({ record }) {
-  const normalizedRecord = { ...record, sessions: record.sessions.map((s) => ({ ...s, date: s.date || (sessionHasAnyData(s) ? todayThaiDateText() : "") })) };
+  const normalizedRecord = {
+    ...record,
+    sessions: record.sessions.map((s) => ({
+      ...s,
+      date: s.date || (sessionHasAnyData(s) ? todayThaiDateText() : ""),
+    })),
+  };
+
   const quality = recordQuality(normalizedRecord);
+
+  const issueList = quality.issues || [];
+  const missingList = quality.missingLatest || [];
+
+  const warningList = [
+    ...issueList,
+    ...missingList.map((item) => `ยังไม่มี${item}`),
+  ].slice(0, 6);
+
+  const statusText = quality.complete
+    ? "ครบพร้อมใช้"
+    : warningList.length > 0
+      ? "ควรตรวจสอบ"
+      : "ยังไม่ครบ";
+
+  const statusClass = quality.complete
+    ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+    : warningList.length > 0
+      ? "border-amber-200 bg-amber-50 text-amber-700"
+      : "border-slate-200 bg-slate-50 text-slate-600";
+
   return (
-    <Card title="สถานะข้อมูล" icon={ClipboardIcon} right={<Pill tone={quality.complete ? "good" : quality.issues.length ? "bad" : "warn"}>{quality.complete ? "ครบพร้อมใช้" : "ควรตรวจสอบ"}</Pill>}>
-      <div className="grid gap-3 md:grid-cols-3">
-        <Info label="จำนวนครั้งที่มีข้อมูล" value={`${quality.filled}/4 ครั้ง`} />
-        <Info label="ข้อมูลล่าสุด" value={quality.missingLatest.length ? quality.missingLatest.join(" / ") : "ครบสำหรับสรุปหลัก"} tone={quality.missingLatest.length ? "fat" : "default"} />
-        <Info label="ค่าที่ควรตรวจสอบ" value={`${quality.issues.length} รายการ`} tone={quality.issues.length ? "fat" : "default"} />
+    <Card
+      title="สถานะข้อมูล"
+      icon={ClipboardIcon}
+      right={
+        <span
+          className={`inline-flex items-center rounded-full border px-3 py-1 text-xs font-bold ${statusClass}`}
+        >
+          {statusText}
+        </span>
+      }
+    >
+      <div className="space-y-3">
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-sm font-bold text-slate-700">
+            บันทึกแล้ว {quality.filled}/4 ครั้ง
+          </span>
+
+          <span
+            className={`inline-flex items-center rounded-full border px-3 py-1.5 text-sm font-bold ${statusClass}`}
+          >
+            ต้องตรวจสอบ {warningList.length} รายการ
+          </span>
+        </div>
+
+        {warningList.length > 0 && (
+          <div className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2">
+            <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm font-semibold text-amber-900">
+              {warningList.map((item, index) => (
+                <span key={index}>• {item}</span>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
-      {quality.issues.length > 0 && <div className="mt-3 rounded-xl border border-amber-200 bg-amber-50 p-3 text-base text-amber-900">{quality.issues.slice(0, 6).map((x) => <div key={x}>• {x}</div>)}</div>}
     </Card>
   );
 }
