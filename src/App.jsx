@@ -4632,8 +4632,8 @@ const menuProgress = Math.round((menuDoneCount / allMenuItems.length) * 100);
             onClick={createNew}
             className={`mb-4 w-full rounded-xl border px-4 py-3 text-base font-bold transition ${
               isCreatingNewRecord
-                ? "border-slate-900 bg-slate-900 text-white shadow-sm"
-                : "border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50"
+                ? "border-sky-300 bg-sky-600 text-white shadow-sm hover:bg-sky-700"
+                : "border-sky-200 bg-sky-50 text-sky-800 hover:border-sky-300 hover:bg-sky-100"
             }`}
           >
             + เพิ่ม HN ใหม่
