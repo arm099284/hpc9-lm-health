@@ -2475,25 +2475,25 @@ return (
           <div className="text-3xl font-black tracking-tight text-slate-900">
             {show(program.type)}
           </div>
-
+        
           {program.strengthFrequency && (
-            <span className="text-2xl font-black text-slate-400">
-              •
+            <>
+              <span className="text-2xl font-black text-slate-400">
+                •
+              </span>
+        
+              <div className="text-2xl font-black text-slate-600">
+                {program.strengthFrequency} วัน/สัปดาห์
+              </div>
+            </>
+          )}
+        
+          {record.goal && (
+            <span className="ml-1 inline-flex max-w-full truncate rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-700">
+              เป้าหมาย: {record.goal}
             </span>
           )}
-
-          {program.strengthFrequency && (
-            <div className="text-2xl font-black text-slate-600">
-              {program.strengthFrequency} วัน/สัปดาห์
-            </div>
-          )}
         </div>
-
-        {record.goal && (
-          <div className="mt-3 inline-flex items-center rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-700">
-            เป้าหมาย: {record.goal}
-          </div>
-        )}
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
