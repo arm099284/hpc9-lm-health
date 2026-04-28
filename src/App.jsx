@@ -4717,7 +4717,7 @@ const menuProgress = Math.round((menuDoneCount / allMenuItems.length) * 100);
       </aside>
 
       <section className="space-y-5">
-        <section className="rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-sm">
+        <section className="rounded-2xl border border-slate-300 bg-white px-4 py-3 shadow-md">
           <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
