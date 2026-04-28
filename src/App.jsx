@@ -4717,13 +4717,48 @@ const menuProgress = Math.round((menuDoneCount / allMenuItems.length) * 100);
       </aside>
 
       <section className="space-y-5">
-        <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-          <div className="flex flex-col justify-between gap-3 md:flex-row md:items-center">
-            <div className="space-y-3"><div><h2 className="text-3xl font-bold text-slate-900">บันทึกข้อมูลสุขภาพ</h2><p className="text-base text-slate-500">กรอกข้อมูลตัวเลข/ตัวเลือก ระบบจะทำตารางและกราฟ 4 ครั้งให้อัตโนมัติ</p></div><div className="grid gap-3 sm:grid-cols-2"><div className="rounded-xl border border-sky-200 bg-sky-50 p-3"><div className="text-sm font-semibold text-sky-700">ผู้ที่กำลังบันทึกข้อมูล</div><div className="text-2xl font-bold text-slate-900">{show(adminUser?.name)}</div><div className="text-sm text-slate-500">Admin ID: {show(adminUser?.id)}</div></div><div className="rounded-xl border border-slate-200 bg-slate-50 p-3"><div className="text-sm font-semibold text-slate-500">แก้ไขล่าสุด</div><div className="text-lg font-bold text-slate-900">{formatDateTimeThai(draft.updatedAt)}</div><div className="text-sm text-slate-500">โดย {show(draft.updatedBy)}</div></div></div></div>
-            <div className="flex flex-wrap gap-2">
-              {deletedBackup && <button onClick={restoreDeletedRecord} className="rounded-xl border border-amber-200 bg-amber-50 px-5 py-3 text-lg font-bold text-amber-700 hover:bg-amber-100">กู้คืน HN ที่ลบล่าสุด</button>}
-              <button onClick={deleteCurrentRecord} className="rounded-xl border border-rose-200 bg-rose-50 px-5 py-3 text-lg font-bold text-rose-700 hover:bg-rose-100">ลบ HN นี้</button>
-              <button onClick={save} className="rounded-xl bg-emerald-600 px-5 py-3 text-lg font-bold text-white shadow-sm hover:bg-emerald-700">บันทึกข้อมูล</button>
+        <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+            <div className="min-w-0">
+              <h1 className="text-2xl font-black tracking-tight text-slate-900">
+                บันทึกข้อมูลสุขภาพ
+              </h1>
+        
+              <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm font-semibold text-slate-500">
+                <span>
+                  ผู้บันทึก:{" "}
+                  <span className="font-bold text-slate-700">
+                    {adminUser?.name || draft.updatedBy || "-"}
+                  </span>
+                </span>
+        
+                <span className="hidden text-slate-300 md:inline">•</span>
+        
+                <span>
+                  แก้ไขล่าสุด:{" "}
+                  <span className="font-bold text-slate-700">
+                    {draft.updatedAt || "-"}
+                  </span>
+                </span>
+              </div>
+            </div>
+        
+            <div className="flex shrink-0 items-center gap-2">
+              <button
+                type="button"
+                onClick={deleteRecord}
+                className="rounded-xl border border-rose-200 bg-white px-4 py-2.5 text-sm font-bold text-rose-600 transition hover:bg-rose-50"
+              >
+                ลบ HN นี้
+              </button>
+        
+              <button
+                type="button"
+                onClick={save}
+                className="rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-emerald-700"
+              >
+                บันทึกข้อมูล
+              </button>
             </div>
           </div>
         </section>
