@@ -2832,7 +2832,12 @@ function Dashboard({ record, back }) {
             </h2>
 
             <p className="mt-1 text-base text-slate-500">
-              {record.sex} • อายุ {show(record.age)} ปี • ส่วนสูง {show(record.height)} ซม. • เป้าหมาย: {record.goal}
+              <div className="mt-1 text-sm font-semibold text-slate-500">
+                {show(record.sex)} • อายุ {show(record.age)} ปี • ส่วนสูง {show(record.height)} ซม.
+                {" "}• โรคประจำตัว: {show(record.disease)}
+                {" "}• ยาที่ใช้ประจำ: {show(record.medication)}
+                {" "}• ประวัติบาดเจ็บ/ผ่าตัด: {show(record.injury)}
+              </div>
             </p>
           </div>
 
