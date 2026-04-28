@@ -2143,15 +2143,12 @@ function NutritionPlanCard({ record }) {
 }
 
 function defaultSetsRepsSummaryByGoal(goal) {
-  if (goal === "เพิ่มกล้ามเนื้อ") return "เพิ่มกล้ามเนื้อ: 3–4 เซต × 8–12 ครั้ง";
-  if (goal === "ลดไขมัน") return "ลดไขมัน: 2–4 เซต × 10–15 ครั้ง";
-  if (goal === "เพิ่มความแข็งแรง") return "เพิ่มความแข็งแรง: 3–5 เซต × 3–6 ครั้ง";
-  if (goal === "ฟื้นฟู/แก้ไขท่าทาง") return "ฟื้นฟู/แก้ไข: 1–3 เซต × 10–15 ครั้ง";
-  return "สุขภาพทั่วไป: 2–3 เซต × 8–12 ครั้ง";
+  return "";
 }
 
 function getSetsRepsText(program = {}, goal = "") {
   return (
+    program.strengthDose ||
     program.setsReps ||
     program.strengthSetsReps ||
     program.strengthSets ||
@@ -2161,7 +2158,7 @@ function getSetsRepsText(program = {}, goal = "") {
     program.volume ||
     program.strengthVolume ||
     program.strengthPlan ||
-    defaultSetsRepsSummaryByGoal(goal)
+    ""
   );
 }
 
@@ -2410,7 +2407,38 @@ function ExercisePlanCard({ record }) {
 
 function ProgramReceivedCard({ record }) {
   const program = record.program || {};
+  const hasProgramData = Boolean(
+  program.type ||
+  program.cardioType ||
+  program.cardioFrequency ||
+  program.cardioDuration ||
+  program.strengthFrequency ||
+  program.strengthDose ||
+  program.intensity ||
+  program.rpe ||
+  program.talk ||
+  program.focus ||
+  program.precaution ||
+  program.followUp ||
+  program.note
+);
 
+if (!hasProgramData) {
+  return (
+    <Card title="โปรแกรมที่ได้รับ" icon={FileIcon}>
+      <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-5 text-center">
+        <div className="text-lg font-black text-amber-900">
+          ยังไม่ได้เข้าพบเทรนเนอร์ / ผู้ดูแล / นักวิทยาศาสตร์การกีฬา
+        </div>
+
+        <div className="mt-2 text-sm font-semibold leading-6 text-amber-800">
+          ยังไม่มีการกำหนดโปรแกรมออกกำลังกายรายบุคคลในระบบ
+          กรุณาเข้าพบเจ้าหน้าที่เพื่อรับคำแนะนำก่อนเริ่มโปรแกรม
+        </div>
+      </div>
+    </Card>
+  );
+}
   const focusItems = Array.isArray(program.focus)
     ? program.focus
     : String(program.focus || "")
@@ -2418,15 +2446,8 @@ function ProgramReceivedCard({ record }) {
         .map((x) => x.trim())
         .filter(Boolean);
 
-  const defaultSetsRepsByGoal = (goal) => {
-    if (goal === "เพิ่มกล้ามเนื้อ") return "เพิ่มกล้ามเนื้อ: 3–4 เซต × 8–12 ครั้ง";
-    if (goal === "ลดไขมัน") return "ลดไขมัน: 2–4 เซต × 10–15 ครั้ง";
-    if (goal === "เพิ่มความแข็งแรง") return "เพิ่มความแข็งแรง: 3–5 เซต × 3–6 ครั้ง";
-    if (goal === "ฟื้นฟู/แก้ไขท่าทาง") return "ฟื้นฟู/แก้ไข: 1–3 เซต × 10–15 ครั้ง";
-    return "สุขภาพทั่วไป: 2–3 เซต × 8–12 ครั้ง";
-  };
-
   const setsReps =
+    program.strengthDose ||
     program.setsReps ||
     program.strengthSetsReps ||
     program.strengthSets ||
@@ -2436,7 +2457,7 @@ function ProgramReceivedCard({ record }) {
     program.volume ||
     program.strengthVolume ||
     program.strengthPlan ||
-    defaultSetsRepsByGoal(record.goal);
+    "";
 
   return (
     <Card title="โปรแกรมที่ได้รับ" icon={ClipboardIcon}>
@@ -2515,7 +2536,7 @@ function ProgramReceivedCard({ record }) {
               </div>
 
               <div className="rounded-xl bg-white px-3 py-2">
-                Target HR: {targetHrText(record.age, program.intensity)}
+                Target HR: {program.intensity ? targetHrText(record.age, program.intensity) : "-"}
               </div>
             </div>
           </div>
