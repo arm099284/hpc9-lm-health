@@ -2407,6 +2407,43 @@ function ExercisePlanCard({ record }) {
 
 function ProgramReceivedCard({ record }) {
   const program = record.program || {};
+  const programFields = [
+  program.type,
+  program.cardioType,
+  program.cardioFrequency,
+  program.cardioDuration,
+  program.strengthFrequency,
+  program.strengthDose,
+  program.intensity,
+  program.rpe,
+  program.talk,
+  program.focus,
+  program.precaution,
+  program.followUp,
+  program.note,
+];
+
+const hasProgramData = programFields.some(
+  (value) => String(value || "").trim() !== ""
+);
+
+if (!hasProgramData) {
+  return (
+    <Card title="โปรแกรมที่ได้รับ" icon={FileIcon}>
+      <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-5 text-center">
+        <div className="text-lg font-black text-amber-900">
+          ยังไม่ได้เข้าพบเทรนเนอร์ / ผู้ดูแล / นักวิทยาศาสตร์การกีฬา
+        </div>
+
+        <div className="mt-2 text-sm font-semibold leading-6 text-amber-800">
+          ยังไม่มีการกำหนดโปรแกรมออกกำลังกายรายบุคคลในระบบ
+          กรุณาเข้าพบเจ้าหน้าที่เพื่อรับคำแนะนำก่อนเริ่มโปรแกรม
+        </div>
+      </div>
+    </Card>
+  );
+}
+  
   const hasProgramData = Boolean(
   program.type ||
   program.cardioType ||
