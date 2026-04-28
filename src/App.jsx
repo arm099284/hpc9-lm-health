@@ -2444,22 +2444,6 @@ if (!hasProgramData) {
   );
 }
   
-  const hasProgramData = Boolean(
-  program.type ||
-  program.cardioType ||
-  program.cardioFrequency ||
-  program.cardioDuration ||
-  program.strengthFrequency ||
-  program.strengthDose ||
-  program.intensity ||
-  program.rpe ||
-  program.talk ||
-  program.focus ||
-  program.precaution ||
-  program.followUp ||
-  program.note
-);
-
 if (!hasProgramData) {
   return (
     <Card title="โปรแกรมที่ได้รับ" icon={FileIcon}>
