@@ -4294,29 +4294,50 @@ function lmAdminRow(record) {
                   className="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm font-semibold outline-none focus:border-slate-700 lg:w-72"
                 />
               
-                <input
-                  type="number"
-                  placeholder="วัน"
+                <select
                   value={day}
                   onChange={(e) => setDay(e.target.value)}
-                  className="h-11 w-16 rounded-xl border border-slate-200 bg-white px-2 text-sm font-semibold outline-none focus:border-slate-700"
-                />
-              
-                <input
-                  type="number"
-                  placeholder="เดือน"
+                  className="h-11 w-20 rounded-xl border border-slate-200 bg-white px-2 text-sm font-semibold outline-none focus:border-slate-700"
+                >
+                  <option value="">วัน</option>
+                  {Array.from({ length: 31 }, (_, i) => i + 1).map((d) => (
+                    <option key={d} value={d}>
+                      {d}
+                    </option>
+                  ))}
+                </select>
+                
+                <select
                   value={month}
                   onChange={(e) => setMonth(e.target.value)}
-                  className="h-11 w-16 rounded-xl border border-slate-200 bg-white px-2 text-sm font-semibold outline-none focus:border-slate-700"
-                />
-              
-                <input
-                  type="number"
-                  placeholder="ปี"
+                  className="h-11 w-28 rounded-xl border border-slate-200 bg-white px-2 text-sm font-semibold outline-none focus:border-slate-700"
+                >
+                  <option value="">เดือน</option>
+                  <option value="1">มกราคม</option>
+                  <option value="2">กุมภาพันธ์</option>
+                  <option value="3">มีนาคม</option>
+                  <option value="4">เมษายน</option>
+                  <option value="5">พฤษภาคม</option>
+                  <option value="6">มิถุนายน</option>
+                  <option value="7">กรกฎาคม</option>
+                  <option value="8">สิงหาคม</option>
+                  <option value="9">กันยายน</option>
+                  <option value="10">ตุลาคม</option>
+                  <option value="11">พฤศจิกายน</option>
+                  <option value="12">ธันวาคม</option>
+                </select>
+                
+                <select
                   value={year}
                   onChange={(e) => setYear(e.target.value)}
-                  className="h-11 w-20 rounded-xl border border-slate-200 bg-white px-2 text-sm font-semibold outline-none focus:border-slate-700"
-                />
+                  className="h-11 w-24 rounded-xl border border-slate-200 bg-white px-2 text-sm font-semibold outline-none focus:border-slate-700"
+                >
+                  <option value="">ปี</option>
+                  <option value="2568">2568</option>
+                  <option value="2569">2569</option>
+                  <option value="2570">2570</option>
+                  <option value="2571">2571</option>
+                </select>
                 
              </div>
             </div>
