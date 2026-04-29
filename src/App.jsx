@@ -4506,17 +4506,19 @@ function lmAdminRow(record) {
             </div>
 
             <div className="h-[430px] rounded-2xl bg-gradient-to-b from-white to-slate-50 p-3">
-              <ResponsiveContainer>
-                <BarChart data={filteredChartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart
+                  data={filteredChartData}
+                  margin={{ top: 24, right: 16, left: -10, bottom: 12 }}
+                >
                   <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                   <XAxis dataKey="name" tick={{ fontSize: 12 }} />
                   <YAxis allowDecimals={false} tick={{ fontSize: 12 }} />
                   <Tooltip formatter={(value) => [`${value} เคส`, "จำนวน"]} />
-                  <Bar dataKey="value" barSize={58} radius={[14, 14, 0, 0]}>
-                <BarChart data={filteredChartData} margin={{ top: 24, right: 16, left: -10, bottom: 12 }}>
+                  <Bar dataKey="value" barSize={58} radius={[14, 14, 0, 0]} />
+                </BarChart>
               </ResponsiveContainer>
             </div>
-          </div>
 
           <div className="min-w-0 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
             <div className="mb-3 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
