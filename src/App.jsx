@@ -3599,23 +3599,7 @@ function AdminSummary({ records, auditLogs, onFullBackup, onRestoreBackup }) {
         </div>
       
         <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-inner">
-          <table className="w-full table-fixed text-left text-[10px]">
-            <colgroup>
-              <col className="w-[15%]" />
-              <col className="w-[5%]" />
-              <col className="w-[7%]" />
-              <col className="w-[6%]" />
-              <col className="w-[6%]" />
-              <col className="w-[6%]" />
-              <col className="w-[6%]" />
-              <col className="w-[6%]" />
-              <col className="w-[6%]" />
-              <col className="w-[6%]" />
-              <col className="w-[6%]" />
-              <col className="w-[6%]" />
-              <col className="w-[6%]" />
-              <col className="w-[13%]" />
-            </colgroup>
+          <table className="w-full text-left text-[10px]">
             <thead className="bg-slate-900 text-[10px] font-black uppercase tracking-wide text-white">
               <tr>
                 <th className="px-1.5 py-2">HN / ชื่อ</th>
