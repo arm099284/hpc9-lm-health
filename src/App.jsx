@@ -2873,8 +2873,8 @@ function Dashboard({ record, back }) {
 function Info({ label, value, tone = "default" }) {
   return (
     <div className={`flex h-full min-h-[5.4rem] flex-col justify-between rounded-xl border p-3 ${panelToneClass(tone)}`}>
-      <div className="text-sm font-semibold text-slate-500">{label}</div>
-      <div className="mt-1 font-bold text-slate-900">{show(value)}</div>
+      <div className="whitespace-nowrap text-[11px] font-semibold text-slate-500">{label}</div>
+      <div className="mt-1 text-xl font-black text-slate-900">{value}</div>
     </div>
   );
 }
@@ -3495,7 +3495,7 @@ function AdminSummary({ records, auditLogs, onFullBackup, onRestoreBackup }) {
           <Pill tone="dark">{periodLabel}</Pill>
         </div>
 
-        <div className="grid gap-3 md:grid-cols-4">
+        <div className="grid gap-3 md:grid-cols-5">
           <Info label="ทั้งหมด" value={`${rows.length} คน`} />
           <Info label="เทียบได้ ≥2 ครั้ง" value={`${comparable.length} คน`} tone="admin" />
           <Info label="ดีขึ้น" value={`${improved} คน`} tone="good" />
