@@ -2983,16 +2983,16 @@ function InsightListPanel({ title, rows, tone = "default" }) {
             return (
               <div
                 key={`${label}-${index}`}
-                className="rounded-2xl bg-white/90 p-2.5 shadow-sm ring-1 ring-slate-100"
+                className="rounded-xl bg-white/90 p-2 shadow-sm ring-1 ring-slate-100"
               >
-                <div className="mb-1.5 flex items-center justify-between gap-3">
+                <div className="mb-1 flex items-center justify-between gap-2">
                   <div className="min-w-0">
-                    <div className="whitespace-normal break-words text-xs font-black leading-tight text-slate-900">
+                    <div className="whitespace-normal break-words text-[11px] font-black leading-tight text-slate-900">
                       {label}
                     </div>
 
                     {sub && (
-                      <div className="mt-0.5 whitespace-normal break-words text-[10px] font-medium leading-tight text-slate-400">
+                      <div className="mt-0.5 whitespace-normal break-words text-[9px] font-medium leading-tight text-slate-400">
                         {sub}
                       </div>
                     )}
