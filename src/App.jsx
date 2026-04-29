@@ -3574,8 +3574,8 @@ function AdminSummary({ records, auditLogs, onFullBackup, onRestoreBackup }) {
           </span>
         </div>
       
-        <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-inner">
-          <table className="w-full min-w-[1380px] text-left text-xs">
+        <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-inner">
+          <table className="w-full table-fixed text-left text-[10px]">
             <thead className="bg-slate-900 text-[10px] font-black uppercase tracking-wide text-white">
               <tr>
                 <th className="px-2.5 py-2">HN / ชื่อ</th>
