@@ -4161,16 +4161,16 @@ function SidebarMenuButton({ active, icon, title, subtitle, badge, tone, onClick
     <button
       type="button"
       onClick={onClick}
-      className={`group flex w-full items-center gap-3 rounded-2xl border px-3 py-3 text-left transition ${
+      className={`group flex w-full items-center gap-2 rounded-xl border px-2.5 py-2 text-left transition ${
         active
-          ? "border-slate-900 bg-slate-900 text-white shadow-sm"
-          : "border-slate-200 bg-white text-slate-700 hover:border-sky-200 hover:bg-sky-50"
+          ? "border-sky-500 bg-gradient-to-r from-sky-600 to-sky-500 text-white shadow-md ring-2 ring-sky-100"
+          : "border-slate-200 bg-white text-slate-700 hover:border-sky-200 hover:bg-sky-50/60"
       }`}
     >
       <div
-        className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border text-xs font-black ${
+        className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border text-[11px] font-black ${
           active
-            ? "border-white/20 bg-white/10 text-white"
+            ? "border-white/20 bg-white/15 text-white"
             : "border-slate-200 bg-slate-50 text-slate-500 group-hover:border-sky-200 group-hover:bg-white group-hover:text-sky-700"
         }`}
       >
@@ -4178,12 +4178,20 @@ function SidebarMenuButton({ active, icon, title, subtitle, badge, tone, onClick
       </div>
 
       <div className="min-w-0 flex-1">
-        <div className={`truncate text-sm font-black ${active ? "text-white" : "text-slate-900"}`}>
+        <div
+          className={`whitespace-normal break-words text-[12px] font-black leading-tight ${
+            active ? "text-white" : "text-slate-900"
+          }`}
+        >
           {title}
         </div>
 
         {subtitle && (
-          <div className={`mt-0.5 truncate text-xs font-semibold ${active ? "text-white/65" : "text-slate-400"}`}>
+          <div
+            className={`mt-0.5 whitespace-normal break-words text-[10px] font-semibold leading-tight ${
+              active ? "text-white/70" : "text-slate-400"
+            }`}
+          >
             {subtitle}
           </div>
         )}
@@ -4191,7 +4199,7 @@ function SidebarMenuButton({ active, icon, title, subtitle, badge, tone, onClick
 
       {badge && (
         active ? (
-          <span className="shrink-0 rounded-full border border-white/20 bg-white/10 px-2 py-0.5 text-[11px] font-black text-white">
+          <span className="shrink-0 rounded-full border border-white/20 bg-white/15 px-2 py-0.5 text-[10px] font-black text-white">
             {badge}
           </span>
         ) : (
@@ -4227,8 +4235,8 @@ function SidebarMenuGroup({ title, tone = "slate", children }) {
   }[tone];
 
   return (
-    <div className={`rounded-2xl border p-3 ${toneClass.wrap}`}>
-      <div className="mb-3 flex items-center gap-2">
+    <div className={`rounded-2xl border p-2.5 ${toneClass.wrap}`}>
+      <div className="mb-2 flex items-center gap-2">
         <span className={`h-2 w-2 rounded-full ${toneClass.line}`} />
 
         <div
@@ -4238,7 +4246,7 @@ function SidebarMenuGroup({ title, tone = "slate", children }) {
         </div>
       </div>
 
-      <div className="space-y-2">
+      <div className="space-y-1.5">
         {children}
       </div>
     </div>
@@ -5200,7 +5208,34 @@ const menuProgress = Math.round((menuDoneCount / allMenuItems.length) * 100);
           >
             + เพิ่ม HN ใหม่
           </button>
-          <div className="mb-3"><Field label="ค้นหา HN / ชื่อ" value={staffSearch} onChange={(v) => { setStaffSearch(v); setStaffPage(1); }} /></div>
+          <div className="mb-3">
+            <label className="block">
+              <div className="mb-1 flex items-center justify-between">
+                <span className="text-sm font-black text-slate-700">
+                  ค้นหา HN / ชื่อ
+                </span>
+                <span className="rounded-full bg-sky-50 px-2 py-0.5 text-[10px] font-bold text-sky-700 ring-1 ring-sky-100">
+                  Search
+                </span>
+              </div>
+          
+              <div className="group flex h-12 items-center gap-2 rounded-2xl border border-slate-200 bg-gradient-to-r from-white to-sky-50/50 px-3 shadow-sm transition focus-within:border-sky-400 focus-within:ring-2 focus-within:ring-sky-100">
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-sky-100 text-sm font-black text-sky-700">
+                  🔎
+                </div>
+          
+                <input
+                  value={staffSearch || ""}
+                  onChange={(e) => {
+                    setStaffSearch(e.target.value);
+                    setStaffPage(1);
+                  }}
+                  placeholder="พิมพ์ HN หรือชื่อผู้รับบริการ"
+                  className="h-full w-full bg-transparent text-sm font-semibold text-slate-800 outline-none placeholder:text-slate-400"
+                />
+              </div>
+            </label>
+          </div>
           <div className="space-y-1.5">
             {pagedPatients.map((r) => {
               const selected = hn === r.hn;
@@ -5276,8 +5311,8 @@ const menuProgress = Math.round((menuDoneCount / allMenuItems.length) * 100);
             </SidebarStatusBadge>
           }
         >
-          <div className="space-y-4">
-            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-3">
+          <div className="space-y-3">
+            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-2.5">
               <div className="mb-2 flex items-center justify-between gap-2">
                 <div className="text-xs font-black text-slate-500">
                   ความครบถ้วนข้อมูล
