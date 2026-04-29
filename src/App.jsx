@@ -3495,7 +3495,7 @@ function AdminSummary({ records, auditLogs, onFullBackup, onRestoreBackup }) {
           <Pill tone="dark">{periodLabel}</Pill>
         </div>
 
-        <div className="grid gap-4 md:grid-cols-5">
+        <div className="grid gap-3 md:grid-cols-4">
           <Info label="ทั้งหมด" value={`${rows.length} คน`} />
           <Info label="เทียบได้ ≥2 ครั้ง" value={`${comparable.length} คน`} tone="admin" />
           <Info label="ดีขึ้น" value={`${improved} คน`} tone="good" />
@@ -3505,7 +3505,7 @@ function AdminSummary({ records, auditLogs, onFullBackup, onRestoreBackup }) {
       </Card>
 
       <Card title="ภาพรวมผลลัพธ์" icon={ActivityIcon}>
-        <div className="h-72">
+        <div className="h-48">
           <ResponsiveContainer>
             <BarChart
               data={summaryChartRows}
@@ -3516,7 +3516,7 @@ function AdminSummary({ records, auditLogs, onFullBackup, onRestoreBackup }) {
               <XAxis dataKey="name" tick={{ fontSize: 14 }} />
               <YAxis allowDecimals={false} tick={{ fontSize: 12 }} />
               <Tooltip />
-              <Bar dataKey="value" barSize={76} radius={[12, 12, 0, 0]}>
+              <Bar dataKey="value" barSize={48} radius={[10, 10, 0, 0]}>
                 {summaryChartRows.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={outcomeColor(entry.name)} />
                 ))}
@@ -3527,32 +3527,8 @@ function AdminSummary({ records, auditLogs, onFullBackup, onRestoreBackup }) {
       </Card>
 
       <Card title="Key Insights / ผลลัพธ์เด่นและจุดที่ควรติดตาม" icon={ClipboardIcon}>
-        <div className="grid gap-4 md:grid-cols-4">
-          <Info
-            label="ต้องติดตามเร่งด่วน"
-            value={`${urgentRows.length} คน`}
-            tone={urgentRows.length ? "fat" : "default"}
-          />
 
-          <Info
-            label="ตัวชี้วัดดีขึ้นสูงสุด"
-            value={improvedRows[0] ? `${improvedRows[0].name}: ${improvedRows[0].count} คน` : "ไม่มี"}
-          />
-
-          <Info
-            label="ตัวชี้วัดแย่ลงสูงสุด"
-            value={issueRows[0] ? `${issueRows[0].name}: ${issueRows[0].count} คน` : "ไม่มี"}
-            tone={issueRows[0]?.count ? "fat" : "default"}
-          />
-
-          <Info
-            label="Fitness ต่ำกว่าเกณฑ์สูงสุด"
-            value={fitnessBelowRows[0] ? `${fitnessBelowRows[0].nameTh}: ${fitnessBelowRows[0].count} คน` : "ไม่มี"}
-            tone={fitnessBelowRows[0]?.count ? "fat" : "default"}
-          />
-        </div>
-
-        <div className="mt-5 grid gap-5 lg:grid-cols-4">
+        <div className="grid gap-3 lg:grid-cols-4">
           <InsightListPanel
             title="ตัวชี้วัดที่ดีขึ้นบ่อย"
             tone="good"
