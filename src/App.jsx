@@ -4011,7 +4011,51 @@ function AdminSummary({ records, auditLogs, onFullBackup, onRestoreBackup }) {
                   </thead>
       
                   <tbody>
-                    {ageSummaryRows.map((row) => (
+                    {(() => {
+                      const result = [];
+                    
+                      (ageSummaryRows || []).forEach((row) => {
+                        const ageLabel = row.age || "";
+                    
+                        if (ageLabel === "ไม่ระบุอายุ") {
+                          return;
+                        }
+                    
+                        if (
+                          ageLabel === "60–69 ปี" ||
+                          ageLabel === "70–79 ปี" ||
+                          ageLabel === "80 ปีขึ้นไป"
+                        ) {
+                          let merged = result.find((item) => item.age === "60+");
+                    
+                          if (!merged) {
+                            merged = {
+                              age: "60+",
+                              total: 0,
+                              comparable: 0,
+                              ดีขึ้น: 0,
+                              แย่ลง: 0,
+                              คงเดิม: 0,
+                              ข้อมูลไม่พอ: 0,
+                            };
+                            result.push(merged);
+                          }
+                    
+                          merged.total += Number(row.total || 0);
+                          merged.comparable += Number(row.comparable || 0);
+                          merged.ดีขึ้น += Number(row.ดีขึ้น || 0);
+                          merged.แย่ลง += Number(row.แย่ลง || 0);
+                          merged.คงเดิม += Number(row.คงเดิม || 0);
+                          merged.ข้อมูลไม่พอ += Number(row.ข้อมูลไม่พอ || 0);
+                    
+                          return;
+                        }
+                    
+                        result.push(row);
+                      });
+                    
+                      return result;
+                    })().map((row) => (
                       <tr key={row.age} className="border-t border-slate-100">
                         <td className="whitespace-nowrap px-3 py-2.5 font-black text-slate-900">
                           {row.age}
