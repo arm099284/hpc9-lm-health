@@ -6199,21 +6199,27 @@ function LmAssessmentForm({ draft, update }) {
               </div>
             </div>
 
-            <div className="flex flex-wrap gap-2">
-              {rounds.map((item, index) => (
-                <button
-                  key={item}
-                  type="button"
-                  onClick={() => setRound(index)}
-                  className={`rounded-xl border px-4 py-2.5 text-sm font-black transition ${
-                    round === index
-                      ? "border-slate-900 bg-slate-900 text-white shadow-sm"
-                      : "border-slate-200 bg-white text-slate-600 hover:bg-slate-100"
-                  }`}
-                >
-                  ครั้งที่ {item}
-                </button>
-              ))}
+            <div className="rounded-2xl border border-slate-200 bg-white/80 p-1 shadow-sm">
+              <div className="grid grid-cols-4 gap-1">
+                {rounds.map((item, index) => {
+                  const selected = round === index;
+            
+                  return (
+                    <button
+                      key={item}
+                      type="button"
+                      onClick={() => setRound(index)}
+                      className={`rounded-xl px-3 py-2 text-sm font-black transition ${
+                        selected
+                          ? "bg-slate-900 text-white shadow-sm"
+                          : "text-slate-600 hover:bg-slate-100"
+                      }`}
+                    >
+                      ครั้งที่ {item}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
           </div>
         </div>
