@@ -1714,63 +1714,101 @@ function OhsTable({ record }) {
 
   const statusOf = (index) => selectedSession?.ohs?.[index] || "ปกติ";
 
-  const colorOf = (status) => {
-    if (status === "ปกติ") return "#94a3b8";
-    if (status === "ต้องระวัง") return "#f59e0b";
-    return "#f43f5e";
-  };
-
-  const softColorOf = (status) => {
-    if (status === "ปกติ") return "#f8fafc";
-    if (status === "ต้องระวัง") return "#fffbeb";
-    return "#fff1f2";
-  };
-
   const toneOf = (status) => {
     if (status === "ปกติ") return "good";
     if (status === "ต้องระวัง") return "warn";
     return "bad";
   };
 
-  const torsoColor = colorOf(statusOf(0));
-  const kneeColor = colorOf(statusOf(1));
-  const hipColor = colorOf(statusOf(2));
-  const footColor = colorOf(statusOf(3));
-  const armsColor = colorOf(statusOf(4));
-  const balanceColor = colorOf(statusOf(5));
+  const markerStyle = (status) => {
+    if (status === "ต้องระวัง") {
+      return {
+        borderColor: "#f59e0b",
+        backgroundColor: "rgba(245, 158, 11, 0.16)",
+        boxShadow: "0 0 0 4px rgba(245, 158, 11, 0.10)",
+      };
+    }
+
+    return {
+      borderColor: "#f43f5e",
+      backgroundColor: "rgba(244, 63, 94, 0.16)",
+      boxShadow: "0 0 0 4px rgba(244, 63, 94, 0.10)",
+    };
+  };
+
+  const problemMarkers = [
+    { view: "front", label: "ไหล่", status: statusOf(4), top: "24%", left: "31%" },
+    { view: "front", label: "ไหล่", status: statusOf(4), top: "24%", left: "69%" },
+    { view: "side", label: "ไหล่", status: statusOf(4), top: "24%", left: "58%" },
+
+    { view: "front", label: "ลำตัว", status: statusOf(0), top: "45%", left: "50%" },
+    { view: "side", label: "ลำตัว", status: statusOf(0), top: "43%", left: "55%" },
+
+    { view: "front", label: "สะโพก", status: statusOf(2), top: "58%", left: "50%" },
+    { view: "side", label: "สะโพก", status: statusOf(2), top: "58%", left: "48%" },
+
+    { view: "front", label: "เข่า", status: statusOf(1), top: "67%", left: "35%" },
+    { view: "front", label: "เข่า", status: statusOf(1), top: "67%", left: "65%" },
+    { view: "side", label: "เข่า", status: statusOf(1), top: "68%", left: "58%" },
+
+    { view: "front", label: "ข้อเท้า", status: statusOf(3), top: "83%", left: "34%" },
+    { view: "front", label: "ข้อเท้า", status: statusOf(3), top: "83%", left: "66%" },
+    { view: "side", label: "ข้อเท้า", status: statusOf(3), top: "84%", left: "62%" },
+
+    { view: "front", label: "สมดุล", status: statusOf(5), top: "52%", left: "50%" },
+  ].filter((marker) => marker.status !== "ปกติ");
 
   const bodyParts = [
-    {
-      label: "แขน / ไหล่",
-      sub: "Overhead position",
-      status: statusOf(4),
-    },
-    {
-      label: "ลำตัว",
-      sub: "Torso control",
-      status: statusOf(0),
-    },
-    {
-      label: "สะโพก",
-      sub: "Hip depth",
-      status: statusOf(2),
-    },
-    {
-      label: "เข่า",
-      sub: "Knee tracking",
-      status: statusOf(1),
-    },
-    {
-      label: "ส้นเท้า / ข้อเท้า",
-      sub: "Heel & ankle",
-      status: statusOf(3),
-    },
-    {
-      label: "สมดุล",
-      sub: "Balance control",
-      status: statusOf(5),
-    },
+    { label: "แขน / ไหล่", sub: "Overhead position", status: statusOf(4) },
+    { label: "ลำตัว", sub: "Torso control", status: statusOf(0) },
+    { label: "สะโพก", sub: "Hip depth", status: statusOf(2) },
+    { label: "เข่า", sub: "Knee tracking", status: statusOf(1) },
+    { label: "ส้นเท้า / ข้อเท้า", sub: "Heel & ankle", status: statusOf(3) },
+    { label: "สมดุล", sub: "Balance control", status: statusOf(5) },
   ];
+
+  const ImageWithMarkers = ({ type, src, title }) => (
+    <div className="rounded-2xl border border-slate-200 bg-gradient-to-b from-white to-slate-50 p-2 shadow-sm">
+      <div className="mb-2 flex items-center justify-between">
+        <div className="text-[11px] font-black text-slate-700">{title}</div>
+        <span className="rounded-full bg-slate-50 px-2 py-0.5 text-[9px] font-bold text-slate-500 ring-1 ring-slate-200">
+          OHS
+        </span>
+      </div>
+
+      <div className="relative aspect-square overflow-hidden rounded-xl bg-white ring-1 ring-slate-100">
+        <img
+          src={src}
+          alt={title}
+          className="h-full w-full object-contain p-2"
+          draggable={false}
+        />
+
+        {problemMarkers
+          .filter((marker) => marker.view === type)
+          .map((marker, index) => (
+            <div
+              key={`${type}-${marker.label}-${index}`}
+              title={`${marker.label}: ${marker.status}`}
+              className="absolute flex h-5 w-5 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border-2"
+              style={{
+                top: marker.top,
+                left: marker.left,
+                ...markerStyle(marker.status),
+              }}
+            >
+              <span
+                className="h-1.5 w-1.5 rounded-full"
+                style={{
+                  backgroundColor:
+                    marker.status === "ต้องระวัง" ? "#f59e0b" : "#f43f5e",
+                }}
+              />
+            </div>
+          ))}
+      </div>
+    </div>
+  );
 
   return (
     <Card title="Overhead Deep Squat ครั้งที่ 1–4" icon={ClipboardIcon}>
@@ -1812,9 +1850,7 @@ function OhsTable({ record }) {
               ))}
 
               <tr className="border-t border-slate-200 bg-slate-50/80">
-                <td className="px-3 py-2 font-black text-slate-900">
-                  สรุป
-                </td>
+                <td className="px-3 py-2 font-black text-slate-900">สรุป</td>
 
                 {sessions.map((s) => {
                   const o = ohsSummary(s);
@@ -1839,7 +1875,7 @@ function OhsTable({ record }) {
                 OHS Body Map
               </div>
               <div className="text-[10px] font-semibold text-slate-400">
-                แผนที่ตำแหน่งที่ควรติดตามจากท่า Overhead Deep Squat
+                รูปท่า Overhead Deep Squat พร้อมจุดที่ควรติดตาม
               </div>
             </div>
 
@@ -1872,277 +1908,38 @@ function OhsTable({ record }) {
           </div>
 
           <div className="rounded-3xl border border-slate-200 bg-white p-3 shadow-inner">
-            <div className="grid gap-3 xl:grid-cols-[1fr_.85fr]">
-              <div className="flex items-center justify-center rounded-2xl bg-gradient-to-b from-slate-50 to-white p-3 ring-1 ring-slate-100">
-                <svg
-                  viewBox="0 0 320 300"
-                  className="h-[280px] w-full max-w-[320px]"
-                  role="img"
-                  aria-label="Overhead Deep Squat thick icon body map"
+            <div className="grid gap-3 sm:grid-cols-2">
+              <ImageWithMarkers
+                type="front"
+                title="มุมหน้า"
+                src="/images/overhead-squat_anterior.png.webp"
+              />
+
+              <ImageWithMarkers
+                type="side"
+                title="มุมข้าง"
+                src="/images/overhead-squat_lateral.png.webp"
+              />
+            </div>
+
+            <div className="mt-3 space-y-2 border-t border-slate-100 pt-3">
+              {bodyParts.map((part) => (
+                <div
+                  key={part.label}
+                  className="flex items-center justify-between gap-2 rounded-2xl border border-slate-100 bg-slate-50/60 px-3 py-2"
                 >
-                  <defs>
-                    <filter
-                      id="ohsIconShadow"
-                      x="-20%"
-                      y="-20%"
-                      width="140%"
-                      height="140%"
-                    >
-                      <feDropShadow
-                        dx="0"
-                        dy="8"
-                        stdDeviation="8"
-                        floodColor="#0f172a"
-                        floodOpacity="0.10"
-                      />
-                    </filter>
-                  </defs>
-              
-                  <rect
-                    x="0"
-                    y="0"
-                    width="320"
-                    height="300"
-                    rx="28"
-                    fill="#ffffff"
-                  />
-              
-                  <g filter="url(#ohsIconShadow)">
-                    {/* Balance line */}
-                    <line
-                      x1="160"
-                      y1="48"
-                      x2="160"
-                      y2="258"
-                      stroke={balanceColor}
-                      strokeWidth="2"
-                      strokeDasharray="5 6"
-                      strokeLinecap="round"
-                      opacity="0.35"
-                    />
-              
-                    {/* Bar */}
-                    <line
-                      x1="74"
-                      y1="42"
-                      x2="246"
-                      y2="42"
-                      stroke="#64748b"
-                      strokeWidth="7"
-                      strokeLinecap="round"
-                    />
-                    <line
-                      x1="74"
-                      y1="42"
-                      x2="246"
-                      y2="42"
-                      stroke="#e2e8f0"
-                      strokeWidth="3"
-                      strokeLinecap="round"
-                    />
-              
-                    {/* Head */}
-                    <circle
-                      cx="160"
-                      cy="78"
-                      r="18"
-                      fill="#ffffff"
-                      stroke="#94a3b8"
-                      strokeWidth="5"
-                    />
-              
-                    {/* Arms overhead */}
-                    <path
-                      d="M142 96 C128 78, 114 58, 100 42"
-                      fill="none"
-                      stroke={armsColor}
-                      strokeWidth="12"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                    <path
-                      d="M178 96 C192 78, 206 58, 220 42"
-                      fill="none"
-                      stroke={armsColor}
-                      strokeWidth="12"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-              
-                    {/* Hands */}
-                    <circle
-                      cx="100"
-                      cy="42"
-                      r="6"
-                      fill="#ffffff"
-                      stroke={armsColor}
-                      strokeWidth="4"
-                    />
-                    <circle
-                      cx="220"
-                      cy="42"
-                      r="6"
-                      fill="#ffffff"
-                      stroke={armsColor}
-                      strokeWidth="4"
-                    />
-              
-                    {/* Shoulders */}
-                    <path
-                      d="M128 102 C145 92, 175 92, 192 102"
-                      fill="none"
-                      stroke={armsColor}
-                      strokeWidth="11"
-                      strokeLinecap="round"
-                    />
-              
-                    {/* Torso main */}
-                    <path
-                      d="M130 106
-                         C120 130, 124 154, 142 172
-                         C151 181, 169 181, 178 172
-                         C196 154, 200 130, 190 106"
-                      fill="none"
-                      stroke={torsoColor}
-                      strokeWidth="13"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-              
-                    {/* Torso inner contour */}
-                    <path
-                      d="M146 112 C140 132, 142 153, 153 168"
-                      fill="none"
-                      stroke="#cbd5e1"
-                      strokeWidth="3"
-                      strokeLinecap="round"
-                      opacity="0.65"
-                    />
-                    <path
-                      d="M174 112 C180 132, 178 153, 167 168"
-                      fill="none"
-                      stroke="#cbd5e1"
-                      strokeWidth="3"
-                      strokeLinecap="round"
-                      opacity="0.65"
-                    />
-              
-                    {/* Hips / pelvis */}
-                    <path
-                      d="M120 178 C139 195, 181 195, 200 178"
-                      fill="none"
-                      stroke={hipColor}
-                      strokeWidth="14"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-              
-                    {/* Thighs squat */}
-                    <path
-                      d="M127 182 C101 191, 80 212, 70 238"
-                      fill="none"
-                      stroke={kneeColor}
-                      strokeWidth="13"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                    <path
-                      d="M193 182 C219 191, 240 212, 250 238"
-                      fill="none"
-                      stroke={kneeColor}
-                      strokeWidth="13"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-              
-                    {/* Knees */}
-                    <circle
-                      cx="70"
-                      cy="238"
-                      r="8"
-                      fill="#ffffff"
-                      stroke={kneeColor}
-                      strokeWidth="5"
-                    />
-                    <circle
-                      cx="250"
-                      cy="238"
-                      r="8"
-                      fill="#ffffff"
-                      stroke={kneeColor}
-                      strokeWidth="5"
-                    />
-              
-                    {/* Shins */}
-                    <path
-                      d="M70 238 C62 252, 53 262, 42 270"
-                      fill="none"
-                      stroke={footColor}
-                      strokeWidth="11"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                    <path
-                      d="M250 238 C258 252, 267 262, 278 270"
-                      fill="none"
-                      stroke={footColor}
-                      strokeWidth="11"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-              
-                    {/* Feet */}
-                    <line
-                      x1="32"
-                      y1="272"
-                      x2="78"
-                      y2="272"
-                      stroke={footColor}
-                      strokeWidth="11"
-                      strokeLinecap="round"
-                    />
-                    <line
-                      x1="242"
-                      y1="272"
-                      x2="288"
-                      y2="272"
-                      stroke={footColor}
-                      strokeWidth="11"
-                      strokeLinecap="round"
-                    />
-              
-                    {/* Subtle ground */}
-                    <ellipse
-                      cx="160"
-                      cy="278"
-                      rx="110"
-                      ry="10"
-                      fill="#e2e8f0"
-                      opacity="0.35"
-                    />
-                  </g>
-                </svg>
-              </div>
-
-              <div className="space-y-2">
-                {bodyParts.map((part) => (
-                  <div
-                    key={part.label}
-                    className="flex items-center justify-between gap-2 rounded-2xl border border-slate-100 bg-slate-50/60 px-3 py-2"
-                  >
-                    <div className="min-w-0">
-                      <div className="text-[11px] font-black leading-tight text-slate-900">
-                        {part.label}
-                      </div>
-                      <div className="mt-0.5 text-[9px] font-semibold leading-tight text-slate-400">
-                        {part.sub}
-                      </div>
+                  <div className="min-w-0">
+                    <div className="text-[11px] font-black leading-tight text-slate-900">
+                      {part.label}
                     </div>
-
-                    <Pill tone={toneOf(part.status)}>{part.status}</Pill>
+                    <div className="mt-0.5 text-[9px] font-semibold leading-tight text-slate-400">
+                      {part.sub}
+                    </div>
                   </div>
-                ))}
-              </div>
+
+                  <Pill tone={toneOf(part.status)}>{part.status}</Pill>
+                </div>
+              ))}
             </div>
 
             <div className="mt-3 flex flex-wrap gap-2 border-t border-slate-100 pt-3 text-[10px] font-bold text-slate-500">
@@ -2150,10 +1947,12 @@ function OhsTable({ record }) {
                 <span className="h-2 w-2 rounded-full bg-slate-400" />
                 ปกติ
               </span>
+
               <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-1 text-amber-700 ring-1 ring-amber-200">
                 <span className="h-2 w-2 rounded-full bg-amber-400" />
                 ต้องระวัง
               </span>
+
               <span className="inline-flex items-center gap-1 rounded-full bg-rose-50 px-2 py-1 text-rose-700 ring-1 ring-rose-200">
                 <span className="h-2 w-2 rounded-full bg-rose-500" />
                 ควรปรับแก้
