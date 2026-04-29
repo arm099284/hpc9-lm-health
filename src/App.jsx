@@ -1352,12 +1352,12 @@ function runSelfTests() {
 
 function Pill({ children, tone = "gray" }) {
   const cls = {
-    gray: "border-slate-300 bg-slate-100 text-slate-700",
+    gray: "border-slate-200 bg-slate-50 text-slate-700",
     dark: "border-slate-900 bg-slate-900 text-white",
-    good: "border-emerald-300 bg-emerald-100 text-emerald-800",
-    warn: "border-amber-300 bg-amber-100 text-amber-800",
-    bad: "border-rose-300 bg-rose-100 text-rose-800",
-  }[tone] || "border-slate-300 bg-slate-100 text-slate-700";
+    good: "border-emerald-200 bg-emerald-50 text-emerald-700",
+    warn: "border-amber-200 bg-amber-50 text-amber-700",
+    bad: "border-rose-200 bg-rose-50 text-rose-700",
+  }[tone] || "border-slate-200 bg-slate-50 text-slate-700";
 
   return (
     <span className={`inline-flex items-center whitespace-nowrap rounded-full border px-2 py-0.5 text-[11px] font-bold leading-none ${cls}`}>
@@ -2876,75 +2876,91 @@ function Dashboard({ record, back }) {
 }
 
 function Info({ label, value, tone = "default" }) {
-  const styles = {
-    default: {
-      box: "border-slate-200 bg-slate-50 text-slate-900",
-      label: "text-slate-500",
-      value: "text-slate-900",
-    },
-    navy: {
-      box: "border-slate-300 bg-slate-900 text-white",
-      label: "text-slate-200",
-      value: "text-white",
-    },
-    sky: {
-      box: "border-sky-300 bg-sky-100 text-sky-950",
-      label: "text-sky-700",
-      value: "text-sky-950",
-    },
-    emerald: {
-      box: "border-emerald-300 bg-emerald-100 text-emerald-950",
-      label: "text-emerald-700",
-      value: "text-emerald-950",
-    },
-    amber: {
-      box: "border-amber-300 bg-amber-100 text-amber-950",
-      label: "text-amber-700",
-      value: "text-amber-950",
-    },
-    violet: {
-      box: "border-violet-300 bg-violet-100 text-violet-950",
-      label: "text-violet-700",
-      value: "text-violet-950",
-    },
-    rose: {
-      box: "border-rose-300 bg-rose-100 text-rose-950",
-      label: "text-rose-700",
-      value: "text-rose-950",
-    },
+  return (
+    <div className={`rounded-2xl border p-4 shadow-sm ${panelToneClass(tone)}`}>
+      <div className="text-[11px] font-bold text-slate-500">{label}</div>
+      <div className="mt-2 text-2xl font-black text-slate-900">{value}</div>
+    </div>
+  );
+}
 
-    // กันของเดิมในระบบพัง
-    fat: {
-      box: "border-amber-200 bg-amber-50 text-slate-900",
-      label: "text-amber-700",
-      value: "text-slate-900",
-    },
-    muscle: {
-      box: "border-rose-200 bg-rose-50 text-slate-900",
-      label: "text-rose-700",
-      value: "text-slate-900",
-    },
-    good: {
-      box: "border-emerald-200 bg-emerald-50 text-slate-900",
-      label: "text-emerald-700",
-      value: "text-slate-900",
-    },
-    admin: {
-      box: "border-sky-200 bg-sky-50 text-slate-900",
-      label: "text-sky-700",
-      value: "text-slate-900",
-    },
-  };
+function InsightListPanel({ title, rows, tone = "default" }) {
+  const wrapClass =
+    tone === "good"
+      ? "border-emerald-200 bg-emerald-50"
+      : tone === "bad"
+        ? "border-rose-200 bg-rose-50"
+        : "border-slate-200 bg-slate-50";
 
-  const s = styles[tone] || styles.default;
+  const titleClass =
+    tone === "good"
+      ? "text-emerald-900"
+      : tone === "bad"
+        ? "text-rose-900"
+        : "text-slate-900";
+
+  const badgeClass =
+    tone === "good"
+      ? "border-emerald-200 bg-white text-emerald-700"
+      : tone === "bad"
+        ? "border-rose-200 bg-white text-rose-700"
+        : "border-slate-200 bg-white text-slate-600";
+
+  const safeRows = Array.isArray(rows) ? rows : [];
 
   return (
-    <div className={`rounded-2xl border p-4 shadow-sm ${s.box}`}>
-      <div className={`text-[11px] font-black ${s.label}`}>
-        {label}
-      </div>
-      <div className={`mt-2 text-2xl font-black tracking-tight ${s.value}`}>
-        {value}
+    <div className={`rounded-xl border p-3 shadow-sm ${wrapClass}`}>
+      <h3 className={`mb-2 truncate text-sm font-black leading-tight ${titleClass}`}>
+        {title}
+      </h3>
+
+      <div className="overflow-hidden rounded-lg border border-slate-200 bg-white">
+        {safeRows.length ? (
+          safeRows.map((row, index) => {
+            const label = row.label || row.nameTh || row.name || "-";
+            const sub = row.sub || row.nameEn || "";
+            const count = row.count ?? row.value ?? 0;
+
+            return (
+              <div
+                key={`${label}-${index}`}
+                className={`grid grid-cols-[minmax(0,1fr)_48px] items-center gap-2 px-3 py-2 ${
+                  index !== 0 ? "border-t border-slate-100" : ""
+                }`}
+              >
+                <div className="min-w-0">
+                  <div
+                    title={label}
+                    className="truncate whitespace-nowrap text-[11px] font-bold leading-tight text-slate-800"
+                  >
+                    {label}
+                  </div>
+
+                  {sub && (
+                    <div
+                      title={sub}
+                      className="mt-0.5 truncate whitespace-nowrap text-[10px] leading-tight text-slate-400"
+                    >
+                      {sub}
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex justify-end">
+                  <span
+                    className={`inline-flex items-center whitespace-nowrap rounded-full border px-1.5 py-0.5 text-[9px] font-bold leading-none ${badgeClass}`}
+                  >
+                    {count} คน
+                  </span>
+                </div>
+              </div>
+            );
+          })
+        ) : (
+          <div className="px-3 py-3 text-center text-xs font-semibold text-slate-400">
+            ไม่มีข้อมูล
+          </div>
+        )}
       </div>
     </div>
   );
@@ -3536,11 +3552,11 @@ function AdminSummary({ records, auditLogs, onFullBackup, onRestoreBackup }) {
         </div>
 
         <div className="grid gap-3 md:grid-cols-5">
-          <Info label="ทั้งหมด" value={`${rows.length} คน`} tone="default" />
-          <Info label="เทียบได้ ≥2 ครั้ง" value={`${comparable.length} คน`} tone="admin" />
+          <Info label="ทั้งหมด" value={`${rows.length} คน`} />
+          <Info label="เทียบได้ ≥2 ครั้ง" value={`${comparable.length} คน`} />
           <Info label="ดีขึ้น" value={`${improved} คน`} tone="good" />
           <Info label="ต้องติดตาม" value={`${needFollow} คน`} tone={needFollow ? "fat" : "default"} />
-          <Info label="คงเดิม" value={`${noChange} คน`} tone="default" />
+          <Info label="คงเดิม" value={`${noChange} คน`} />
         </div>
         <div className="mt-5 rounded-3xl border border-slate-200 bg-gradient-to-br from-white via-slate-50 to-slate-100 p-4 shadow-[0_12px_35px_rgba(15,23,42,0.08)] ring-1 ring-white/70">
         <div className="mb-3 flex items-center justify-between gap-3 border-b border-slate-200 pb-3">
