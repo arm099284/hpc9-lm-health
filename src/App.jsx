@@ -3602,20 +3602,20 @@ function AdminSummary({ records, auditLogs, onFullBackup, onRestoreBackup }) {
           <table className="w-full text-left text-[10px]">
             <thead className="bg-slate-900 text-[10px] font-black uppercase tracking-wide text-white">
               <tr>
-                <th className="px-1.5 py-2">HN / ชื่อ</th>
-                <th className="px-1.5 py-2">ครั้ง</th>
-                <th className="px-1.5 py-2">เทียบ</th>
-                <th className="px-1.5 py-2">WT</th>
-                <th className="px-1.5 py-2">BF%</th>
-                <th className="px-1.5 py-2">FM</th>
-                <th className="px-1.5 py-2">SMM</th>
-                <th className="px-1.5 py-2">STEP</th>
-                <th className="px-1.5 py-2">GRIP</th>
-                <th className="px-1.5 py-2">STS</th>
-                <th className="px-1.5 py-2">SAR</th>
-                <th className="px-1.5 py-2">TUG</th>
-                <th className="px-1.5 py-2">OHS</th>
-                <th className="px-1.5 py-2">สรุป</th>
+                <th className="px-2 py-2 text-center whitespace-nowrap">HN / ชื่อ</th>
+                <th className="px-2 py-2 text-center whitespace-nowrap">ครั้ง</th>
+                <th className="px-2 py-2 text-center whitespace-nowrap">เทียบ</th>
+                <th className="px-2 py-2 text-center whitespace-nowrap">WT</th>
+                <th className="px-2 py-2 text-center whitespace-nowrap">BF%</th>
+                <th className="px-2 py-2 text-center whitespace-nowrap">FM</th>
+                <th className="px-2 py-2 text-center whitespace-nowrap">SMM</th>
+                <th className="px-2 py-2 text-center whitespace-nowrap">STEP</th>
+                <th className="px-2 py-2 text-center whitespace-nowrap">GRIP</th>
+                <th className="px-2 py-2 text-center whitespace-nowrap">STS</th>
+                <th className="px-2 py-2 text-center whitespace-nowrap">SAR</th>
+                <th className="px-2 py-2 text-center whitespace-nowrap">TUG</th>
+                <th className="px-2 py-2 text-center whitespace-nowrap">OHS</th>
+                <th className="px-2 py-2 text-center whitespace-nowrap">สรุป</th>
               </tr>
             </thead>
       
