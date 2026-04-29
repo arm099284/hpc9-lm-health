@@ -4552,7 +4552,7 @@ function lmAdminRow(record) {
                 </ResponsiveContainer>
               </div>
             </div>
-          
+          </div>
           <div className="min-w-0 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
             <div className="mb-3 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
               <div>
