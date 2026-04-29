@@ -3576,11 +3576,11 @@ function AdminSummary({ records, auditLogs, onFullBackup, onRestoreBackup }) {
         </div>
 
         <div className="grid gap-3 md:grid-cols-5">
-          <Info label="ทั้งหมด" value={`${rows.length} คน`} />
-          <Info label="เทียบได้ ≥2 ครั้ง" value={`${comparable.length} คน`} />
+          <Info label="ทั้งหมด" value={`${rows.length} คน`} tone="admin" />
+          <Info label="เทียบได้ ≥2 ครั้ง" value={`${comparable.length} คน`} tone="fat" />
           <Info label="ดีขึ้น" value={`${improved} คน`} tone="good" />
-          <Info label="ต้องติดตาม" value={`${needFollow} คน`} tone={needFollow ? "fat" : "default"} />
-          <Info label="คงเดิม" value={`${noChange} คน`} />
+          <Info label="ต้องติดตาม" value={`${needFollow} คน`} tone="muscle" />
+          <Info label="คงเดิม" value={`${noChange} คน`} tone="default" />
         </div>
         <div className="mt-5 rounded-3xl border border-slate-200 bg-gradient-to-br from-white via-slate-50 to-slate-100 p-4 shadow-[0_12px_35px_rgba(15,23,42,0.08)] ring-1 ring-white/70">
         <div className="mb-3 flex items-center justify-between gap-3 border-b border-slate-200 pb-3">
