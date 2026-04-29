@@ -217,7 +217,7 @@ function exportRecordsCSV(records) {
     "Fat Mass ล่าสุด",
     "Muscle ล่าสุด",
     "Visceral Fat ล่าสุด",
-    "รอบเอวล่าสุด",
+    "Visceral Fat Area ล่าสุด",
 
     "Program Type",
     "Strength วัน/สัปดาห์",
@@ -483,7 +483,7 @@ function recordQuality(record) {
     checkRange(`${prefix}: Muscle Mass`, s.inbody.muscle, 5, 80, issues);
     checkRange(`${prefix}: Fat Mass`, s.inbody.fatMass, 1, 150, issues);
     checkRange(`${prefix}: Visceral Fat`, s.inbody.visceral, 1, 30, issues);
-    checkRange(`${prefix}: รอบเอว`, s.inbody.waist, 40, 200, issues);
+    checkRange(`${prefix}: พื้นที่ไขมันในช่องท้อง (Visceral Fat Area)`, s.inbody.waist, 1, 300, issues);
     checkRange(`${prefix}: Step Test HR`, s.fitness.step, 40, 220, issues);
     checkRange(`${prefix}: Handgrip`, s.fitness.grip, 1, 100, issues);
     checkRange(`${prefix}: Sit to Stand`, s.fitness.sitstand, 0, 100, issues);
@@ -509,7 +509,7 @@ const metrics = {
     ["muscle", "มวลกล้ามเนื้อโครงร่าง (Skeletal Muscle Mass)", "kg", "higher"],
     ["fatMass", "มวลไขมัน (Fat Mass)", "kg", "lower"],
     ["visceral", "ไขมันในช่องท้อง (Visceral Fat)", "level", "lower"],
-    ["waist", "รอบเอว", "cm", "lower"],
+    ["waist", "พื้นที่ไขมันในช่องท้อง (Visceral Fat Area)", "cm²", "lower"],
   ],
   fitness: [
     ["step", "ก้าวขึ้นลง 3 นาที (Step Test)", "bpm", "lower"],
