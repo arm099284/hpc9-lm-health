@@ -2909,82 +2909,98 @@ function Info({ label, value, tone = "default" }) {
 }
 
 function InsightListPanel({ title, rows, tone = "default" }) {
-  const wrapClass =
-    tone === "good"
-      ? "border-emerald-200 bg-emerald-50"
-      : tone === "bad"
-        ? "border-rose-200 bg-rose-50"
-        : "border-slate-200 bg-slate-50";
-
-  const titleClass =
-    tone === "good"
-      ? "text-emerald-900"
-      : tone === "bad"
-        ? "text-rose-900"
-        : "text-slate-900";
-
-  const badgeClass =
-    tone === "good"
-      ? "border-emerald-200 bg-white text-emerald-700"
-      : tone === "bad"
-        ? "border-rose-200 bg-white text-rose-700"
-        : "border-slate-200 bg-white text-slate-600";
-
   const safeRows = Array.isArray(rows) ? rows : [];
 
-  return (
-    <div className={`rounded-xl border p-3 shadow-sm ${wrapClass}`}>
-      <h3 className={`mb-2 truncate text-sm font-black leading-tight ${titleClass}`}>
-        {title}
-      </h3>
+  const styles = {
+    good: {
+      card: "border-emerald-200 bg-gradient-to-br from-emerald-50 via-white to-white",
+      icon: "bg-emerald-500 text-white",
+      dot: "bg-emerald-500",
+      title: "text-emerald-950",
+      badge: "border-emerald-200 bg-emerald-50 text-emerald-700",
+      action: "text-emerald-600",
+      symbol: "↗",
+    },
+    bad: {
+      card: "border-rose-200 bg-gradient-to-br from-rose-50 via-white to-white",
+      icon: "bg-rose-500 text-white",
+      dot: "bg-rose-500",
+      title: "text-rose-950",
+      badge: "border-rose-200 bg-rose-50 text-rose-700",
+      action: "text-rose-600",
+      symbol: "↘",
+    },
+    default: {
+      card: "border-slate-200 bg-gradient-to-br from-slate-50 via-white to-white",
+      icon: "bg-slate-500 text-white",
+      dot: "bg-slate-400",
+      title: "text-slate-950",
+      badge: "border-slate-200 bg-slate-50 text-slate-600",
+      action: "text-slate-500",
+      symbol: "•",
+    },
+  };
 
-      <div className="overflow-hidden rounded-lg border border-slate-200 bg-white">
+  const s = styles[tone] || styles.default;
+
+  return (
+    <div className={`min-h-[260px] rounded-3xl border p-5 shadow-sm ${s.card}`}>
+      <div className="mb-4 flex items-center justify-between gap-3">
+        <div className="flex min-w-0 items-center gap-3">
+          <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-lg font-black shadow-sm ${s.icon}`}>
+            {s.symbol}
+          </div>
+
+          <h3 className={`truncate text-base font-black ${s.title}`}>
+            {title}
+          </h3>
+        </div>
+
+        <span className={`shrink-0 rounded-full border px-3 py-1 text-xs font-black ${s.badge}`}>
+          {safeRows.length} รายการ
+        </span>
+      </div>
+
+      <div className="space-y-3">
         {safeRows.length ? (
-          safeRows.map((row, index) => {
+          safeRows.slice(0, 5).map((row, index) => {
             const label = row.label || row.nameTh || row.name || "-";
             const sub = row.sub || row.nameEn || "";
             const count = row.count ?? row.value ?? 0;
 
             return (
-              <div
-                key={`${label}-${index}`}
-                className={`grid grid-cols-[minmax(0,1fr)_48px] items-center gap-2 px-3 py-2 ${
-                  index !== 0 ? "border-t border-slate-100" : ""
-                }`}
-              >
-                <div className="min-w-0">
-                  <div
-                    title={label}
-                    className="truncate whitespace-nowrap text-[11px] font-bold leading-tight text-slate-800"
-                  >
-                    {label}
-                  </div>
+              <div key={`${label}-${index}`} className="flex items-start justify-between gap-3">
+                <div className="flex min-w-0 items-start gap-2">
+                  <span className={`mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full ${s.dot}`} />
 
-                  {sub && (
-                    <div
-                      title={sub}
-                      className="mt-0.5 truncate whitespace-nowrap text-[10px] leading-tight text-slate-400"
-                    >
-                      {sub}
+                  <div className="min-w-0">
+                    <div className="truncate text-sm font-bold leading-tight text-slate-900">
+                      {label}
                     </div>
-                  )}
+
+                    {sub && (
+                      <div className="mt-0.5 truncate text-xs font-medium leading-tight text-slate-400">
+                        {sub}
+                      </div>
+                    )}
+                  </div>
                 </div>
 
-                <div className="flex justify-end">
-                  <span
-                    className={`inline-flex items-center whitespace-nowrap rounded-full border px-1.5 py-0.5 text-[9px] font-bold leading-none ${badgeClass}`}
-                  >
-                    {count} คน
-                  </span>
+                <div className="shrink-0 text-sm font-bold text-slate-600">
+                  {count} คน
                 </div>
               </div>
             );
           })
         ) : (
-          <div className="px-3 py-3 text-center text-xs font-semibold text-slate-400">
+          <div className="rounded-2xl border border-slate-200 bg-white px-3 py-5 text-center text-sm font-semibold text-slate-400">
             ไม่มีข้อมูล
           </div>
         )}
+      </div>
+
+      <div className={`mt-5 text-center text-sm font-black ${s.action}`}>
+        ดูทั้งหมด →
       </div>
     </div>
   );
