@@ -4341,7 +4341,7 @@ function lmAdminRow(record) {
                   onChange={(e) => setDay(e.target.value)}
                   className="h-11 w-20 rounded-xl border border-slate-200 bg-white px-2 text-sm font-semibold outline-none focus:border-slate-700"
                 >
-                  <option value="">วัน</option>
+                  <option value="">ทุกวัน</option>
                   {Array.from({ length: 31 }, (_, i) => i + 1).map((d) => (
                     <option key={d} value={d}>
                       {d}
@@ -4354,7 +4354,7 @@ function lmAdminRow(record) {
                   onChange={(e) => setMonth(e.target.value)}
                   className="h-11 w-28 rounded-xl border border-slate-200 bg-white px-2 text-sm font-semibold outline-none focus:border-slate-700"
                 >
-                  <option value="">เดือน</option>
+                  <option value="">ทุกเดือน</option>
                   <option value="1">มกราคม</option>
                   <option value="2">กุมภาพันธ์</option>
                   <option value="3">มีนาคม</option>
@@ -4374,11 +4374,12 @@ function lmAdminRow(record) {
                   onChange={(e) => setYear(e.target.value)}
                   className="h-11 w-24 rounded-xl border border-slate-200 bg-white px-2 text-sm font-semibold outline-none focus:border-slate-700"
                 >
-                  <option value="">ปี</option>
-                  <option value="2568">2568</option>
-                  <option value="2569">2569</option>
-                  <option value="2570">2570</option>
-                  <option value="2571">2571</option>
+                  <option value="">ทุกปี</option>
+                  {Array.from({ length: 15 }, (_, i) => 2566 + i).map((y) => (
+                    <option key={y} value={y}>
+                      {y}
+                    </option>
+                  ))}
                 </select>
                 
              </div>
