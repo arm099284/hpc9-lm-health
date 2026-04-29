@@ -6484,7 +6484,7 @@ function LmAssessmentForm({ draft, update }) {
                                 </Pill>
                               </div>
 
-                              <div className="mt-4 flex flex-wrap gap-2">
+                              <div className="mt-3 grid grid-cols-6 gap-2 sm:grid-cols-11">
                                 {question.options.map(
                                   (option, optionIndex) => {
                                     const optionScore =
@@ -6508,7 +6508,7 @@ function LmAssessmentForm({ draft, update }) {
                                             optionIndex
                                           )
                                         }
-                                        className={`min-w-[64px] rounded-2xl border px-3.5 py-2.5 text-center transition ${
+                                        className={`rounded-xl border px-2 py-2 text-center transition ${
                                           disabled
                                             ? "cursor-not-allowed border-slate-100 bg-slate-50 text-slate-300"
                                             : selected
@@ -6516,24 +6516,15 @@ function LmAssessmentForm({ draft, update }) {
                                               : "border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50"
                                         }`}
                                       >
-                                        <div className="text-sm font-black leading-5">
+                                        <div className="text-sm font-black leading-tight">
                                           {option}
                                         </div>
 
-                                        <div
-                                          className={`mt-0.5 text-[9px] font-semibold leading-3 ${
-                                            selected
-                                              ? "text-white/60"
-                                              : "text-slate-300"
-                                          }`}
-                                        >
-                                          {disabled
-                                            ? "-"
-                                            : `${scoreLabel(
-                                                question,
-                                                optionIndex
-                                              )} คะแนน`}
-                                        </div>
+                                        {selected && !disabled && (
+                                          <div className="mt-0.5 text-[9px] font-bold leading-3 text-white/70">
+                                            {scoreLabel(question, optionIndex)} คะแนน
+                                          </div>
+                                        )}
                                       </button>
                                     );
                                   }
