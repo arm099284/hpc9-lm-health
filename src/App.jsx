@@ -3127,11 +3127,11 @@ function AdminSummary({ records, auditLogs, onFullBackup, onRestoreBackup }) {
     { value: "80+", label: "80 ปีขึ้นไป" },
   ];
 
-  const ageFilteredRecords = all.filter(
+  const agerows = all.filter(
     (record) => ageFilter === "all" || adminAgeGroup(record.age) === ageFilter
   );
 
-  const rows = ageFilteredRecords.map((record) => {
+  const rows = agerows.map((record) => {
     const sessions = sessionsInPeriod(record, yearFilter, monthFilter);
     const first = sessions[0];
     const last = sessions[sessions.length - 1];
@@ -3536,11 +3536,11 @@ function AdminSummary({ records, auditLogs, onFullBackup, onRestoreBackup }) {
         </div>
 
         <div className="grid gap-3 md:grid-cols-5">
-          <Info label="ทั้งหมด" value={`${rows.length} คน`} tone="navy" />
-          <Info label="เทียบได้ ≥2 ครั้ง" value={`${filteredComparable.length} คน`} tone="sky" />
-          <Info label="ดีขึ้น" value={`${improved} คน`} tone="emerald" />
-          <Info label="ต้องติดตาม" value={`${needFollow} คน`} tone="amber" />
-          <Info label="คงเดิม" value={`${noChange} คน`} tone="violet" />
+          <Info label="ทั้งหมด" value={`${rows.length} คน`} tone="default" />
+          <Info label="เทียบได้ ≥2 ครั้ง" value={`${comparable.length} คน`} tone="admin" />
+          <Info label="ดีขึ้น" value={`${improved} คน`} tone="good" />
+          <Info label="ต้องติดตาม" value={`${needFollow} คน`} tone={needFollow ? "fat" : "default"} />
+          <Info label="คงเดิม" value={`${noChange} คน`} tone="default" />
         </div>
         <div className="mt-5 rounded-3xl border border-slate-200 bg-gradient-to-br from-white via-slate-50 to-slate-100 p-4 shadow-[0_12px_35px_rgba(15,23,42,0.08)] ring-1 ring-white/70">
         <div className="mb-3 flex items-center justify-between gap-3 border-b border-slate-200 pb-3">
