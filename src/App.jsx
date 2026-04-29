@@ -5212,18 +5212,18 @@ const menuProgress = Math.round((menuDoneCount / allMenuItems.length) * 100);
                   onClick={() => selectRecord(r.hn)}
                   className={`w-full rounded-xl border px-3 py-2.5 text-left transition ${
                     selected
-                      ? "border-sky-300 bg-sky-50 text-slate-900 shadow-sm ring-1 ring-sky-100"
+                      ? "border-sky-500 bg-gradient-to-r from-sky-600 to-sky-500 text-white shadow-md ring-2 ring-sky-200"
                       : "border-slate-200 bg-white text-slate-700 hover:border-sky-200 hover:bg-sky-50/50"
                   }`}
                 >
                   <div className="flex items-center justify-between gap-2">
-                    <div className="text-sm font-black leading-tight text-slate-900">
+                    <div className={`text-sm font-black leading-tight ${selected ? "text-white" : "text-slate-900"}`}>
                       HN {r.hn}
                     </div>
           
                     <span
                       className={`text-sm font-black ${
-                        selected ? "text-sky-600" : "text-slate-300"
+                        selected ? "text-white" : "text-slate-300"
                       }`}
                     >
                       {selected ? "✓" : "›"}
@@ -5232,7 +5232,7 @@ const menuProgress = Math.round((menuDoneCount / allMenuItems.length) * 100);
           
                   <div
                     className={`mt-1 whitespace-normal break-words text-[12px] font-medium leading-snug ${
-                      selected ? "text-slate-700" : "text-slate-500"
+                      selected ? "text-sky-50" : "text-slate-500"
                     }`}
                   >
                     {r.name || "-"}
