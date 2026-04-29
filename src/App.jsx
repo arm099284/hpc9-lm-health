@@ -4928,8 +4928,18 @@ function Staff({ records, setRecords, adminUser, addAuditLog, refreshData }) {
   }
   
   async function save() {
-    if (!draft.hn) return alert("กรุณากรอก HN");
-    const quality = recordQuality(draft);
+    const targetHN = String(draft.hn || "").trim();
+    const currentHN = String(hn || "").trim();
+    
+    if (!targetHN) {
+      return alert("กรุณากรอก HN");
+    }
+    
+    if (records?.[targetHN] && targetHN !== currentHN) {
+      return alert(`มี HN ${targetHN} อยู่แล้ว ไม่สามารถบันทึกซ้ำได้`);
+    }
+    
+    const quality = recordQuality({ ...draft, hn: targetHN });
     if (quality.issues.length > 0) {
       const ok = window.confirm(`พบข้อมูลที่ควรตรวจสอบ ${quality.issues.length} รายการ
 
@@ -4938,9 +4948,10 @@ ${quality.issues.slice(0, 8).join("\n")}
 ต้องการบันทึกต่อหรือไม่?`);
       if (!ok) return;
     }
-    const existed = Boolean(records[draft.hn]);
+    const existed = Boolean(records[targetHN]);
     const preparedDraft = {
       ...clone(draft),
+      hn: targetHN,
       sessions: draft.sessions.map((s) => ({
         ...s,
         date: s.date || (sessionHasAnyData(s) ? todayThaiDateText() : ""),
