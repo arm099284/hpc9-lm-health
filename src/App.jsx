@@ -4045,59 +4045,119 @@ function lmAdminRow(record) {
   };
 }
 
-function LmAdminDashboard({ records }) {
-  const [lmSearch, setLmSearch] = useState("");
-  const [lmPage, setLmPage] = useState(1);
-
-  const rows = useMemo(() => {
-    return Object.values(records || {})
-      .map((record) => lmAdminRow(record))
-      .filter((row) => row.hasAny)
-      .sort((a, b) => {
-        if (a.comparable !== b.comparable) return a.comparable ? -1 : 1;
-        return String(a.hn).localeCompare(String(b.hn));
-      });
-  }, [records]);
-
-  const comparableRows = rows.filter((row) => row.comparable);
-
-  const improvedCount = comparableRows.filter((row) => row.delta > 0).length;
-  const worsenedCount = comparableRows.filter((row) => row.delta < 0).length;
-  const unchangedCount = comparableRows.filter((row) => row.delta === 0).length;
-
-  const latestCompleteRows = rows.filter((row) => row.latestComplete);
-
-  const averageLatest =
-    latestCompleteRows.length > 0
-      ? (
-          latestCompleteRows.reduce(
-            (sum, row) => sum + row.latestComplete.total,
-            0
-          ) / latestCompleteRows.length
-        ).toFixed(1)
-      : "-";
-
-  const averageDelta =
-    comparableRows.length > 0
-      ? (
-          comparableRows.reduce((sum, row) => sum + row.delta, 0) /
-          comparableRows.length
-        ).toFixed(1)
-      : "-";
-
-  const chartData = [
-    { name: "ดีขึ้น", value: improvedCount },
-    { name: "คงเดิม", value: unchangedCount },
-    { name: "ลดลง", value: worsenedCount },
-  ];
-
-  const searchText = lmSearch.trim().toLowerCase();
-
+  function LmAdminDashboard({ records }) {
+    const [lmSearch, setLmSearch] = useState("");
+      const [day, setDay] = useState("");
+      const [month, setMonth] = useState("");
+      const [year, setYear] = useState("");
+  
+    
+    const [lmPage, setLmPage] = useState(1);
+  
+    const rows = useMemo(() => {
+      return Object.values(records || {})
+        .map((record) => lmAdminRow(record))
+        .filter((row) => row.hasAny)
+        .sort((a, b) => {
+          if (a.comparable !== b.comparable) return a.comparable ? -1 : 1;
+          return String(a.hn).localeCompare(String(b.hn));
+        });
+    }, [records]);
+  
+    const comparableRows = rows.filter((row) => row.comparable);
+  
+    const improvedCount = comparableRows.filter((row) => row.delta > 0).length;
+    const worsenedCount = comparableRows.filter((row) => row.delta < 0).length;
+    const unchangedCount = comparableRows.filter((row) => row.delta === 0).length;
+  
+    const latestCompleteRows = rows.filter((row) => row.latestComplete);
+  
+    const averageLatest =
+      latestCompleteRows.length > 0
+        ? (
+            latestCompleteRows.reduce(
+              (sum, row) => sum + row.latestComplete.total,
+              0
+            ) / latestCompleteRows.length
+          ).toFixed(1)
+        : "-";
+  
+    const averageDelta =
+      comparableRows.length > 0
+        ? (
+            comparableRows.reduce((sum, row) => sum + row.delta, 0) /
+            comparableRows.length
+          ).toFixed(1)
+        : "-";
+  
+    const chartData = [
+      { name: "ดีขึ้น", value: improvedCount },
+      { name: "คงเดิม", value: unchangedCount },
+      { name: "ลดลง", value: worsenedCount },
+    ];
+  
+    const searchText = lmSearch.trim().toLowerCase();
+  
+    function parseLmDate(value) {
+    const text = String(value || "").trim();
+    if (!text) return null;
+  
+    if (text.includes("/")) {
+      const parts = text.split("/");
+      const d = Number(parts[0]);
+      const m = Number(parts[1]);
+      const y = Number(parts[2]);
+  
+      if (!d || !m || !y) return null;
+  
+      return {
+        day: d,
+        month: m,
+        yearBE: y < 2400 ? y + 543 : y,
+        yearCE: y < 2400 ? y : y - 543,
+      };
+    }
+  
+    if (text.includes("-")) {
+      const parts = text.split("-");
+      const y = Number(parts[0]);
+      const m = Number(parts[1]);
+      const d = Number(String(parts[2] || "").slice(0, 2));
+  
+      if (!d || !m || !y) return null;
+  
+      return {
+        day: d,
+        month: m,
+        yearBE: y < 2400 ? y + 543 : y,
+        yearCE: y < 2400 ? y : y - 543,
+      };
+    }
+  
+    return null;
+  }
+  
   const filteredRows = rows.filter((row) => {
-    if (!searchText) return true;
-    return `${row.hn} ${row.name}`.toLowerCase().includes(searchText);
+    const matchSearch =
+      !searchText ||
+      `${row.hn} ${row.name}`.toLowerCase().includes(searchText);
+  
+    const dateText =
+      row.latestComplete?.assessment?.date ||
+      row.latestAny?.assessment?.date ||
+      "";
+  
+    const parsed = parseLmDate(dateText);
+  
+    const matchDay = !day || parsed?.day === Number(day);
+    const matchMonth = !month || parsed?.month === Number(month);
+    const matchYear =
+      !year ||
+      parsed?.yearBE === Number(year) ||
+      parsed?.yearCE === Number(year);
+  
+    return matchSearch && matchDay && matchMonth && matchYear;
   });
-
   const pageCount = Math.max(
     1,
     Math.ceil(filteredRows.length / LM_ADMIN_PAGE_SIZE)
@@ -4112,7 +4172,7 @@ function LmAdminDashboard({ records }) {
 
   useEffect(() => {
     setLmPage(1);
-  }, [lmSearch]);
+  }, [lmSearch, day, month, year]);
 
   function deltaText(row) {
     if (!row.comparable) return "-";
@@ -4257,39 +4317,27 @@ function LmAdminDashboard({ records }) {
                   onChange={(e) => setYear(e.target.value)}
                   className="h-11 w-20 rounded-xl border border-slate-200 bg-white px-2 text-sm font-semibold outline-none focus:border-slate-700"
                 />
-              
-              </div>
-                const rowsToShow = (lmRows || []).filter((row) => {
-                  const matchSearch =
-                    row.hn?.includes(lmSearch) ||
-                    row.name?.includes(lmSearch);
                 
-                  const d = row.date ? new Date(row.date) : null;
-                
-                  const matchDay = !day || (d && d.getDate() === Number(day));
-                  const matchMonth = !month || (d && d.getMonth() + 1 === Number(month));
-                  const matchYear = !year || (d && d.getFullYear() === Number(year));
-                
-                  return matchSearch && matchDay && matchMonth && matchYear;
-                });
+             </div>
+            </div>
               
             <div className="overflow-x-auto rounded-xl border border-slate-200">
-              <tbody>
-                {(lmRows || [])
-                  .filter((row) => {
-                    const matchSearch =
-                      row.hn?.includes(lmSearch) ||
-                      row.name?.includes(lmSearch);
-              
-                    const d = row.date ? new Date(row.date) : null;
-              
-                    const matchDay = !day || (d && d.getDate() === Number(day));
-                    const matchMonth = !month || (d && d.getMonth() + 1 === Number(month));
-                    const matchYear = !year || (d && d.getFullYear() === Number(year));
-              
-                    return matchSearch && matchDay && matchMonth && matchYear;
-                  })
-                  .map((row) => (
+              <table className="w-full min-w-[720px] text-left text-xs">
+                <thead className="bg-slate-50 text-xs font-bold text-slate-500">
+                  <tr>
+                    <th className="px-2 py-2 whitespace-nowrap">HN / ชื่อ</th>
+                    <th className="px-2 py-2 whitespace-nowrap">ครั้งที่ 1</th>
+                    <th className="px-2 py-2 whitespace-nowrap">ครั้งที่ 2</th>
+                    <th className="px-2 py-2 whitespace-nowrap">ครั้งที่ 3</th>
+                    <th className="px-2 py-2 whitespace-nowrap">ครั้งที่ 4</th>
+                    <th className="px-2 py-2 whitespace-nowrap">เปลี่ยนแปลง</th>
+                    <th className="px-2 py-2 whitespace-nowrap">สถานะ</th>
+                    <th className="px-2 py-2 whitespace-nowrap">ควรปรับ</th>
+                  </tr>
+                </thead>
+            
+                <tbody>
+                  {pagedRows.map((row) => (
                     <tr key={row.hn} className="border-t border-slate-100">
                       <td className="px-2 py-2 align-top">
                         <div className="whitespace-nowrap text-[11px] font-black leading-tight text-slate-900">
@@ -4299,23 +4347,23 @@ function LmAdminDashboard({ records }) {
                           {row.name || "-"}
                         </div>
                       </td>
-              
+            
                       {row.rounds.map((round) => (
                         <td key={round.no} className="px-2 py-2 whitespace-nowrap align-top text-[11px]">
                           {roundText(round)}
                         </td>
                       ))}
-              
+            
                       <td className="px-2 py-2 whitespace-nowrap align-top">
                         <Pill tone={row.delta > 0 ? "good" : row.delta < 0 ? "bad" : "gray"}>
                           {deltaText(row)}
                         </Pill>
                       </td>
-              
+            
                       <td className="px-2 py-2 whitespace-nowrap align-top">
                         <Pill tone={row.tone}>{row.status}</Pill>
                       </td>
-              
+            
                       <td className="px-2 py-2 align-top">
                         <div className="flex flex-wrap gap-1">
                           {row.improvements.length ? (
@@ -4333,7 +4381,8 @@ function LmAdminDashboard({ records }) {
                       </td>
                     </tr>
                   ))}
-              </tbody>
+                </tbody>
+              </table>
             </div>
 
             <div className="mt-4 flex flex-wrap items-center justify-between gap-3 text-sm text-slate-500">
