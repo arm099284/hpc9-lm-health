@@ -1679,8 +1679,8 @@ function OhsTable({ record }) {
   return (
     <Card title="Overhead Deep Squat ครั้งที่ 1–4" icon={ClipboardIcon}>
       <div className="grid gap-6 lg:grid-cols-[1.3fr_.7fr]">
-        <div className="overflow-x-auto rounded-xl border border-slate-200">
-          <table className="w-full min-w-[760px] text-left text-base">
+        <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm">
+          <table className="w-full min-w-[900px] text-left text-xs">
             <thead className="bg-slate-50 text-sm text-slate-500"><tr><th className="p-3">รายการ</th>{record.sessions.map((s) => <th key={s.no} className="p-3">ครั้งที่ {s.no}</th>)}</tr></thead>
             <tbody>
               {ohsItems.map((x, i) => <tr key={x} className="border-t border-slate-100"><td className="p-3 font-semibold text-slate-900">{x}</td>{record.sessions.map((s) => <td key={s.no} className="p-3"><Pill tone={s.ohs[i] === "ปกติ" ? "good" : s.ohs[i] === "ต้องระวัง" ? "warn" : "bad"}>{s.ohs[i]}</Pill></td>)}</tr>)}
@@ -3408,7 +3408,7 @@ function AdminSummary({ records, auditLogs, onFullBackup, onRestoreBackup }) {
   return (
     <main className="mx-auto max-w-7xl space-y-5 px-4 py-6">
       <Card title="สรุปภาพรวมแอดมิน" icon={ClipboardIcon}>
-        <div className="mb-4 flex flex-nowrap items-center gap-2 overflow-x-auto whitespace-nowrap pb-1">
+        <div className="mb-4 flex flex-nowrap items-center gap-2 overflow-x-auto whitespace-nowrap rounded-2xl border border-slate-200 bg-gradient-to-r from-slate-50 via-white to-slate-50 p-2 shadow-sm">
           <select
             value={yearFilter}
             onChange={(e) => setYearFilter(e.target.value)}
@@ -3502,6 +3502,153 @@ function AdminSummary({ records, auditLogs, onFullBackup, onRestoreBackup }) {
           <Info label="ต้องติดตาม" value={`${needFollow} คน`} tone={needFollow ? "fat" : "default"} />
           <Info label="คงเดิม" value={`${noChange} คน`} />
         </div>
+        <div className="mt-5 rounded-3xl border border-slate-200 bg-gradient-to-br from-white via-slate-50 to-slate-100 p-4 shadow-[0_12px_35px_rgba(15,23,42,0.08)] ring-1 ring-white/70">
+        <div className="mb-3 flex items-center justify-between gap-3 border-b border-slate-200 pb-3">
+          <div>
+            <h3 className="text-base font-black text-slate-900">
+              ตารางสรุปทุกคน สำหรับแอดมิน
+            </h3>
+            <p className="mt-0.5 text-xs font-medium text-slate-500">
+              ภาพรวมรายบุคคลตามตัวกรองที่เลือก
+            </p>
+          </div>
+      
+          <span className="rounded-full border border-slate-200 bg-slate-900 px-3 py-1 text-xs font-bold text-white shadow-sm">
+            Admin table
+          </span>
+        </div>
+      
+        <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-inner">
+          <table className="w-full min-w-[1380px] text-left text-xs">
+            <thead className="bg-slate-900 text-[10px] font-black uppercase tracking-wide text-white">
+              <tr>
+                <th className="px-2.5 py-2">HN / ชื่อ</th>
+                <th className="px-2.5 py-2">จำนวนครั้ง</th>
+                <th className="px-2.5 py-2">ช่วงที่เทียบ</th>
+                <th className="px-2.5 py-2">น้ำหนัก</th>
+                <th className="px-2.5 py-2">Body Fat</th>
+                <th className="px-2.5 py-2">Fat Mass</th>
+                <th className="px-2.5 py-2">Muscle</th>
+                <th className="px-2.5 py-2">Step Test</th>
+                <th className="px-2.5 py-2">Grip</th>
+                <th className="px-2.5 py-2">Sit to Stand</th>
+                <th className="px-2.5 py-2">Sit and Reach</th>
+                <th className="px-2.5 py-2">TUG</th>
+                <th className="px-2.5 py-2">OHS</th>
+                <th className="px-2.5 py-2">สรุป</th>
+              </tr>
+            </thead>
+      
+            <tbody>
+              {pagedComparable.map((r) => (
+                <tr
+                  key={r.record.hn}
+                  className={`border-t border-slate-100 transition hover:bg-slate-50 ${
+                    r.badCount > r.goodCount ? "bg-rose-50/45" : ""
+                  }`}
+                >
+                  <td className="px-2.5 py-2">
+                    <div className="whitespace-nowrap font-bold text-slate-900">
+                      HN {r.record.hn}
+                    </div>
+                    <div className="max-w-[130px] truncate text-[11px] text-slate-500">
+                      {r.record.name || "-"}
+                    </div>
+                  </td>
+      
+                  <td className="px-2.5 py-2">
+                    <Pill>{r.sessions.length} ครั้ง</Pill>
+                  </td>
+      
+                  <td className="px-2.5 py-2 text-[11px] leading-tight text-slate-600">
+                    ครั้งที่ {r.first?.no || "-"} → {r.last?.no || "-"}
+                    <br />
+                    {r.first?.date || "-"} → {r.last?.date || "-"}
+                  </td>
+      
+                  <td className="px-2.5 py-2">
+                    <Pill tone={r.weight.tone}>{r.weight.text}</Pill>
+                  </td>
+      
+                  <td className="px-2.5 py-2">
+                    <Pill tone={r.bodyFat.tone}>{r.bodyFat.text}</Pill>
+                  </td>
+      
+                  <td className="px-2.5 py-2">
+                    <Pill tone={r.fatMass.tone}>{r.fatMass.text}</Pill>
+                  </td>
+      
+                  <td className="px-2.5 py-2">
+                    <Pill tone={r.muscle.tone}>{r.muscle.text}</Pill>
+                  </td>
+      
+                  <td className="px-2.5 py-2">
+                    <Pill tone={r.step.tone}>{r.step.text}</Pill>
+                  </td>
+      
+                  <td className="px-2.5 py-2">
+                    <Pill tone={r.grip.tone}>{r.grip.text}</Pill>
+                  </td>
+      
+                  <td className="px-2.5 py-2">
+                    <Pill tone={r.sitstand.tone}>{r.sitstand.text}</Pill>
+                  </td>
+      
+                  <td className="px-2.5 py-2">
+                    <Pill tone={r.sitreach.tone}>{r.sitreach.text}</Pill>
+                  </td>
+      
+                  <td className="px-2.5 py-2">
+                    <Pill tone={r.tug.tone}>{r.tug.text}</Pill>
+                  </td>
+      
+                  <td className="px-2.5 py-2">
+                    <Pill tone={r.ohsDelta.tone}>{r.ohsDelta.text}</Pill>
+                  </td>
+      
+                  <td className="px-2.5 py-2">
+                    <Pill tone={summaryTone(r.goodCount, r.badCount)}>
+                      {summaryText(r.goodCount, r.badCount)}
+                    </Pill>
+                  </td>
+                </tr>
+              ))}
+      
+              {pagedComparable.length === 0 && (
+                <tr>
+                  <td colSpan="14" className="px-4 py-5 text-center text-sm text-slate-500">
+                    ไม่มีข้อมูลที่เทียบได้ในช่วงที่เลือก
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      
+        <div className="mt-3 flex flex-wrap items-center justify-between gap-3 text-xs text-slate-500">
+          <div>
+            แสดง {pagedComparable.length} รายการต่อหน้า จากทั้งหมด {filteredComparable.length} รายการ • หน้า {safePage}/{pageCount}
+          </div>
+      
+          <div className="flex gap-2">
+            <button
+              disabled={safePage <= 1}
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              className="rounded-xl border border-slate-200 bg-white px-3 py-1.5 font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-40"
+            >
+              ก่อนหน้า
+            </button>
+      
+            <button
+              disabled={safePage >= pageCount}
+              onClick={() => setPage((p) => Math.min(pageCount, p + 1))}
+              className="rounded-xl border border-slate-200 bg-white px-3 py-1.5 font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-40"
+            >
+              ถัดไป
+            </button>
+          </div>
+        </div>
+      </div>
       </Card>
 
       <Card title="ภาพรวมผลลัพธ์" icon={ActivityIcon}>
@@ -3677,135 +3824,6 @@ function AdminSummary({ records, auditLogs, onFullBackup, onRestoreBackup }) {
       
       <LmAdminDashboard records={records} />
       
-      <Card title="ตารางสรุปทุกคน สำหรับแอดมิน" icon={ClipboardIcon}>
-        <div className="overflow-x-auto rounded-xl border border-slate-200">
-          <table className="w-full min-w-[1380px] text-left text-base">
-            <thead className="bg-slate-50 text-sm text-slate-500">
-              <tr>
-                <th className="p-3">HN / ชื่อ</th>
-                <th className="p-3">จำนวนครั้งในช่วงที่เลือก</th>
-                <th className="p-3">ช่วงที่เทียบ</th>
-                <th className="p-3">น้ำหนัก</th>
-                <th className="p-3">Body Fat</th>
-                <th className="p-3">Fat Mass</th>
-                <th className="p-3">Muscle</th>
-                <th className="p-3">Step Test</th>
-                <th className="p-3">Grip</th>
-                <th className="p-3">Sit to Stand</th>
-                <th className="p-3">Sit and Reach</th>
-                <th className="p-3">TUG</th>
-                <th className="p-3">OHS</th>
-                <th className="p-3">สรุป</th>
-              </tr>
-            </thead>
-
-            <tbody>
-              {pagedComparable.map((r) => (
-                <tr
-                  key={r.record.hn}
-                  className={`border-t border-slate-100 ${
-                    r.badCount > r.goodCount ? "bg-rose-50/45" : ""
-                  }`}
-                >
-                  <td className="p-3">
-                    <div className="font-bold text-slate-900">HN {r.record.hn}</div>
-                    <div className="text-sm text-slate-500">{r.record.name || "-"}</div>
-                  </td>
-
-                  <td className="p-3">
-                    <Pill>{r.sessions.length} ครั้ง</Pill>
-                  </td>
-
-                  <td className="p-3 text-sm text-slate-600">
-                    ครั้งที่ {r.first?.no || "-"} → {r.last?.no || "-"}
-                    <br />
-                    {r.first?.date || "-"} → {r.last?.date || "-"}
-                  </td>
-
-                  <td className="p-3">
-                    <Pill tone={r.weight.tone}>{r.weight.text}</Pill>
-                  </td>
-
-                  <td className="p-3">
-                    <Pill tone={r.bodyFat.tone}>{r.bodyFat.text}</Pill>
-                  </td>
-
-                  <td className="p-3">
-                    <Pill tone={r.fatMass.tone}>{r.fatMass.text}</Pill>
-                  </td>
-
-                  <td className="p-3">
-                    <Pill tone={r.muscle.tone}>{r.muscle.text}</Pill>
-                  </td>
-
-                  <td className="p-3">
-                    <Pill tone={r.step.tone}>{r.step.text}</Pill>
-                  </td>
-
-                  <td className="p-3">
-                    <Pill tone={r.grip.tone}>{r.grip.text}</Pill>
-                  </td>
-
-                  <td className="p-3">
-                    <Pill tone={r.sitstand.tone}>{r.sitstand.text}</Pill>
-                  </td>
-
-                  <td className="p-3">
-                    <Pill tone={r.sitreach.tone}>{r.sitreach.text}</Pill>
-                  </td>
-
-                  <td className="p-3">
-                    <Pill tone={r.tug.tone}>{r.tug.text}</Pill>
-                  </td>
-
-                  <td className="p-3">
-                    <Pill tone={r.ohsDelta.tone}>{r.ohsDelta.text}</Pill>
-                  </td>
-
-                  <td className="p-3">
-                    <Pill tone={summaryTone(r.goodCount, r.badCount)}>
-                      {summaryText(r.goodCount, r.badCount)}
-                    </Pill>
-                  </td>
-                </tr>
-              ))}
-
-              {pagedComparable.length === 0 && (
-                <tr>
-                  <td colSpan="14" className="p-4 text-center text-slate-500">
-                    ไม่มีข้อมูลที่เทียบได้ในช่วงที่เลือก
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-
-        <div className="mt-4 flex flex-wrap items-center justify-between gap-3 text-sm text-slate-500">
-          <div>
-            แสดง {pagedComparable.length} รายการต่อหน้า จากทั้งหมด {filteredComparable.length} รายการ • หน้า {safePage}/{pageCount}
-          </div>
-
-          <div className="flex gap-2">
-            <button
-              disabled={safePage <= 1}
-              onClick={() => setPage((p) => Math.max(1, p - 1))}
-              className="rounded-xl border border-slate-200 bg-white px-4 py-2 font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-40"
-            >
-              ก่อนหน้า
-            </button>
-
-            <button
-              disabled={safePage >= pageCount}
-              onClick={() => setPage((p) => Math.min(pageCount, p + 1))}
-              className="rounded-xl border border-slate-200 bg-white px-4 py-2 font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-40"
-            >
-              ถัดไป
-            </button>
-          </div>
-        </div>
-      </Card>
-
       <AuditLogPanel auditLogs={auditLogs} />
     </main>
   );
@@ -4399,7 +4417,7 @@ function lmAdminRow(record) {
               
             <div className="overflow-x-auto rounded-xl border border-slate-200">
               <table className="w-full min-w-[720px] text-left text-xs">
-                <thead className="bg-slate-50 text-xs font-bold text-slate-500">
+                <thead className="bg-slate-100/80 text-[11px] font-black uppercase tracking-wide text-slate-500">
                   <tr>
                     <th className="px-2 py-2 whitespace-nowrap">HN / ชื่อ</th>
                     <th className="px-2 py-2 whitespace-nowrap">ครั้งที่ 1</th>
