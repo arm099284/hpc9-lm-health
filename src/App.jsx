@@ -5201,12 +5201,69 @@ const menuProgress = Math.round((menuDoneCount / allMenuItems.length) * 100);
             + เพิ่ม HN ใหม่
           </button>
           <div className="mb-3"><Field label="ค้นหา HN / ชื่อ" value={staffSearch} onChange={(v) => { setStaffSearch(v); setStaffPage(1); }} /></div>
-          <div className="space-y-2">{pagedPatients.map((r) => <button key={r.hn} onClick={() => selectRecord(r.hn)} className={`w-full rounded-xl border px-3 py-3 text-left text-base ${hn === r.hn ? "border-slate-900 bg-slate-900 text-white" : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"}`}><div className="font-bold">HN {r.hn}</div><div className="truncate text-sm opacity-70">{r.name}</div></button>)}</div>
-          <div className="mt-3 flex items-center justify-between gap-2 text-sm text-slate-500">
-            <span>{filteredPatients.length} รายการ • หน้า {safeStaffPage}/{staffPageCount}</span>
+          <div className="space-y-1.5">
+            {pagedPatients.map((r) => {
+              const selected = hn === r.hn;
+          
+              return (
+                <button
+                  key={r.hn}
+                  type="button"
+                  onClick={() => selectRecord(r.hn)}
+                  className={`w-full rounded-xl border px-3 py-2.5 text-left transition ${
+                    selected
+                      ? "border-sky-300 bg-sky-50 text-slate-900 shadow-sm ring-1 ring-sky-100"
+                      : "border-slate-200 bg-white text-slate-700 hover:border-sky-200 hover:bg-sky-50/50"
+                  }`}
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="text-sm font-black leading-tight text-slate-900">
+                      HN {r.hn}
+                    </div>
+          
+                    <span
+                      className={`text-sm font-black ${
+                        selected ? "text-sky-600" : "text-slate-300"
+                      }`}
+                    >
+                      {selected ? "✓" : "›"}
+                    </span>
+                  </div>
+          
+                  <div
+                    className={`mt-1 whitespace-normal break-words text-[12px] font-medium leading-snug ${
+                      selected ? "text-slate-700" : "text-slate-500"
+                    }`}
+                  >
+                    {r.name || "-"}
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+          <div className="mt-3 flex items-center justify-between gap-2 border-t border-slate-100 pt-3 text-[11px] text-slate-500">
+            <span className="font-semibold">
+              {filteredPatients.length} รายการ • หน้า {safeStaffPage}/{staffPageCount}
+            </span>
+          
             <div className="flex gap-1">
-              <button onClick={() => setStaffPage(Math.max(1, safeStaffPage - 1))} disabled={safeStaffPage <= 1} className="rounded-lg border border-slate-200 bg-white px-3 py-1 font-semibold disabled:opacity-40">ก่อนหน้า</button>
-              <button onClick={() => setStaffPage(Math.min(staffPageCount, safeStaffPage + 1))} disabled={safeStaffPage >= staffPageCount} className="rounded-lg border border-slate-200 bg-white px-3 py-1 font-semibold disabled:opacity-40">ถัดไป</button>
+              <button
+                type="button"
+                onClick={() => setStaffPage(Math.max(1, safeStaffPage - 1))}
+                disabled={safeStaffPage <= 1}
+                className="rounded-lg border border-slate-200 bg-white px-2.5 py-1 font-bold text-slate-600 hover:bg-slate-50 disabled:opacity-40"
+              >
+                ก่อนหน้า
+              </button>
+          
+              <button
+                type="button"
+                onClick={() => setStaffPage(Math.min(staffPageCount, safeStaffPage + 1))}
+                disabled={safeStaffPage >= staffPageCount}
+                className="rounded-lg border border-slate-200 bg-white px-2.5 py-1 font-bold text-slate-600 hover:bg-slate-50 disabled:opacity-40"
+              >
+                ถัดไป
+              </button>
             </div>
           </div>
         </Card>
