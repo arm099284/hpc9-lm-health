@@ -1704,52 +1704,154 @@ function CompareTable({ record, title, icon, list, withFitnessInterpretation = f
 }
 
 function OhsTable({ record }) {
-  const chart = record.sessions.map((s) => ({ name: `ครั้งที่ ${s.no}`, normal: ohsSummary(s).normal }));
+  const chart = record.sessions.map((s) => {
+    const normal = ohsSummary(s).normal;
+
+    return {
+      name: `ครั้ง ${s.no}`,
+      normal,
+      fill:
+        normal >= 5
+          ? "#10b981"
+          : normal >= 3
+            ? "#f59e0b"
+            : "#f43f5e",
+    };
+  });
+
   return (
     <Card title="Overhead Deep Squat ครั้งที่ 1–4" icon={ClipboardIcon}>
-      <div className="grid gap-6 lg:grid-cols-[1.3fr_.7fr]">
-        <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-inner">
-          <table className="w-full min-w-[900px] text-left text-xs">
-            <thead className="bg-slate-50 text-sm text-slate-500"><tr><th className="p-3">รายการ</th>{record.sessions.map((s) => <th key={s.no} className="p-3">ครั้งที่ {s.no}</th>)}</tr></thead>
+      <div className="grid gap-4 lg:grid-cols-[1.15fr_.85fr]">
+        <div className="overflow-hidden rounded-2xl border border-slate-200 bg-gradient-to-br from-white to-slate-50 shadow-sm">
+          <table className="w-full table-fixed text-left text-[11px]">
+            <colgroup>
+              <col className="w-[36%]" />
+              <col className="w-[16%]" />
+              <col className="w-[16%]" />
+              <col className="w-[16%]" />
+              <col className="w-[16%]" />
+            </colgroup>
+
+            <thead className="bg-slate-50 text-[10px] font-black uppercase tracking-wide text-slate-500">
+              <tr>
+                <th className="px-3 py-2">รายการ</th>
+                {record.sessions.map((s) => (
+                  <th key={s.no} className="px-2 py-2 text-center">
+                    ครั้ง {s.no}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+
             <tbody>
-              {ohsItems.map((x, i) => <tr key={x} className="border-t border-slate-100"><td className="p-3 font-semibold text-slate-900">{x}</td>{record.sessions.map((s) => <td key={s.no} className="p-3"><Pill tone={s.ohs[i] === "ปกติ" ? "good" : s.ohs[i] === "ต้องระวัง" ? "warn" : "bad"}>{s.ohs[i]}</Pill></td>)}</tr>)}
-              <tr className="border-t border-slate-100 bg-slate-50"><td className="p-3 font-bold">สรุป</td>{record.sessions.map((s) => { const o = ohsSummary(s); return <td key={s.no} className="p-3"><Pill tone={o.tone}>{o.text} {o.normal}/6</Pill></td>; })}</tr>
+              {ohsItems.map((x, i) => (
+                <tr key={x} className="border-t border-slate-100">
+                  <td className="px-3 py-2 font-bold leading-tight text-slate-900">
+                    {x}
+                  </td>
+
+                  {record.sessions.map((s) => (
+                    <td key={s.no} className="px-2 py-2 text-center">
+                      <Pill
+                        tone={
+                          s.ohs[i] === "ปกติ"
+                            ? "good"
+                            : s.ohs[i] === "ต้องระวัง"
+                              ? "warn"
+                              : "bad"
+                        }
+                      >
+                        {s.ohs[i]}
+                      </Pill>
+                    </td>
+                  ))}
+                </tr>
+              ))}
+
+              <tr className="border-t border-slate-200 bg-slate-50/80">
+                <td className="px-3 py-2 font-black text-slate-900">
+                  สรุป
+                </td>
+
+                {record.sessions.map((s) => {
+                  const o = ohsSummary(s);
+
+                  return (
+                    <td key={s.no} className="px-2 py-2 text-center">
+                      <Pill tone={o.tone}>
+                        {o.text} {o.normal}/6
+                      </Pill>
+                    </td>
+                  );
+                })}
+              </tr>
             </tbody>
           </table>
         </div>
-        <div className="h-72">
-          <ResponsiveContainer>
-            <BarChart
-              data={chart}
-              barCategoryGap="45%"
-              margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
-            >
-              <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-            
-              <XAxis
-                dataKey="name"
-                tick={{ fontSize: 14, fill: "#64748b" }}
-                axisLine={{ stroke: "#cbd5e1" }}
-                tickLine={false}
-              />
-            
-              <YAxis
-                domain={[0, 6]}
-                tick={{ fontSize: 12, fill: "#64748b" }}
-                axisLine={{ stroke: "#cbd5e1" }}
-                tickLine={false}
-              />
-            
-              <Tooltip />
-            
-              <Bar
-                dataKey="normal"
-                fill="#0f172a"
-                barSize={28}
-                radius={[8, 8, 0, 0]}
-              />
-            </BarChart>
-          </ResponsiveContainer>
+
+        <div className="rounded-2xl border border-slate-200 bg-gradient-to-br from-white via-slate-50 to-sky-50/30 p-3 shadow-[0_8px_24px_rgba(15,23,42,0.05)]">
+          <div className="mb-2 flex items-center justify-between">
+            <div>
+              <div className="text-sm font-black text-slate-900">
+                แนวโน้ม OHS
+              </div>
+              <div className="text-[10px] font-semibold text-slate-400">
+                จำนวนรายการที่ปกติ จากทั้งหมด 6 รายการ
+              </div>
+            </div>
+
+            <span className="rounded-full border border-slate-200 bg-white px-2 py-0.5 text-[10px] font-black text-slate-500 shadow-sm">
+              /6
+            </span>
+          </div>
+
+          <div className="h-64 rounded-2xl bg-white p-2 shadow-inner ring-1 ring-slate-100">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart
+                data={chart}
+                barCategoryGap="42%"
+                margin={{ top: 12, right: 8, left: -12, bottom: 0 }}
+              >
+                <CartesianGrid
+                  strokeDasharray="3 3"
+                  stroke="#e2e8f0"
+                  vertical={false}
+                />
+
+                <XAxis
+                  dataKey="name"
+                  tick={{ fontSize: 11, fill: "#64748b", fontWeight: 700 }}
+                  axisLine={false}
+                  tickLine={false}
+                />
+
+                <YAxis
+                  domain={[0, 6]}
+                  ticks={[0, 2, 4, 6]}
+                  tick={{ fontSize: 11, fill: "#64748b" }}
+                  axisLine={false}
+                  tickLine={false}
+                />
+
+                <Tooltip
+                  formatter={(value) => [`${value}/6`, "ปกติ"]}
+                  contentStyle={{
+                    borderRadius: "14px",
+                    border: "1px solid #e2e8f0",
+                    backgroundColor: "#ffffff",
+                    boxShadow: "0 10px 28px rgba(15,23,42,0.08)",
+                    fontSize: "12px",
+                  }}
+                />
+
+                <Bar dataKey="normal" barSize={34} radius={[10, 10, 0, 0]}>
+                  {chart.map((entry) => (
+                    <Cell key={entry.name} fill={entry.fill} />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
         </div>
       </div>
     </Card>
