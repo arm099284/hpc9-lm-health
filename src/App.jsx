@@ -1358,7 +1358,7 @@ function Pill({ children, tone = "gray" }) {
     warn: "border-amber-200 bg-amber-50 text-amber-700",
     bad: "border-rose-200 bg-rose-50 text-rose-700",
   }[tone];
-  return <span className={`inline-flex rounded-full border px-3 py-1 text-sm font-semibold ${cls}`}>{children}</span>;
+  return <span className={`inline-flex items-center whitespace-nowrap rounded-full border px-2 py-0.5 text-[11px] font-bold leading-none ${cls}`}>{children}</span>;
 }
 
 function Card({ title, icon: Icon, right, children }) {
@@ -4234,39 +4234,39 @@ function LmAdminDashboard({ records }) {
             </div>
 
             <div className="overflow-x-auto rounded-xl border border-slate-200">
-              <table className="w-full min-w-[760px] text-left text-sm">
+              <table className="w-full min-w-[720px] text-left text-xs">
                 <thead className="bg-slate-50 text-xs font-bold text-slate-500">
                   <tr>
-                    <th className="p-3">HN / ชื่อ</th>
-                    <th className="p-3">ครั้งที่ 1</th>
-                    <th className="p-3">ครั้งที่ 2</th>
-                    <th className="p-3">ครั้งที่ 3</th>
-                    <th className="p-3">ครั้งที่ 4</th>
-                    <th className="p-3">เปลี่ยนแปลง</th>
-                    <th className="p-3">สถานะ</th>
-                    <th className="p-3">ควรปรับ</th>
+                    <th className="px-2 py-2 whitespace-nowrap">HN / ชื่อ</th>
+                    <th className="px-2 py-2 whitespace-nowrap">ครั้งที่ 1</th>
+                    <th className="px-2 py-2 whitespace-nowrap">ครั้งที่ 2</th>
+                    <th className="px-2 py-2 whitespace-nowrap">ครั้งที่ 3</th>
+                    <th className="px-2 py-2 whitespace-nowrap">ครั้งที่ 4</th>
+                    <th className="px-2 py-2 whitespace-nowrap">เปลี่ยนแปลง</th>
+                    <th className="px-2 py-2 whitespace-nowrap">สถานะ</th>
+                    <th className="px-2 py-2 whitespace-nowrap">ควรปรับ</th>
                   </tr>
                 </thead>
 
                 <tbody>
                   {pagedRows.map((row) => (
                     <tr key={row.hn} className="border-t border-slate-100">
-                      <td className="p-3">
-                        <div className="font-black text-slate-900">
+                      <td className="px-2 py-2 align-top">
+                        <div className="whitespace-nowrap text-[11px] font-black leading-tight text-slate-900">
                           {row.hn}
                         </div>
-                        <div className="text-xs font-semibold text-slate-500">
+                        <div className="max-w-[90px] truncate text-[10px] font-semibold leading-tight text-slate-500">
                           {row.name || "-"}
                         </div>
                       </td>
 
                       {row.rounds.map((round) => (
-                        <td key={round.no} className="p-3">
+                        <td key={round.no} className="px-2 py-2 whitespace-nowrap align-top text-[11px]">
                           {roundText(round)}
                         </td>
                       ))}
 
-                      <td className="p-3">
+                      <td className="px-2 py-2 whitespace-nowrap align-top">
                         <Pill
                           tone={
                             row.delta > 0
@@ -4280,12 +4280,12 @@ function LmAdminDashboard({ records }) {
                         </Pill>
                       </td>
 
-                      <td className="p-3">
+                      <td className="px-2 py-2 whitespace-nowrap align-top">
                         <Pill tone={row.tone}>{row.status}</Pill>
                       </td>
 
-                      <td className="p-3">
-                        <div className="flex flex-wrap gap-1.5">
+                      <td className="px-2 py-2 align-top">
+                        <div className="flex flex-wrap gap-1">
                           {row.improvements.length ? (
                             row.improvements.map((item) => (
                               <Pill key={`${row.hn}-${item.key}`} tone="bad">
@@ -4304,7 +4304,7 @@ function LmAdminDashboard({ records }) {
 
                   {pagedRows.length === 0 && (
                     <tr>
-                      <td colSpan="8" className="p-5 text-center text-slate-500">
+                      <td colSpan="8" className="px-3 py-4 text-center text-xs text-slate-500">
                         ยังไม่มีข้อมูล LM
                       </td>
                     </tr>
