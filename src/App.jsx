@@ -6386,44 +6386,54 @@ function LmAssessmentForm({ draft, update }) {
                   key={section.key}
                   className={`overflow-hidden rounded-2xl border transition ${
                     isOpen
-                      ? "border-slate-300 bg-white shadow-sm ring-1 ring-slate-100"
-                      : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/60"
+                      ? "border-slate-300 bg-white shadow-[0_10px_26px_rgba(15,23,42,0.06)] ring-1 ring-slate-100"
+                      : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/70"
                   }`}
                 >
                   <button
                     type="button"
-                    onClick={() =>
-                      setOpenSection(isOpen ? "" : section.key)
-                    }
-                    className={`flex w-full items-center justify-between gap-3 px-4 py-3 text-left transition ${
-                      isOpen ? "bg-slate-50" : "bg-white"
+                    onClick={() => setOpenSection(isOpen ? "" : section.key)}
+                    className={`flex w-full items-center justify-between gap-3 px-3.5 py-3 text-left transition ${
+                      isOpen
+                        ? "bg-gradient-to-r from-slate-50 via-white to-slate-50"
+                        : "bg-white"
                     }`}
                   >
                     <div className="flex min-w-0 items-center gap-3">
-                      <span
-                        className={`h-10 w-1.5 shrink-0 rounded-full ${color.dot}`}
-                      />
-
+                      <div
+                        className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border shadow-sm ${
+                          isOpen
+                            ? "border-slate-200 bg-white"
+                            : "border-slate-100 bg-slate-50"
+                        }`}
+                      >
+                        <span className={`h-6 w-1.5 rounded-full ${color.dot}`} />
+                      </div>
+                
                       <div className="min-w-0">
-                        <div className="truncate text-base font-black text-slate-900">
+                        <div className="whitespace-normal break-words text-sm font-black leading-tight text-slate-900">
                           {section.thai}
                         </div>
-                        <div className="truncate text-xs font-bold text-slate-400">
+                        <div className="mt-0.5 whitespace-normal break-words text-[10px] font-bold leading-tight text-slate-400">
                           {section.label}
                         </div>
                       </div>
                     </div>
-
-                    <div className="flex shrink-0 items-center gap-2">
+                
+                    <div className="flex shrink-0 items-center gap-1.5">
                       <Pill tone={sectionTone}>
-                        {answered > 0
-                          ? `${score}/${section.max}`
-                          : `-/${section.max}`}
+                        {answered > 0 ? `${score}/${section.max}` : `-/${section.max}`}
                       </Pill>
-
+                
                       <Pill tone={status.tone}>{status.text}</Pill>
-
-                      <span className="text-lg font-black text-slate-400">
+                
+                      <span
+                        className={`flex h-7 w-7 items-center justify-center rounded-full text-base font-black transition ${
+                          isOpen
+                            ? "bg-slate-900 text-white"
+                            : "bg-slate-50 text-slate-400"
+                        }`}
+                      >
                         {isOpen ? "−" : "+"}
                       </span>
                     </div>
