@@ -3600,6 +3600,22 @@ function AdminSummary({ records, auditLogs, onFullBackup, onRestoreBackup }) {
       
         <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-inner">
           <table className="w-full table-fixed text-left text-[10px]">
+            <colgroup>
+              <col className="w-[15%]" />
+              <col className="w-[5%]" />
+              <col className="w-[7%]" />
+              <col className="w-[6%]" />
+              <col className="w-[6%]" />
+              <col className="w-[6%]" />
+              <col className="w-[6%]" />
+              <col className="w-[6%]" />
+              <col className="w-[6%]" />
+              <col className="w-[6%]" />
+              <col className="w-[6%]" />
+              <col className="w-[6%]" />
+              <col className="w-[6%]" />
+              <col className="w-[13%]" />
+            </colgroup>
             <thead className="bg-slate-900 text-[10px] font-black uppercase tracking-wide text-white">
               <tr>
                 <th className="px-1.5 py-2">HN / ชื่อ</th>
@@ -3631,7 +3647,7 @@ function AdminSummary({ records, auditLogs, onFullBackup, onRestoreBackup }) {
                     <div className="whitespace-nowrap font-bold text-slate-900">
                       HN {r.record.hn}
                     </div>
-                    <div className="max-w-[130px] truncate text-[11px] text-slate-500">
+                    <div className="whitespace-normal break-words text-[10px] leading-tight text-slate-500">
                       {r.record.name || "-"}
                     </div>
                   </td>
@@ -3692,10 +3708,12 @@ function AdminSummary({ records, auditLogs, onFullBackup, onRestoreBackup }) {
                     <Pill tone={r.ohsDelta.tone}>{r.ohsDelta.text}</Pill>
                   </td>
       
-                  <td className="px-2.5 py-2">
-                    <Pill tone={summaryTone(r.goodCount, r.badCount)}>
-                      {summaryText(r.goodCount, r.badCount)}
-                    </Pill>
+                  <td className="px-1.5 py-2 text-center">
+                    <div className="flex justify-center">
+                      <span className="inline-flex max-w-full items-center justify-center rounded-full border border-emerald-200 bg-emerald-50 px-1.5 py-0.5 text-[9px] font-bold leading-tight text-emerald-700">
+                        {summaryText(r.goodCount, r.badCount)}
+                      </span>
+                    </div>
                   </td>
                 </tr>
               ))}
