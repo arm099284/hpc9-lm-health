@@ -2786,13 +2786,30 @@ function LmHnSummaryStrip({ record }) {
         </div>
       </div>
 
-      <div className="mt-3 grid gap-3 md:grid-cols-2">
-        <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3">
-          <div className="text-sm font-black text-emerald-800">
-            จุดเด่น
+      <div className="mt-3 grid gap-2.5 md:grid-cols-2">
+        <div className="rounded-2xl border border-emerald-200/80 bg-gradient-to-br from-emerald-50 via-white to-white px-3.5 py-3 shadow-[0_8px_22px_rgba(16,185,129,0.07)]">
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex min-w-0 items-center gap-2">
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-emerald-200 bg-white text-sm font-black text-emerald-600 shadow-sm">
+                ✓
+              </div>
+      
+              <div className="min-w-0">
+                <div className="text-sm font-black leading-tight text-emerald-900">
+                  จุดเด่น
+                </div>
+                <div className="text-[10px] font-semibold text-emerald-700/70">
+                  ด้านที่ทำได้ดี
+                </div>
+              </div>
+            </div>
+      
+            <span className="shrink-0 rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-[10px] font-black text-emerald-700">
+              {strengths.length} รายการ
+            </span>
           </div>
-
-          <div className="mt-2 flex flex-wrap gap-2">
+      
+          <div className="mt-2 flex flex-wrap gap-1.5">
             {strengths.length ? (
               strengths.map((item) => (
                 <Pill key={item.key} tone="good">
@@ -2800,19 +2817,36 @@ function LmHnSummaryStrip({ record }) {
                 </Pill>
               ))
             ) : (
-              <span className="text-sm font-semibold text-emerald-800/70">
+              <span className="rounded-xl border border-emerald-100 bg-white px-3 py-2 text-xs font-semibold text-emerald-700/70">
                 ยังไม่มีข้อมูลจุดเด่น
               </span>
             )}
           </div>
         </div>
-
-        <div className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3">
-          <div className="text-sm font-black text-rose-800">
-            ควรปรับ
+      
+        <div className="rounded-2xl border border-rose-200/80 bg-gradient-to-br from-rose-50 via-white to-white px-3.5 py-3 shadow-[0_8px_22px_rgba(244,63,94,0.07)]">
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex min-w-0 items-center gap-2">
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-rose-200 bg-white text-sm font-black text-rose-600 shadow-sm">
+                !
+              </div>
+      
+              <div className="min-w-0">
+                <div className="text-sm font-black leading-tight text-rose-900">
+                  ควรปรับ
+                </div>
+                <div className="text-[10px] font-semibold text-rose-700/70">
+                  จุดที่ควรติดตาม
+                </div>
+              </div>
+            </div>
+      
+            <span className="shrink-0 rounded-full border border-rose-200 bg-rose-50 px-2 py-0.5 text-[10px] font-black text-rose-700">
+              {improvements.length} รายการ
+            </span>
           </div>
-
-          <div className="mt-2 flex flex-wrap gap-2">
+      
+          <div className="mt-2 flex flex-wrap gap-1.5">
             {improvements.length ? (
               improvements.map((item) => (
                 <Pill key={item.key} tone="bad">
@@ -2820,7 +2854,7 @@ function LmHnSummaryStrip({ record }) {
                 </Pill>
               ))
             ) : (
-              <span className="text-sm font-semibold text-rose-800/70">
+              <span className="rounded-xl border border-rose-100 bg-white px-3 py-2 text-xs font-semibold text-rose-700/70">
                 ยังไม่มีข้อมูลที่ควรปรับ
               </span>
             )}
