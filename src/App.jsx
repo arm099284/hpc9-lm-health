@@ -1684,7 +1684,7 @@ function OhsTable({ record }) {
   return (
     <Card title="Overhead Deep Squat ครั้งที่ 1–4" icon={ClipboardIcon}>
       <div className="grid gap-6 lg:grid-cols-[1.3fr_.7fr]">
-        <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-inner">
           <table className="w-full min-w-[900px] text-left text-xs">
             <thead className="bg-slate-50 text-sm text-slate-500"><tr><th className="p-3">รายการ</th>{record.sessions.map((s) => <th key={s.no} className="p-3">ครั้งที่ {s.no}</th>)}</tr></thead>
             <tbody>
