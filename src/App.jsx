@@ -3575,12 +3575,118 @@ function AdminSummary({ records, auditLogs, onFullBackup, onRestoreBackup }) {
           <Pill tone="dark">{periodLabel}</Pill>
         </div>
 
-        <div className="grid gap-3 md:grid-cols-5">
-          <Info label="ทั้งหมด" value={`${rows.length} คน`} tone="admin" />
-          <Info label="เทียบได้ ≥2 ครั้ง" value={`${comparable.length} คน`} tone="fat" />
-          <Info label="ดีขึ้น" value={`${improved} คน`} tone="good" />
-          <Info label="ต้องติดตาม" value={`${needFollow} คน`} tone="muscle" />
-          <Info label="คงเดิม" value={`${noChange} คน`} tone="default" />
+        <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+          <div className="grid grid-cols-5 divide-x divide-slate-200">
+            <div className="bg-sky-50/80 px-3 py-2.5">
+              <div className="text-[10px] font-black text-sky-700">ทั้งหมด</div>
+              <div className="mt-0.5 text-lg font-black text-sky-950">
+                {rows.length} คน
+              </div>
+            </div>
+        
+            <div className="bg-violet-50/80 px-3 py-2.5">
+              <div className="text-[10px] font-black text-violet-700">
+                เทียบได้ ≥2 ครั้ง
+              </div>
+              <div className="mt-0.5 text-lg font-black text-violet-950">
+                {comparable.length} คน
+              </div>
+            </div>
+        
+            <div className="bg-emerald-50/80 px-3 py-2.5">
+              <div className="text-[10px] font-black text-emerald-700">ดีขึ้น</div>
+              <div className="mt-0.5 text-lg font-black text-emerald-950">
+                {improved} คน
+              </div>
+            </div>
+        
+            <div className="bg-amber-50/80 px-3 py-2.5">
+              <div className="text-[10px] font-black text-amber-700">ต้องติดตาม</div>
+              <div className="mt-0.5 text-lg font-black text-amber-950">
+                {needFollow} คน
+              </div>
+            </div>
+        
+            <div className="bg-slate-50 px-3 py-2.5">
+              <div className="text-[10px] font-black text-slate-500">คงเดิม</div>
+              <div className="mt-0.5 text-lg font-black text-slate-900">
+                {noChange} คน
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div className="mt-3 rounded-2xl border border-slate-200 bg-gradient-to-br from-white to-slate-50 p-3 shadow-sm">
+          <div className="mb-3 flex items-center justify-between gap-3">
+            <div>
+              <h3 className="text-sm font-black text-slate-900">
+                ผลลัพธ์ตามตัวกรอง
+              </h3>
+              <p className="text-[11px] font-medium text-slate-500">
+                สัดส่วนผลลัพธ์จากผู้ที่มีข้อมูลเทียบได้
+              </p>
+            </div>
+        
+            <span className="rounded-full border border-slate-200 bg-white px-3 py-1 text-[11px] font-bold text-slate-500">
+              {comparable.length} รายการเทียบได้
+            </span>
+          </div>
+        
+          <div className="space-y-2.5">
+            <div className="grid grid-cols-[88px_44px_minmax(120px,520px)_42px] items-center gap-2">
+              <div className="text-[11px] font-bold text-emerald-700">ดีขึ้น</div>
+              <div className="text-right text-[11px] font-black text-slate-700">
+                {improved} คน
+              </div>
+              <div className="h-2.5 overflow-hidden rounded-full bg-slate-100 ring-1 ring-slate-200">
+                <div
+                  className="h-full rounded-full bg-emerald-500"
+                  style={{
+                    width: `${Math.round((improved / Math.max(1, comparable.length)) * 100)}%`,
+                  }}
+                />
+              </div>
+              <div className="text-right text-[11px] font-black text-slate-500">
+                {Math.round((improved / Math.max(1, comparable.length)) * 100)}%
+              </div>
+            </div>
+        
+            <div className="grid grid-cols-[88px_44px_minmax(120px,520px)_42px] items-center gap-2">
+              <div className="text-[11px] font-bold text-amber-700">ต้องติดตาม</div>
+              <div className="text-right text-[11px] font-black text-slate-700">
+                {needFollow} คน
+              </div>
+              <div className="h-2.5 overflow-hidden rounded-full bg-slate-100 ring-1 ring-slate-200">
+                <div
+                  className="h-full rounded-full bg-amber-400"
+                  style={{
+                    width: `${Math.round((needFollow / Math.max(1, comparable.length)) * 100)}%`,
+                  }}
+                />
+              </div>
+              <div className="text-right text-[11px] font-black text-slate-500">
+                {Math.round((needFollow / Math.max(1, comparable.length)) * 100)}%
+              </div>
+            </div>
+        
+            <div className="grid grid-cols-[88px_44px_minmax(120px,520px)_42px] items-center gap-2">
+              <div className="text-[11px] font-bold text-slate-500">คงเดิม</div>
+              <div className="text-right text-[11px] font-black text-slate-700">
+                {noChange} คน
+              </div>
+              <div className="h-2.5 overflow-hidden rounded-full bg-slate-100 ring-1 ring-slate-200">
+                <div
+                  className="h-full rounded-full bg-slate-400"
+                  style={{
+                    width: `${Math.round((noChange / Math.max(1, comparable.length)) * 100)}%`,
+                  }}
+                />
+              </div>
+              <div className="text-right text-[11px] font-black text-slate-500">
+                {Math.round((noChange / Math.max(1, comparable.length)) * 100)}%
+              </div>
+            </div>
+          </div>
         </div>
         <div className="mt-5 rounded-3xl border border-slate-200 bg-gradient-to-br from-white via-slate-50 to-slate-100 p-4 shadow-[0_12px_35px_rgba(15,23,42,0.08)] ring-1 ring-white/70">
         <div className="mb-3 flex items-center justify-between gap-3 border-b border-slate-200 pb-3">
