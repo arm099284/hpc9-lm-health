@@ -2162,10 +2162,18 @@ function getSetsRepsText(program = {}, goal = "") {
   );
 }
 
+function shortSetsRepsText(text) {
+  const value = String(text || "").trim();
+  if (!value) return "";
+  return value.includes(":") ? value.split(":").slice(1).join(":").trim() : value;
+}
+
 function ExercisePlanCard({ record }) {
-  const log = record?.exerciseLog || {};
+  const log = record.exerciseLog || {};
   const days = log.days || {};
-  const program = record?.program || {};
+  const program = record.program || {};
+  const latestUpdate =
+    Array.isArray(log.history) && log.history.length ? log.history[0] : null;
 
   const dayNames = {
     fullBody: "Full Body",
@@ -2176,127 +2184,210 @@ function ExercisePlanCard({ record }) {
     legs: "Legs Day",
   };
 
-  const dayOrder = ["fullBody", "upper", "lower", "push", "pull", "legs"];
+  const allowedDaysBySplit = {
+    "Full Body": ["fullBody"],
+    "Upper / Lower": ["upper", "lower"],
+    PPL: ["push", "pull", "legs"],
+    "Hybrid / Mixed": ["fullBody", "upper", "lower", "push", "pull", "legs"],
+  };
 
-  const activeDays = Object.entries(days)
-    .filter(([, list]) => Array.isArray(list) && list.length > 0)
-    .sort(([a], [b]) => dayOrder.indexOf(a) - dayOrder.indexOf(b));
+  const allowedDays = allowedDaysBySplit[log.split] || ["fullBody"];
 
-  const setsRepsSummary =
-    program.strengthDose ||
-    program.setsReps ||
-    program.strengthSetsReps ||
-    "";
+  const activeDays = Object.entries(days).filter(
+    ([dayKey, list]) =>
+      allowedDays.includes(dayKey) &&
+      Array.isArray(list) &&
+      list.length > 0
+  );
 
+  const dayDisplayOrder = ["fullBody", "upper", "lower", "push", "pull", "legs"];
+
+  activeDays.sort(
+    ([a], [b]) => dayDisplayOrder.indexOf(a) - dayDisplayOrder.indexOf(b)
+  );
+
+  const planText =
+    log.description ||
+    exercisePlanDescription(log.split, log.daysPerWeek, log.days);
+  const setsRepsSummary = shortSetsRepsText(
+    getSetsRepsText(program, record.goal)
+  );
+  
   const cardioSummary = program.cardioDuration
     ? `${program.cardioDuration} นาที/ครั้ง`
     : "";
-
   return (
     <Card title="โปรแกรมออกกำลังกายของฉัน" icon={ActivityIcon}>
-      <div className="space-y-5">
-        <div className="rounded-3xl border border-sky-200 bg-gradient-to-br from-sky-50 to-white p-5 shadow-sm">
-          <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
-            <div>
-              <div className="text-sm font-bold text-slate-500">
-                My Exercise Plan
-              </div>
-
-              <div className="mt-1 text-3xl font-black tracking-tight text-slate-900">
-                {log.split || "ยังไม่ได้กำหนดโปรแกรม"}
-                {log.daysPerWeek ? ` ${log.daysPerWeek} วัน/สัปดาห์` : ""}
-              </div>
+      <div className="rounded-3xl border border-blue-200 bg-blue-50 p-4 md:p-5">
+        <div className="grid gap-4 lg:grid-cols-[1fr_250px]">
+          <div>
+            <div className="text-sm font-bold text-slate-500">
+              My Exercise Plan
             </div>
 
-            {record?.goal && (
-              <div className="inline-flex w-fit rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-bold text-emerald-700">
-                เป้าหมาย: {record.goal}
+            <div className="mt-1 text-2xl font-black text-slate-900 md:text-3xl">
+              {log.split || "ยังไม่ได้กำหนดโปรแกรม"}{" "}
+              {log.daysPerWeek ? `${log.daysPerWeek} วัน/สัปดาห์` : ""}
+            </div>
+
+            {(setsRepsSummary || cardioSummary) && (
+              <div className="mt-3 inline-block w-fit max-w-full rounded-xl border border-slate-200 bg-white/70 px-2.5 py-1.5 shadow-sm">
+                <div className="mb-1.5 text-[10px] font-bold uppercase tracking-wide text-slate-400">
+                  สรุปแผน / Plan Summary
+                </div>
+            
+                <div className="flex flex-wrap gap-1.5">
+                  {setsRepsSummary && (
+                    <span className="inline-flex items-center rounded-full border border-blue-100 bg-blue-50 px-3 py-1.5 text-xs font-bold text-blue-700">
+                      <span className="mr-1 text-blue-500">Strength:</span>
+                      <span className="text-slate-900">{setsRepsSummary}</span>
+                    </span>
+                  )}
+                
+                  {cardioSummary && (
+                    <span className="inline-flex items-center rounded-full border border-emerald-100 bg-emerald-50 px-3 py-1.5 text-xs font-bold text-emerald-700">
+                      <span className="mr-1 text-emerald-600">Cardio:</span>
+                      <span className="text-slate-900">{cardioSummary}</span>
+                    </span>
+                  )}
+                </div>
               </div>
             )}
-          </div>
-
-          {(setsRepsSummary || cardioSummary) && (
-            <div className="mt-5 rounded-2xl border border-slate-200 bg-white/80 p-4 shadow-sm">
-              <div className="mb-3 text-xs font-black uppercase tracking-wide text-slate-400">
-                สรุปแผน / Plan Summary
+            
+            <div className="mt-4 border-t border-slate-200 pt-3">
+              <div className="mb-2 text-xs font-bold uppercase tracking-wide text-slate-400">
+                วันฝึก / Training Days
               </div>
-
+            
               <div className="flex flex-wrap gap-2">
-                {setsRepsSummary && (
-                  <span className="inline-flex max-w-full items-center rounded-full border border-blue-100 bg-blue-50 px-3 py-1.5 text-xs font-bold text-blue-700">
-                    Strength:
-                    <span className="ml-1 truncate text-slate-900">
-                      {setsRepsSummary}
-                    </span>
+                {exercisePlanPills(planText).map((item, index) => (
+                  <span
+                    key={`${item.text}-${index}`}
+                    className={`inline-flex rounded-full border px-3 py-1.5 text-sm font-bold ${dayPillClass(item.dayKey)}`}
+                  >
+                    {item.text}
                   </span>
-                )}
-
-                {cardioSummary && (
-                  <span className="inline-flex max-w-full items-center rounded-full border border-emerald-100 bg-emerald-50 px-3 py-1.5 text-xs font-bold text-emerald-700">
-                    Cardio:
-                    <span className="ml-1 truncate text-slate-900">
-                      {cardioSummary}
-                    </span>
-                  </span>
-                )}
+                ))}
               </div>
             </div>
-          )}
 
-          <div className="mt-5 border-t border-sky-100 pt-4">
-            <div className="mb-3 text-xs font-black uppercase tracking-wide text-slate-400">
-              วันฝึก / Training Days
-            </div>
-
-            <div className="flex flex-wrap gap-2">
-              {activeDays.length ? (
-                activeDays.map(([dayKey, list]) => (
-                  <span
-                    key={dayKey}
-                    className="inline-flex rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-700 shadow-sm"
-                  >
-                    {dayNames[dayKey] || dayKey} {list.length} ท่า
-                  </span>
-                ))
-              ) : (
-                <span className="text-sm font-semibold text-slate-400">
-                  ยังไม่ได้กำหนดวันฝึก
-                </span>
-              )}
-            </div>
-
-            <div className="mt-3 text-sm font-semibold text-slate-500">
+            <div className="mt-2 text-sm font-semibold text-slate-500">
               ให้ทำตามลำดับท่าที่แสดงจากบนลงล่าง
             </div>
           </div>
+
+          <div className="self-start rounded-2xl border border-sky-100 bg-white p-3 shadow-sm">
+            <div className="flex items-center justify-between gap-2">
+              <div className="text-xs font-bold text-sky-700">
+                อัปเดตล่าสุด
+              </div>
+
+              {Array.isArray(log.history) && log.history.length > 1 && (
+                <details className="relative">
+                  <summary className="cursor-pointer list-none text-xs font-bold text-slate-400 hover:text-slate-700">
+                    ดูประวัติ
+                  </summary>
+
+                  <div className="absolute right-0 z-20 mt-2 w-80 rounded-2xl border border-slate-200 bg-white p-3 shadow-lg">
+                    <div className="mb-2 text-xs font-bold text-slate-500">
+                      ประวัติการเปลี่ยนโปรแกรม
+                    </div>
+
+                    <div className="space-y-2">
+                      {log.history.slice(1, 4).map((item, index) => (
+                        <div
+                          key={`${item.at}-${index}`}
+                          className="rounded-xl bg-slate-50 p-2"
+                        >
+                          <div className="text-[11px] font-semibold text-slate-500">
+                            {formatDateTimeThai(item.at)} • โดย {show(item.by)}
+                          </div>
+
+                          <div className="mt-1 text-xs font-bold text-slate-800">
+                            {show(item.from)}
+                            <span className="mx-1 text-sky-600">→</span>
+                            {show(item.to)}
+                          </div>
+
+                          {item.reason && (
+                            <div className="mt-1 text-[11px] font-bold text-emerald-700">
+                              เหตุผล: {item.reason}
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </details>
+              )}
+            </div>
+
+            {latestUpdate ? (
+              <div className="mt-2">
+                <div className="text-[11px] font-semibold text-slate-500">
+                  {formatDateTimeThai(latestUpdate.at)}
+                </div>
+
+                <div className="mt-0.5 text-[11px] font-bold text-slate-600">
+                  โดย {show(latestUpdate.by)}
+                </div>
+
+                <div className="mt-2 rounded-xl bg-slate-50 px-2 py-2 text-xs font-black leading-5 text-slate-900">
+                  <div>{show(latestUpdate.from)}</div>
+                  <div className="text-center text-sky-600">↓</div>
+                  <div>{show(latestUpdate.to)}</div>
+                </div>
+
+                {latestUpdate.reason && (
+                  <div className="mt-1 text-[11px] font-bold text-emerald-700">
+                    เหตุผล: {latestUpdate.reason}
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="mt-2 rounded-xl bg-slate-50 p-2 text-xs font-semibold text-slate-600">
+                ยังไม่มีข้อมูลการอัปเดต
+              </div>
+            )}
+          </div>
         </div>
 
-        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+        <div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
           {activeDays.length ? (
             activeDays.map(([dayKey, list]) => (
               <div
                 key={dayKey}
-                className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm"
+                className="rounded-2xl border border-slate-200 bg-white p-3 shadow-md md:p-4"
               >
                 <div className="mb-3 text-lg font-black text-slate-900">
                   {dayNames[dayKey] || dayKey}
                 </div>
 
                 <ol className="space-y-2">
-                  {list.map((exercise, index) => (
-                    <li
-                      key={`${dayKey}-${exercise}-${index}`}
-                      className="flex items-start gap-3 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-800"
-                    >
-                      <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-slate-900 text-xs font-bold text-white">
-                        {String(index + 1).padStart(2, "0")}
-                      </span>
-
-                      <div className="font-bold text-slate-900">
-                        {exercise}
-                      </div>
-                    </li>
-                  ))}
+                  {sortExercisesByDay(dayNames[dayKey], list).map(
+                    (exercise, index) => (
+                      <li
+                        key={exercise}
+                        className="flex items-start gap-3 rounded-xl border border-slate-200 bg-slate-100 px-3 py-2.5 text-sm text-slate-800"
+                      >
+                        <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-slate-900 text-xs font-bold text-white">
+                          {String(index + 1).padStart(2, "0")}
+                        </span>
+                      
+                        <div className="min-w-0">
+                          <div className="font-bold text-slate-900">
+                            {exercise}
+                          </div>
+                      
+                          {exerciseMuscleText(exercise) && (
+                            <div className="mt-0.5 text-xs font-medium leading-5 text-slate-400">
+                              {exerciseMuscleText(exercise)}
+                            </div>
+                          )}
+                        </div>
+                      </li>
+                    )
+                  )}
                 </ol>
               </div>
             ))
@@ -2384,25 +2475,25 @@ return (
           <div className="text-3xl font-black tracking-tight text-slate-900">
             {show(program.type)}
           </div>
-        
+
           {program.strengthFrequency && (
-            <>
-              <span className="text-2xl font-black text-slate-400">
-                •
-              </span>
-        
-              <div className="text-2xl font-black text-slate-600">
-                {program.strengthFrequency} วัน/สัปดาห์
-              </div>
-            </>
-          )}
-        
-          {record.goal && (
-            <span className="ml-1 inline-flex max-w-full truncate rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-700">
-              เป้าหมาย: {record.goal}
+            <span className="text-2xl font-black text-slate-400">
+              •
             </span>
           )}
+
+          {program.strengthFrequency && (
+            <div className="text-2xl font-black text-slate-600">
+              {program.strengthFrequency} วัน/สัปดาห์
+            </div>
+          )}
         </div>
+
+        {record.goal && (
+          <div className="mt-3 inline-flex items-center rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-700">
+            เป้าหมาย: {record.goal}
+          </div>
+        )}
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
@@ -2438,10 +2529,7 @@ return (
               Cardio Plan
             </div>
 
-            <div
-              className="mt-1 truncate text-lg font-black text-slate-900"
-              title={`${show(program.cardioType)}${program.cardioDuration ? ` • ${program.cardioDuration} นาที/ครั้ง` : ""}`}
-            >
+            <div className="mt-1 text-xl font-black text-slate-900">
               {show(program.cardioType)}
               {program.cardioDuration && (
                 <span className="text-slate-600">
@@ -2461,18 +2549,12 @@ return (
             </span>
           </div>
 
-          <div className="mt-4 grid gap-2 text-xs font-bold text-slate-700">
-            <div
-              className="truncate rounded-2xl border border-emerald-100 bg-white px-4 py-3 shadow-sm"
-              title={`Talk Test: ${show(program.talk)}`}
-            >
+          <div className="mt-4 grid gap-2 text-sm font-bold text-slate-700">
+            <div className="rounded-2xl border border-emerald-100 bg-white px-4 py-3 shadow-sm">
               Talk Test: {show(program.talk)}
             </div>
 
-            <div
-              className="truncate rounded-2xl border border-emerald-100 bg-white px-4 py-3 shadow-sm"
-              title={`Target HR: ${program.intensity ? targetHrText(record.age, program.intensity) : "-"}`}
-            >
+            <div className="rounded-2xl border border-emerald-100 bg-white px-4 py-3 shadow-sm">
               Target HR: {program.intensity ? targetHrText(record.age, program.intensity) : "-"}
             </div>
           </div>
@@ -2741,12 +2823,7 @@ function Dashboard({ record, back }) {
             </h2>
 
             <p className="mt-1 text-base text-slate-500">
-              <div className="mt-1 text-sm font-semibold text-slate-500">
-                {show(record.sex)} • อายุ {show(record.age)} ปี • ส่วนสูง {show(record.height)} ซม.
-                {" "}• โรคประจำตัว: {show(record.disease)}
-                {" "}• ยาที่ใช้ประจำ: {show(record.medication)}
-                {" "}• ประวัติบาดเจ็บ/ผ่าตัด: {show(record.injury)}
-              </div>
+              {record.sex} • อายุ {show(record.age)} ปี • ส่วนสูง {show(record.height)} ซม. • เป้าหมาย: {record.goal}
             </p>
           </div>
 
@@ -2782,7 +2859,7 @@ function Dashboard({ record, back }) {
       
       <NutritionPlanCard record={record} />
 
-      <ExercisePlanCard record={record} /> 
+      <ExercisePlanCard record={record} />
       
       <CompareTable record={record} title="ตารางเปรียบเทียบ InBody / Body Composition" icon={HeartIcon} list={metrics.inbody} />
       
