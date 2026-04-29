@@ -2910,7 +2910,7 @@ function Info({ label, value, tone = "default" }) {
 
 function InsightListPanel({ title, rows, tone = "default" }) {
   const safeRows = Array.isArray(rows) ? rows : [];
-  const topRows = safeRows.slice(0, 4);
+  const topRows = safeRows.slice(0, 5);
 
   const styles = {
     good: {
@@ -2956,7 +2956,7 @@ function InsightListPanel({ title, rows, tone = "default" }) {
           </div>
 
           <div className="min-w-0">
-            <h3 className={`truncate text-sm font-black leading-tight ${s.title}`}>
+            <h3 className={`whitespace-normal break-words text-sm font-black leading-tight ${s.title}`}>
               {title}
             </h3>
             <p className="mt-0.5 text-[10px] font-semibold text-slate-400">
@@ -2987,12 +2987,12 @@ function InsightListPanel({ title, rows, tone = "default" }) {
               >
                 <div className="mb-1.5 flex items-center justify-between gap-3">
                   <div className="min-w-0">
-                    <div className="truncate text-xs font-black leading-tight text-slate-900">
+                    <div className="whitespace-normal break-words text-xs font-black leading-tight text-slate-900">
                       {label}
                     </div>
 
                     {sub && (
-                      <div className="mt-0.5 truncate text-[10px] font-medium leading-tight text-slate-400">
+                      <div className="mt-0.5 whitespace-normal break-words text-[10px] font-medium leading-tight text-slate-400">
                         {sub}
                       </div>
                     )}
