@@ -6420,28 +6420,22 @@ function LmAssessmentForm({ draft, update }) {
                   key={section.key}
                   className={`overflow-hidden rounded-2xl border transition ${
                     isOpen
-                      ? "border-slate-300 bg-white shadow-[0_10px_26px_rgba(15,23,42,0.06)] ring-1 ring-slate-100"
+                      ? "border-slate-300 bg-white shadow-[0_8px_22px_rgba(15,23,42,0.06)] ring-1 ring-slate-100"
                       : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/70"
                   }`}
                 >
                   <button
                     type="button"
                     onClick={() => setOpenSection(isOpen ? "" : section.key)}
-                    className={`flex w-full items-center justify-between gap-3 px-3.5 py-3 text-left transition ${
+                    className={`flex w-full items-center justify-between gap-3 px-3.5 py-2.5 text-left transition ${
                       isOpen
                         ? "bg-gradient-to-r from-slate-50 via-white to-slate-50"
                         : "bg-white"
                     }`}
                   >
-                    <div className="flex min-w-0 items-center gap-3">
-                      <div
-                        className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border shadow-sm ${
-                          isOpen
-                            ? "border-slate-200 bg-white"
-                            : "border-slate-100 bg-slate-50"
-                        }`}
-                      >
-                        <span className={`h-6 w-1.5 rounded-full ${color.dot}`} />
+                    <div className="flex min-w-0 items-center gap-2.5">
+                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-slate-50 shadow-sm">
+                        <span className={`h-5 w-1.5 rounded-full ${color.dot}`} />
                       </div>
                 
                       <div className="min-w-0">
@@ -6464,7 +6458,7 @@ function LmAssessmentForm({ draft, update }) {
                       <span
                         className={`flex h-7 w-7 items-center justify-center rounded-full text-base font-black transition ${
                           isOpen
-                            ? "bg-slate-900 text-white"
+                            ? "bg-slate-900 text-white shadow-sm"
                             : "bg-slate-50 text-slate-400"
                         }`}
                       >
