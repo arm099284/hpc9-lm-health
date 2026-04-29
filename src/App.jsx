@@ -2914,42 +2914,44 @@ function InsightListPanel({ title, rows, tone = "default" }) {
 
   const styles = {
     good: {
-      card: "border-emerald-200 bg-gradient-to-br from-emerald-100 via-white to-white",
-      iconWrap: "bg-emerald-600 text-white shadow-emerald-200",
+      card: "border-emerald-200/80 bg-gradient-to-br from-emerald-50 via-white to-white",
+      iconWrap: "bg-white text-emerald-600 ring-1 ring-emerald-200",
       soft: "bg-emerald-50 text-emerald-700 ring-emerald-200",
-      bar: "from-emerald-400 to-emerald-600",
+      bar: "from-emerald-300 to-emerald-500",
       title: "text-emerald-950",
-      accent: "text-emerald-700",
       icon: "✓",
     },
     bad: {
-      card: "border-rose-200 bg-gradient-to-br from-rose-100 via-white to-white",
-      iconWrap: "bg-rose-600 text-white shadow-rose-200",
+      card: "border-rose-200/80 bg-gradient-to-br from-rose-50 via-white to-white",
+      iconWrap: "bg-white text-rose-600 ring-1 ring-rose-200",
       soft: "bg-rose-50 text-rose-700 ring-rose-200",
-      bar: "from-rose-400 to-rose-600",
+      bar: "from-rose-300 to-rose-500",
       title: "text-rose-950",
-      accent: "text-rose-700",
       icon: "!",
     },
     default: {
-      card: "border-slate-200 bg-gradient-to-br from-slate-100 via-white to-white",
-      iconWrap: "bg-slate-800 text-white shadow-slate-200",
+      card: "border-slate-200 bg-gradient-to-br from-slate-50 via-white to-white",
+      iconWrap: "bg-white text-slate-700 ring-1 ring-slate-200",
       soft: "bg-slate-50 text-slate-600 ring-slate-200",
-      bar: "from-slate-400 to-slate-600",
+      bar: "from-slate-300 to-slate-500",
       title: "text-slate-950",
-      accent: "text-slate-600",
       icon: "i",
     },
   };
 
   const s = styles[tone] || styles.default;
-  const maxCount = Math.max(1, ...topRows.map((row) => Number(row.count ?? row.value ?? 0)));
+  const maxCount = Math.max(
+    1,
+    ...topRows.map((row) => Number(row.count ?? row.value ?? 0))
+  );
 
   return (
-    <div className={`rounded-3xl border p-4 shadow-[0_10px_28px_rgba(15,23,42,0.06)] ${s.card}`}>
-      <div className="mb-4 flex items-start justify-between gap-3">
+    <div className={`rounded-3xl border p-4 shadow-sm ${s.card}`}>
+      <div className="mb-3 flex items-center justify-between gap-3">
         <div className="flex min-w-0 items-center gap-3">
-          <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl text-lg font-black shadow-lg ${s.iconWrap}`}>
+          <div
+            className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl text-base font-black shadow-sm ${s.iconWrap}`}
+          >
             {s.icon}
           </div>
 
@@ -2957,40 +2959,48 @@ function InsightListPanel({ title, rows, tone = "default" }) {
             <h3 className={`truncate text-sm font-black leading-tight ${s.title}`}>
               {title}
             </h3>
-            <p className="mt-0.5 text-[11px] font-medium text-slate-400">
+            <p className="mt-0.5 text-[10px] font-semibold text-slate-400">
               Top indicators
             </p>
           </div>
         </div>
 
-        <span className={`shrink-0 rounded-full px-2.5 py-1 text-[10px] font-black ring-1 ${s.soft}`}>
+        <span
+          className={`shrink-0 rounded-full px-2.5 py-1 text-[10px] font-black ring-1 ${s.soft}`}
+        >
           {safeRows.length} รายการ
         </span>
       </div>
 
-      <div className="space-y-3">
+      <div className="space-y-2.5">
         {topRows.length ? (
           topRows.map((row, index) => {
             const label = row.label || row.nameTh || row.name || "-";
             const sub = row.sub || row.nameEn || "";
             const count = Number(row.count ?? row.value ?? 0);
-            const percent = Math.max(8, Math.round((count / maxCount) * 100));
+            const percent = Math.max(6, Math.round((count / maxCount) * 100));
 
             return (
-              <div key={`${label}-${index}`} className="rounded-2xl bg-white/80 p-3 ring-1 ring-slate-100">
-                <div className="mb-2 flex items-center justify-between gap-3">
+              <div
+                key={`${label}-${index}`}
+                className="rounded-2xl bg-white/90 p-2.5 shadow-sm ring-1 ring-slate-100"
+              >
+                <div className="mb-1.5 flex items-center justify-between gap-3">
                   <div className="min-w-0">
                     <div className="truncate text-xs font-black leading-tight text-slate-900">
                       {label}
                     </div>
+
                     {sub && (
-                      <div className="mt-0.5 truncate text-[10px] font-medium text-slate-400">
+                      <div className="mt-0.5 truncate text-[10px] font-medium leading-tight text-slate-400">
                         {sub}
                       </div>
                     )}
                   </div>
 
-                  <div className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-black ring-1 ${s.soft}`}>
+                  <div
+                    className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-black ring-1 ${s.soft}`}
+                  >
                     {count} คน
                   </div>
                 </div>
@@ -3005,7 +3015,7 @@ function InsightListPanel({ title, rows, tone = "default" }) {
             );
           })
         ) : (
-          <div className="rounded-2xl border border-slate-200 bg-white px-3 py-6 text-center text-xs font-semibold text-slate-400">
+          <div className="rounded-2xl border border-slate-200 bg-white px-3 py-5 text-center text-xs font-semibold text-slate-400">
             ไม่มีข้อมูล
           </div>
         )}
