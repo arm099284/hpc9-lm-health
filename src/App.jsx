@@ -6182,8 +6182,8 @@ function LmAssessmentForm({ draft, update }) {
 
   return (
     <Card title="แบบประเมินพฤติกรรมสุขภาพ LM" icon={FileIcon}>
-      <div className="space-y-4">
-        <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+      <div className="space-y-3">
+        <div className="rounded-2xl border border-slate-200 bg-gradient-to-br from-white via-slate-50 to-sky-50/40 p-4 shadow-[0_8px_24px_rgba(15,23,42,0.05)]">
           <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
             <div>
               <div className="text-sm font-bold text-slate-500">
@@ -6218,7 +6218,7 @@ function LmAssessmentForm({ draft, update }) {
           </div>
         </div>
 
-        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+        <div className="rounded-2xl border border-slate-200 bg-gradient-to-br from-white via-slate-50 to-white p-4 shadow-[0_8px_24px_rgba(15,23,42,0.05)]">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div>
               <div className="text-sm font-bold text-slate-500">
@@ -6275,7 +6275,7 @@ function LmAssessmentForm({ draft, update }) {
         </div>
 
         <div className="grid gap-3 md:grid-cols-2">
-          <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-4 shadow-sm">
+          <div className="rounded-2xl border border-emerald-200 bg-gradient-to-br from-emerald-50 via-white to-emerald-50/70 px-4 py-4 shadow-[0_8px_22px_rgba(16,185,129,0.08)]">
             <div className="mb-3 flex items-center justify-between gap-3">
               <div>
                 <div className="text-sm font-black text-emerald-800">
@@ -6309,7 +6309,7 @@ function LmAssessmentForm({ draft, update }) {
             </div>
           </div>
         
-          <div className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-4 shadow-sm">
+          <div className="rounded-2xl border border-rose-200 bg-gradient-to-br from-rose-50 via-white to-rose-50/70 px-4 py-4 shadow-[0_8px_22px_rgba(244,63,94,0.08)]">
             <div className="mb-3 flex items-center justify-between gap-3">
               <div>
                 <div className="text-sm font-black text-rose-800">
@@ -6343,7 +6343,7 @@ function LmAssessmentForm({ draft, update }) {
             </div>
           </div>
         </div>
-        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+        <div className="rounded-2xl border border-slate-200 bg-gradient-to-b from-white to-slate-50/70 p-4 shadow-[0_10px_28px_rgba(15,23,42,0.05)]">
           <div className="mb-4 rounded-2xl border border-slate-100 bg-gradient-to-r from-slate-50 to-white px-4 py-3">
             <div className="flex items-center justify-between gap-3">
               <div>
