@@ -3579,16 +3579,14 @@ function AdminSummary({ records, auditLogs, onFullBackup, onRestoreBackup }) {
             <thead className="bg-slate-900 text-[10px] font-black uppercase tracking-wide text-white">
               <tr>
                 <th className="px-2.5 py-2">HN / ชื่อ</th>
-                <th className="px-2.5 py-2">จำนวนครั้ง</th>
-                <th className="px-2.5 py-2">ช่วงที่เทียบ</th>
-                <th className="px-2.5 py-2">น้ำหนัก</th>
-                <th className="px-2.5 py-2">Body Fat</th>
-                <th className="px-2.5 py-2">Fat Mass</th>
-                <th className="px-2.5 py-2">Muscle</th>
-                <th className="px-2.5 py-2">Step Test</th>
-                <th className="px-2.5 py-2">Grip</th>
-                <th className="px-2.5 py-2">Sit to Stand</th>
-                <th className="px-2.5 py-2">Sit and Reach</th>
+                <th className="px-1.5 py-2">ครั้ง</th>
+                <th className="px-1.5 py-2">เทียบ</th>
+                <th className="px-1.5 py-2">BF%</th>
+                <th className="px-1.5 py-2">FM</th>
+                <th className="px-1.5 py-2">SMM</th>
+                <th className="px-1.5 py-2">STEP</th>
+                <th className="px-1.5 py-2">STS</th>
+                <th className="px-1.5 py-2">SAR</th>
                 <th className="px-2.5 py-2">TUG</th>
                 <th className="px-2.5 py-2">OHS</th>
                 <th className="px-2.5 py-2">สรุป</th>
@@ -3616,10 +3614,8 @@ function AdminSummary({ records, auditLogs, onFullBackup, onRestoreBackup }) {
                     <Pill>{r.sessions.length} ครั้ง</Pill>
                   </td>
       
-                  <td className="px-2.5 py-2 text-[11px] leading-tight text-slate-600">
-                    ครั้งที่ {r.first?.no || "-"} → {r.last?.no || "-"}
-                    <br />
-                    {r.first?.date || "-"} → {r.last?.date || "-"}
+                  <td className="px-1.5 py-2 whitespace-nowrap text-center text-[10px] font-bold text-slate-700">
+                    {r.first?.no || "-"} → {r.last?.no || "-"}
                   </td>
       
                   <td className="px-2.5 py-2">
