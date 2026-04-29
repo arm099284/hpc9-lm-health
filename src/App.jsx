@@ -3845,150 +3845,188 @@ function AdminSummary({ records, auditLogs, onFullBackup, onRestoreBackup }) {
       </div>
       </Card>
 
-      <Card title="Key Insights / ผลลัพธ์เด่นและจุดที่ควรติดตาม" icon={ClipboardIcon}>
-
-        <div className="grid gap-3 lg:grid-cols-4">
-          <InsightListPanel
-            title="ตัวชี้วัดที่ดีขึ้นบ่อย"
-            tone="good"
-            rows={improvedRows.map((row) => ({ label: row.name, count: row.count }))}
-          />
-
-          <InsightListPanel
-            title="ตัวชี้วัดที่แย่ลงบ่อย"
-            tone="bad"
-            rows={issueRows.map((row) => ({ label: row.name, count: row.count }))}
-          />
-
-          <InsightListPanel
-            title="Fitness ต่ำกว่าเกณฑ์"
-            tone="bad"
-            rows={fitnessBelowRows.map((row) => ({
-              label: row.nameTh,
-              sub: row.nameEn,
-              count: row.count,
-            }))}
-          />
-
-          <InsightListPanel
-            title="ข้อมูลไม่ครบ"
-            rows={incompleteSummary.map((row) => ({
-              label: row.label,
-              count: row.value,
-            }))}
-          />
-        </div>
-      </Card>
-
-      <Card title="สรุปตามเพศและช่วงอายุ" icon={UserIcon}>
-        <div className="grid gap-3 lg:grid-cols-[0.8fr_1.2fr]">
-          <div className="rounded-2xl border border-slate-200 bg-gradient-to-br from-white to-slate-50 p-3 shadow-sm">
-            <div className="mb-2 flex items-center justify-between">
-              <h3 className="text-sm font-black text-slate-900">เพศ</h3>
-              <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-bold text-slate-500">
-                Sex
-              </span>
+            <Card
+        title="Insights & Demographics / ผลลัพธ์เชิงลึกและข้อมูลประชากร"
+        icon={ClipboardIcon}
+      >
+        <div className="space-y-5">
+          <div>
+            <div className="mb-2">
+              <h3 className="text-sm font-black text-slate-900">
+                Key Insights / ผลลัพธ์เด่นและจุดที่ควรติดตาม
+              </h3>
+              <p className="text-xs font-medium text-slate-500">
+                สรุปตัวชี้วัดที่ดีขึ้น แย่ลง ต่ำกว่าเกณฑ์ และข้อมูลที่ยังไม่ครบ
+              </p>
             </div>
-      
-            <div className="overflow-hidden rounded-xl border border-slate-200 bg-white">
-              <table className="w-full text-left text-[11px]">
-                <thead className="bg-slate-50 text-[10px] font-bold text-slate-500">
-                  <tr>
-                    <th className="px-2 py-1.5">กลุ่ม</th>
-                    <th className="px-2 py-1.5 text-center">ทั้งหมด</th>
-                    <th className="px-2 py-1.5 text-center">เทียบ</th>
-                    <th className="px-2 py-1.5 text-center">ดี</th>
-                    <th className="px-2 py-1.5 text-center">แย่</th>
-                    <th className="px-2 py-1.5 text-center">นิ่ง</th>
-                    <th className="px-2 py-1.5 text-center">ไม่พอ</th>
-                  </tr>
-                </thead>
-      
-                <tbody>
-                  {sexSummaryRows.map((row) => (
-                    <tr key={row.sex} className="border-t border-slate-100">
-                      <td className="px-2 py-1.5 font-black text-slate-900">
-                        {row.sex}
-                      </td>
-                      <td className="px-2 py-1.5 text-center font-semibold">{row.total}</td>
-                      <td className="px-2 py-1.5 text-center font-semibold">{row.comparable}</td>
-                      <td className="px-2 py-1.5 text-center">
-                        <span className="inline-flex min-w-6 justify-center rounded-full bg-emerald-50 px-1.5 py-0.5 text-[10px] font-bold text-emerald-700 ring-1 ring-emerald-200">
-                          {row.improved}
-                        </span>
-                      </td>
-                      <td className="px-2 py-1.5 text-center">
-                        <span className="inline-flex min-w-6 justify-center rounded-full bg-rose-50 px-1.5 py-0.5 text-[10px] font-bold text-rose-700 ring-1 ring-rose-200">
-                          {row.worsened}
-                        </span>
-                      </td>
-                      <td className="px-2 py-1.5 text-center">
-                        <span className="inline-flex min-w-6 justify-center rounded-full bg-slate-50 px-1.5 py-0.5 text-[10px] font-bold text-slate-600 ring-1 ring-slate-200">
-                          {row.unchanged}
-                        </span>
-                      </td>
-                      <td className="px-2 py-1.5 text-center font-semibold text-slate-600">
-                        {row.incomplete}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+
+            <div className="grid gap-3 lg:grid-cols-4">
+              <InsightListPanel
+                title="ตัวชี้วัดที่ดีขึ้นบ่อย"
+                tone="good"
+                rows={improvedRows.map((row) => ({
+                  label: row.name,
+                  count: row.count,
+                }))}
+              />
+
+              <InsightListPanel
+                title="ตัวชี้วัดที่แย่ลงบ่อย"
+                tone="bad"
+                rows={issueRows.map((row) => ({
+                  label: row.name,
+                  count: row.count,
+                }))}
+              />
+
+              <InsightListPanel
+                title="Fitness ต่ำกว่าเกณฑ์"
+                tone="bad"
+                rows={fitnessBelowRows.map((row) => ({
+                  label: row.nameTh,
+                  sub: row.nameEn,
+                  count: row.count,
+                }))}
+              />
+
+              <InsightListPanel
+                title="ข้อมูลไม่ครบ"
+                rows={incompleteSummary.map((row) => ({
+                  label: row.label,
+                  count: row.value,
+                }))}
+              />
             </div>
           </div>
-      
-          <div className="rounded-2xl border border-slate-200 bg-gradient-to-br from-white to-slate-50 p-3 shadow-sm">
-            <div className="mb-2 flex items-center justify-between">
-              <h3 className="text-sm font-black text-slate-900">ช่วงอายุ</h3>
-              <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-bold text-slate-500">
-                Age group
-              </span>
+
+          <div className="border-t border-slate-200 pt-5">
+            <div className="mb-2">
+              <h3 className="text-sm font-black text-slate-900">
+                Demographics / สรุปตามเพศและช่วงอายุ
+              </h3>
+              <p className="text-xs font-medium text-slate-500">
+                ภาพรวมการเปลี่ยนแปลง แยกตามเพศและช่วงอายุ
+              </p>
             </div>
-      
-            <div className="overflow-hidden rounded-xl border border-slate-200 bg-white">
-              <table className="w-full text-left text-[11px]">
-                <thead className="bg-slate-50 text-[10px] font-bold text-slate-500">
-                  <tr>
-                    <th className="px-2 py-1.5">กลุ่ม</th>
-                    <th className="px-2 py-1.5 text-center">ทั้งหมด</th>
-                    <th className="px-2 py-1.5 text-center">เทียบ</th>
-                    <th className="px-2 py-1.5 text-center">ดี</th>
-                    <th className="px-2 py-1.5 text-center">แย่</th>
-                    <th className="px-2 py-1.5 text-center">นิ่ง</th>
-                    <th className="px-2 py-1.5 text-center">ไม่พอ</th>
-                  </tr>
-                </thead>
-      
-                <tbody>
-                  {ageSummaryRows.map((row) => (
-                    <tr key={row.age} className="border-t border-slate-100">
-                      <td className="whitespace-nowrap px-2 py-1.5 font-black text-slate-900">
-                        {row.age}
-                      </td>
-                      <td className="px-2 py-1.5 text-center font-semibold">{row.total}</td>
-                      <td className="px-2 py-1.5 text-center font-semibold">{row.comparable}</td>
-                      <td className="px-2 py-1.5 text-center">
-                        <span className="inline-flex min-w-6 justify-center rounded-full bg-emerald-50 px-1.5 py-0.5 text-[10px] font-bold text-emerald-700 ring-1 ring-emerald-200">
-                          {row.ดีขึ้น}
-                        </span>
-                      </td>
-                      <td className="px-2 py-1.5 text-center">
-                        <span className="inline-flex min-w-6 justify-center rounded-full bg-rose-50 px-1.5 py-0.5 text-[10px] font-bold text-rose-700 ring-1 ring-rose-200">
-                          {row.แย่ลง}
-                        </span>
-                      </td>
-                      <td className="px-2 py-1.5 text-center">
-                        <span className="inline-flex min-w-6 justify-center rounded-full bg-slate-50 px-1.5 py-0.5 text-[10px] font-bold text-slate-600 ring-1 ring-slate-200">
-                          {row.คงเดิม}
-                        </span>
-                      </td>
-                      <td className="px-2 py-1.5 text-center font-semibold text-slate-600">
-                        {row.ข้อมูลไม่พอ}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+
+            <div className="grid gap-3 lg:grid-cols-[0.8fr_1.2fr]">
+              <div className="rounded-2xl border border-slate-200 bg-gradient-to-br from-white to-slate-50 p-3 shadow-sm">
+                <div className="mb-2 flex items-center justify-between">
+                  <h3 className="text-sm font-black text-slate-900">เพศ</h3>
+                  <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-bold text-slate-500">
+                    Sex
+                  </span>
+                </div>
+
+                <div className="overflow-hidden rounded-xl border border-slate-200 bg-white">
+                  <table className="w-full text-left text-[11px]">
+                    <thead className="bg-slate-50 text-[10px] font-bold text-slate-500">
+                      <tr>
+                        <th className="px-2 py-1.5">กลุ่ม</th>
+                        <th className="px-2 py-1.5 text-center">ทั้งหมด</th>
+                        <th className="px-2 py-1.5 text-center">เทียบ</th>
+                        <th className="px-2 py-1.5 text-center">ดี</th>
+                        <th className="px-2 py-1.5 text-center">แย่</th>
+                        <th className="px-2 py-1.5 text-center">นิ่ง</th>
+                        <th className="px-2 py-1.5 text-center">ไม่พอ</th>
+                      </tr>
+                    </thead>
+
+                    <tbody>
+                      {sexSummaryRows.map((row) => (
+                        <tr key={row.sex} className="border-t border-slate-100">
+                          <td className="px-2 py-1.5 font-black text-slate-900">
+                            {row.sex}
+                          </td>
+                          <td className="px-2 py-1.5 text-center font-semibold">
+                            {row.total}
+                          </td>
+                          <td className="px-2 py-1.5 text-center font-semibold">
+                            {row.comparable}
+                          </td>
+                          <td className="px-2 py-1.5 text-center">
+                            <span className="inline-flex min-w-6 justify-center rounded-full bg-emerald-50 px-1.5 py-0.5 text-[10px] font-bold text-emerald-700 ring-1 ring-emerald-200">
+                              {row.improved}
+                            </span>
+                          </td>
+                          <td className="px-2 py-1.5 text-center">
+                            <span className="inline-flex min-w-6 justify-center rounded-full bg-rose-50 px-1.5 py-0.5 text-[10px] font-bold text-rose-700 ring-1 ring-rose-200">
+                              {row.worsened}
+                            </span>
+                          </td>
+                          <td className="px-2 py-1.5 text-center">
+                            <span className="inline-flex min-w-6 justify-center rounded-full bg-slate-50 px-1.5 py-0.5 text-[10px] font-bold text-slate-600 ring-1 ring-slate-200">
+                              {row.unchanged}
+                            </span>
+                          </td>
+                          <td className="px-2 py-1.5 text-center font-semibold text-slate-600">
+                            {row.incomplete}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <div className="rounded-2xl border border-slate-200 bg-gradient-to-br from-white to-slate-50 p-3 shadow-sm">
+                <div className="mb-2 flex items-center justify-between">
+                  <h3 className="text-sm font-black text-slate-900">ช่วงอายุ</h3>
+                  <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-bold text-slate-500">
+                    Age group
+                  </span>
+                </div>
+
+                <div className="overflow-hidden rounded-xl border border-slate-200 bg-white">
+                  <table className="w-full text-left text-[11px]">
+                    <thead className="bg-slate-50 text-[10px] font-bold text-slate-500">
+                      <tr>
+                        <th className="px-2 py-1.5">กลุ่ม</th>
+                        <th className="px-2 py-1.5 text-center">ทั้งหมด</th>
+                        <th className="px-2 py-1.5 text-center">เทียบ</th>
+                        <th className="px-2 py-1.5 text-center">ดี</th>
+                        <th className="px-2 py-1.5 text-center">แย่</th>
+                        <th className="px-2 py-1.5 text-center">นิ่ง</th>
+                        <th className="px-2 py-1.5 text-center">ไม่พอ</th>
+                      </tr>
+                    </thead>
+
+                    <tbody>
+                      {ageSummaryRows.map((row) => (
+                        <tr key={row.age} className="border-t border-slate-100">
+                          <td className="whitespace-nowrap px-2 py-1.5 font-black text-slate-900">
+                            {row.age}
+                          </td>
+                          <td className="px-2 py-1.5 text-center font-semibold">
+                            {row.total}
+                          </td>
+                          <td className="px-2 py-1.5 text-center font-semibold">
+                            {row.comparable}
+                          </td>
+                          <td className="px-2 py-1.5 text-center">
+                            <span className="inline-flex min-w-6 justify-center rounded-full bg-emerald-50 px-1.5 py-0.5 text-[10px] font-bold text-emerald-700 ring-1 ring-emerald-200">
+                              {row.ดีขึ้น}
+                            </span>
+                          </td>
+                          <td className="px-2 py-1.5 text-center">
+                            <span className="inline-flex min-w-6 justify-center rounded-full bg-rose-50 px-1.5 py-0.5 text-[10px] font-bold text-rose-700 ring-1 ring-rose-200">
+                              {row.แย่ลง}
+                            </span>
+                          </td>
+                          <td className="px-2 py-1.5 text-center">
+                            <span className="inline-flex min-w-6 justify-center rounded-full bg-slate-50 px-1.5 py-0.5 text-[10px] font-bold text-slate-600 ring-1 ring-slate-200">
+                              {row.คงเดิม}
+                            </span>
+                          </td>
+                          <td className="px-2 py-1.5 text-center font-semibold text-slate-600">
+                            {row.ข้อมูลไม่พอ}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
             </div>
           </div>
         </div>
