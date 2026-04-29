@@ -3938,7 +3938,28 @@ function AdminSummary({ records, auditLogs, onFullBackup, onRestoreBackup }) {
                   Sex
                 </span>
               </div>
-      
+              <div className="mb-3 grid grid-cols-3 gap-2">
+                <div className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2">
+                  <div className="text-[10px] font-bold text-slate-500">รวมทั้งหมด</div>
+                  <div className="mt-0.5 text-sm font-black text-slate-900">
+                    {sexSummaryRows.reduce((sum, row) => sum + Number(row.total || 0), 0)} คน
+                  </div>
+                </div>
+              
+                <div className="rounded-2xl border border-sky-200 bg-sky-50 px-3 py-2">
+                  <div className="text-[10px] font-bold text-sky-600">ชาย</div>
+                  <div className="mt-0.5 text-sm font-black text-sky-950">
+                    {sexSummaryRows.find((row) => row.sex === "ชาย")?.total || 0} คน
+                  </div>
+                </div>
+              
+                <div className="rounded-2xl border border-rose-200 bg-rose-50 px-3 py-2">
+                  <div className="text-[10px] font-bold text-rose-600">หญิง</div>
+                  <div className="mt-0.5 text-sm font-black text-rose-950">
+                    {sexSummaryRows.find((row) => row.sex === "หญิง")?.total || 0} คน
+                  </div>
+                </div>
+              </div>
               <div className="overflow-hidden rounded-2xl border border-slate-200">
                 <table className="w-full text-left text-xs">
                   <thead className="bg-slate-50 text-[11px] font-black text-slate-500">
@@ -3995,7 +4016,28 @@ function AdminSummary({ records, auditLogs, onFullBackup, onRestoreBackup }) {
                   Age group
                 </span>
               </div>
-      
+                <div className="mb-3 grid grid-cols-3 gap-2">
+                  <div className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2">
+                    <div className="text-[10px] font-bold text-slate-500">ช่วงอายุ</div>
+                    <div className="mt-0.5 text-sm font-black text-slate-900">
+                      6 กลุ่ม
+                    </div>
+                  </div>
+                
+                  <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-3 py-2">
+                    <div className="text-[10px] font-bold text-emerald-600">ดีขึ้นเด่น</div>
+                    <div className="mt-0.5 text-sm font-black text-emerald-950">
+                      20–29 ปี
+                    </div>
+                  </div>
+                
+                  <div className="rounded-2xl border border-amber-200 bg-amber-50 px-3 py-2">
+                    <div className="text-[10px] font-bold text-amber-600">กลุ่มมากสุด</div>
+                    <div className="mt-0.5 text-sm font-black text-amber-950">
+                      50–59 ปี
+                    </div>
+                  </div>
+                </div>
               <div className="overflow-hidden rounded-2xl border border-slate-200">
                 <table className="w-full text-left text-xs">
                   <thead className="bg-slate-50 text-[11px] font-black text-slate-500">
