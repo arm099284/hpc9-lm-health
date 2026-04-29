@@ -1873,16 +1873,16 @@ function OhsTable({ record }) {
 
           <div className="rounded-3xl border border-slate-200 bg-white p-3 shadow-inner">
             <div className="grid gap-3 xl:grid-cols-[1fr_.85fr]">
-              <div className="flex items-center justify-center rounded-2xl bg-gradient-to-b from-slate-50 to-white p-2 ring-1 ring-slate-100">
+              <div className="flex items-center justify-center rounded-2xl bg-gradient-to-b from-slate-50 to-white p-3 ring-1 ring-slate-100">
                 <svg
-                  viewBox="0 0 560 320"
-                  className="h-[300px] w-full max-w-[560px]"
+                  viewBox="0 0 320 300"
+                  className="h-[280px] w-full max-w-[320px]"
                   role="img"
-                  aria-label="Overhead Deep Squat anatomical line art body map"
+                  aria-label="Overhead Deep Squat thick icon body map"
                 >
                   <defs>
                     <filter
-                      id="ohsPremiumShadow"
+                      id="ohsIconShadow"
                       x="-20%"
                       y="-20%"
                       width="140%"
@@ -1893,453 +1893,232 @@ function OhsTable({ record }) {
                         dy="8"
                         stdDeviation="8"
                         floodColor="#0f172a"
-                        floodOpacity="0.08"
+                        floodOpacity="0.10"
                       />
                     </filter>
                   </defs>
-
+              
                   <rect
                     x="0"
                     y="0"
-                    width="560"
-                    height="320"
+                    width="320"
+                    height="300"
                     rx="28"
                     fill="#ffffff"
                   />
-
-                  <text
-                    x="140"
-                    y="28"
-                    textAnchor="middle"
-                    fontSize="11"
-                    fontWeight="800"
-                    fill="#64748b"
-                  >
-                    Front View
-                  </text>
-
-                  <text
-                    x="420"
-                    y="28"
-                    textAnchor="middle"
-                    fontSize="11"
-                    fontWeight="800"
-                    fill="#64748b"
-                  >
-                    Side View
-                  </text>
-
-                  <g transform="translate(25 26)" filter="url(#ohsPremiumShadow)">
-                    <line
-                      x1="34"
-                      y1="38"
-                      x2="246"
-                      y2="38"
-                      stroke="#64748b"
-                      strokeWidth="5"
-                      strokeLinecap="round"
-                    />
-                    <line
-                      x1="34"
-                      y1="38"
-                      x2="246"
-                      y2="38"
-                      stroke="#e2e8f0"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                    />
-
-                    <circle
-                      cx="140"
-                      cy="74"
-                      r="16"
-                      fill="#ffffff"
-                      stroke="#94a3b8"
-                      strokeWidth="3"
-                    />
-
-                    <path
-                      d="M82 40 C88 60, 97 78, 111 99"
-                      fill="none"
-                      stroke={armsColor}
-                      strokeWidth="9"
-                      strokeLinecap="round"
-                    />
-                    <path
-                      d="M198 40 C192 60, 183 78, 169 99"
-                      fill="none"
-                      stroke={armsColor}
-                      strokeWidth="9"
-                      strokeLinecap="round"
-                    />
-
-                    <path
-                      d="M110 100 C125 92, 155 92, 170 100"
-                      fill="none"
-                      stroke={armsColor}
-                      strokeWidth="8"
-                      strokeLinecap="round"
-                    />
-
-                    <path
-                      d="M110 104
-                         C101 128, 103 151, 118 169
-                         C127 180, 153 180, 162 169
-                         C177 151, 179 128, 170 104
-                         C154 113, 126 113, 110 104 Z"
-                      fill="#ffffff"
-                      stroke={torsoColor}
-                      strokeWidth="5"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-
-                    <path
-                      d="M122 113 C129 126, 130 148, 124 165"
-                      fill="none"
-                      stroke={torsoColor}
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      opacity="0.45"
-                    />
-                    <path
-                      d="M158 113 C151 126, 150 148, 156 165"
-                      fill="none"
-                      stroke={torsoColor}
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      opacity="0.45"
-                    />
-
-                    <line
-                      x1="140"
-                      y1="106"
-                      x2="140"
-                      y2="171"
-                      stroke={torsoColor}
-                      strokeWidth="3"
-                      strokeLinecap="round"
-                      strokeDasharray="4 5"
-                      opacity="0.7"
-                    />
-
-                    <path
-                      d="M104 173 C122 190, 158 190, 176 173"
-                      fill="none"
-                      stroke={hipColor}
-                      strokeWidth="10"
-                      strokeLinecap="round"
-                    />
-
-                    <path
-                      d="M111 177 C84 184, 65 203, 58 231"
-                      fill="none"
-                      stroke={kneeColor}
-                      strokeWidth="10"
-                      strokeLinecap="round"
-                    />
-                    <path
-                      d="M169 177 C196 184, 215 203, 222 231"
-                      fill="none"
-                      stroke={kneeColor}
-                      strokeWidth="10"
-                      strokeLinecap="round"
-                    />
-
-                    <path
-                      d="M58 231 C56 249, 50 263, 40 276"
-                      fill="none"
-                      stroke={footColor}
-                      strokeWidth="8"
-                      strokeLinecap="round"
-                    />
-                    <path
-                      d="M222 231 C224 249, 230 263, 240 276"
-                      fill="none"
-                      stroke={footColor}
-                      strokeWidth="8"
-                      strokeLinecap="round"
-                    />
-
-                    <line
-                      x1="28"
-                      y1="278"
-                      x2="70"
-                      y2="278"
-                      stroke={footColor}
-                      strokeWidth="8"
-                      strokeLinecap="round"
-                    />
-                    <line
-                      x1="210"
-                      y1="278"
-                      x2="252"
-                      y2="278"
-                      stroke={footColor}
-                      strokeWidth="8"
-                      strokeLinecap="round"
-                    />
-
-                    <circle
-                      cx="110"
-                      cy="100"
-                      r="9"
-                      fill={softColorOf(statusOf(4))}
-                      stroke={armsColor}
-                      strokeWidth="4"
-                    />
-                    <circle
-                      cx="170"
-                      cy="100"
-                      r="9"
-                      fill={softColorOf(statusOf(4))}
-                      stroke={armsColor}
-                      strokeWidth="4"
-                    />
-                    <circle
-                      cx="140"
-                      cy="139"
-                      r="9"
-                      fill={softColorOf(statusOf(0))}
-                      stroke={torsoColor}
-                      strokeWidth="4"
-                    />
-                    <circle
-                      cx="140"
-                      cy="174"
-                      r="9"
-                      fill={softColorOf(statusOf(2))}
-                      stroke={hipColor}
-                      strokeWidth="4"
-                    />
-                    <circle
-                      cx="58"
-                      cy="231"
-                      r="9"
-                      fill={softColorOf(statusOf(1))}
-                      stroke={kneeColor}
-                      strokeWidth="4"
-                    />
-                    <circle
-                      cx="222"
-                      cy="231"
-                      r="9"
-                      fill={softColorOf(statusOf(1))}
-                      stroke={kneeColor}
-                      strokeWidth="4"
-                    />
-                    <circle
-                      cx="45"
-                      cy="264"
-                      r="8"
-                      fill={softColorOf(statusOf(3))}
-                      stroke={footColor}
-                      strokeWidth="4"
-                    />
-                    <circle
-                      cx="235"
-                      cy="264"
-                      r="8"
-                      fill={softColorOf(statusOf(3))}
-                      stroke={footColor}
-                      strokeWidth="4"
-                    />
-
-                    <line
-                      x1="140"
-                      y1="42"
-                      x2="140"
-                      y2="284"
-                      stroke={balanceColor}
-                      strokeWidth="2"
-                      strokeDasharray="5 6"
-                      opacity="0.32"
-                    />
-                  </g>
-
-                  <g transform="translate(320 26)" filter="url(#ohsPremiumShadow)">
-                    <line
-                      x1="92"
-                      y1="40"
-                      x2="205"
-                      y2="40"
-                      stroke="#64748b"
-                      strokeWidth="5"
-                      strokeLinecap="round"
-                    />
-                    <line
-                      x1="92"
-                      y1="40"
-                      x2="205"
-                      y2="40"
-                      stroke="#e2e8f0"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                    />
-
-                    <circle
-                      cx="164"
-                      cy="76"
-                      r="15"
-                      fill="#ffffff"
-                      stroke="#94a3b8"
-                      strokeWidth="3"
-                    />
-
-                    <path
-                      d="M151 80 C160 78, 168 81, 176 87"
-                      fill="none"
-                      stroke="#94a3b8"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                    />
-
-                    <path
-                      d="M140 43 C146 62, 153 80, 159 101"
-                      fill="none"
-                      stroke={armsColor}
-                      strokeWidth="9"
-                      strokeLinecap="round"
-                    />
-                    <path
-                      d="M178 43 C174 62, 170 80, 166 101"
-                      fill="none"
-                      stroke={armsColor}
-                      strokeWidth="9"
-                      strokeLinecap="round"
-                    />
-
-                    <path
-                      d="M158 102
-                         C133 116, 119 144, 126 170
-                         C132 193, 160 202, 184 187
-                         C184 162, 174 127, 164 104
-                         C162 102, 160 101, 158 102 Z"
-                      fill="#ffffff"
-                      stroke={torsoColor}
-                      strokeWidth="5"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-
-                    <path
-                      d="M150 118 C144 135, 145 157, 156 180"
-                      fill="none"
-                      stroke={torsoColor}
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      opacity="0.45"
-                    />
-
-                    <path
-                      d="M180 185 C198 187, 215 196, 226 213"
-                      fill="none"
-                      stroke={hipColor}
-                      strokeWidth="10"
-                      strokeLinecap="round"
-                    />
-
-                    <path
-                      d="M183 188 C156 194, 133 213, 116 238"
-                      fill="none"
-                      stroke={kneeColor}
-                      strokeWidth="10"
-                      strokeLinecap="round"
-                    />
-
-                    <path
-                      d="M215 211 C234 224, 246 244, 250 268"
-                      fill="none"
-                      stroke={kneeColor}
-                      strokeWidth="8"
-                      strokeLinecap="round"
-                    />
-
-                    <path
-                      d="M116 238 C109 258, 101 271, 88 280"
-                      fill="none"
-                      stroke={footColor}
-                      strokeWidth="8"
-                      strokeLinecap="round"
-                    />
-
-                    <path
-                      d="M250 268 C260 276, 273 280, 288 280"
-                      fill="none"
-                      stroke={footColor}
-                      strokeWidth="8"
-                      strokeLinecap="round"
-                    />
-
-                    <line
-                      x1="72"
-                      y1="282"
-                      x2="121"
-                      y2="282"
-                      stroke={footColor}
-                      strokeWidth="8"
-                      strokeLinecap="round"
-                    />
-                    <line
-                      x1="244"
-                      y1="282"
-                      x2="294"
-                      y2="282"
-                      stroke={footColor}
-                      strokeWidth="8"
-                      strokeLinecap="round"
-                    />
-
-                    <circle
-                      cx="164"
-                      cy="101"
-                      r="9"
-                      fill={softColorOf(statusOf(4))}
-                      stroke={armsColor}
-                      strokeWidth="4"
-                    />
-                    <circle
-                      cx="153"
-                      cy="146"
-                      r="9"
-                      fill={softColorOf(statusOf(0))}
-                      stroke={torsoColor}
-                      strokeWidth="4"
-                    />
-                    <circle
-                      cx="184"
-                      cy="187"
-                      r="9"
-                      fill={softColorOf(statusOf(2))}
-                      stroke={hipColor}
-                      strokeWidth="4"
-                    />
-                    <circle
-                      cx="116"
-                      cy="238"
-                      r="9"
-                      fill={softColorOf(statusOf(1))}
-                      stroke={kneeColor}
-                      strokeWidth="4"
-                    />
-                    <circle
-                      cx="94"
-                      cy="270"
-                      r="8"
-                      fill={softColorOf(statusOf(3))}
-                      stroke={footColor}
-                      strokeWidth="4"
-                    />
-
+              
+                  <g filter="url(#ohsIconShadow)">
+                    {/* Balance line */}
                     <line
                       x1="160"
-                      y1="44"
+                      y1="48"
                       x2="160"
-                      y2="286"
+                      y2="258"
                       stroke={balanceColor}
                       strokeWidth="2"
                       strokeDasharray="5 6"
-                      opacity="0.28"
+                      strokeLinecap="round"
+                      opacity="0.35"
+                    />
+              
+                    {/* Bar */}
+                    <line
+                      x1="74"
+                      y1="42"
+                      x2="246"
+                      y2="42"
+                      stroke="#64748b"
+                      strokeWidth="7"
+                      strokeLinecap="round"
+                    />
+                    <line
+                      x1="74"
+                      y1="42"
+                      x2="246"
+                      y2="42"
+                      stroke="#e2e8f0"
+                      strokeWidth="3"
+                      strokeLinecap="round"
+                    />
+              
+                    {/* Head */}
+                    <circle
+                      cx="160"
+                      cy="78"
+                      r="18"
+                      fill="#ffffff"
+                      stroke="#94a3b8"
+                      strokeWidth="5"
+                    />
+              
+                    {/* Arms overhead */}
+                    <path
+                      d="M142 96 C128 78, 114 58, 100 42"
+                      fill="none"
+                      stroke={armsColor}
+                      strokeWidth="12"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                    <path
+                      d="M178 96 C192 78, 206 58, 220 42"
+                      fill="none"
+                      stroke={armsColor}
+                      strokeWidth="12"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+              
+                    {/* Hands */}
+                    <circle
+                      cx="100"
+                      cy="42"
+                      r="6"
+                      fill="#ffffff"
+                      stroke={armsColor}
+                      strokeWidth="4"
+                    />
+                    <circle
+                      cx="220"
+                      cy="42"
+                      r="6"
+                      fill="#ffffff"
+                      stroke={armsColor}
+                      strokeWidth="4"
+                    />
+              
+                    {/* Shoulders */}
+                    <path
+                      d="M128 102 C145 92, 175 92, 192 102"
+                      fill="none"
+                      stroke={armsColor}
+                      strokeWidth="11"
+                      strokeLinecap="round"
+                    />
+              
+                    {/* Torso main */}
+                    <path
+                      d="M130 106
+                         C120 130, 124 154, 142 172
+                         C151 181, 169 181, 178 172
+                         C196 154, 200 130, 190 106"
+                      fill="none"
+                      stroke={torsoColor}
+                      strokeWidth="13"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+              
+                    {/* Torso inner contour */}
+                    <path
+                      d="M146 112 C140 132, 142 153, 153 168"
+                      fill="none"
+                      stroke="#cbd5e1"
+                      strokeWidth="3"
+                      strokeLinecap="round"
+                      opacity="0.65"
+                    />
+                    <path
+                      d="M174 112 C180 132, 178 153, 167 168"
+                      fill="none"
+                      stroke="#cbd5e1"
+                      strokeWidth="3"
+                      strokeLinecap="round"
+                      opacity="0.65"
+                    />
+              
+                    {/* Hips / pelvis */}
+                    <path
+                      d="M120 178 C139 195, 181 195, 200 178"
+                      fill="none"
+                      stroke={hipColor}
+                      strokeWidth="14"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+              
+                    {/* Thighs squat */}
+                    <path
+                      d="M127 182 C101 191, 80 212, 70 238"
+                      fill="none"
+                      stroke={kneeColor}
+                      strokeWidth="13"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                    <path
+                      d="M193 182 C219 191, 240 212, 250 238"
+                      fill="none"
+                      stroke={kneeColor}
+                      strokeWidth="13"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+              
+                    {/* Knees */}
+                    <circle
+                      cx="70"
+                      cy="238"
+                      r="8"
+                      fill="#ffffff"
+                      stroke={kneeColor}
+                      strokeWidth="5"
+                    />
+                    <circle
+                      cx="250"
+                      cy="238"
+                      r="8"
+                      fill="#ffffff"
+                      stroke={kneeColor}
+                      strokeWidth="5"
+                    />
+              
+                    {/* Shins */}
+                    <path
+                      d="M70 238 C62 252, 53 262, 42 270"
+                      fill="none"
+                      stroke={footColor}
+                      strokeWidth="11"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                    <path
+                      d="M250 238 C258 252, 267 262, 278 270"
+                      fill="none"
+                      stroke={footColor}
+                      strokeWidth="11"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+              
+                    {/* Feet */}
+                    <line
+                      x1="32"
+                      y1="272"
+                      x2="78"
+                      y2="272"
+                      stroke={footColor}
+                      strokeWidth="11"
+                      strokeLinecap="round"
+                    />
+                    <line
+                      x1="242"
+                      y1="272"
+                      x2="288"
+                      y2="272"
+                      stroke={footColor}
+                      strokeWidth="11"
+                      strokeLinecap="round"
+                    />
+              
+                    {/* Subtle ground */}
+                    <ellipse
+                      cx="160"
+                      cy="278"
+                      rx="110"
+                      ry="10"
+                      fill="#e2e8f0"
+                      opacity="0.35"
                     />
                   </g>
                 </svg>
