@@ -4505,15 +4505,15 @@ function lmAdminRow(record) {
               </div>
             </div>
 
-            <div className="h-64">
+            <div className="h-[430px] rounded-2xl bg-gradient-to-b from-white to-slate-50 p-3">
               <ResponsiveContainer>
                 <BarChart data={filteredChartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                   <XAxis dataKey="name" tick={{ fontSize: 12 }} />
                   <YAxis allowDecimals={false} tick={{ fontSize: 12 }} />
                   <Tooltip formatter={(value) => [`${value} เคส`, "จำนวน"]} />
-                  <Bar dataKey="value" radius={[10, 10, 0, 0]} fill="#0f172a" />
-                </BarChart>
+                  <Bar dataKey="value" barSize={58} radius={[14, 14, 0, 0]}>
+                <BarChart data={filteredChartData} margin={{ top: 24, right: 16, left: -10, bottom: 12 }}>
               </ResponsiveContainer>
             </div>
           </div>
