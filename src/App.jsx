@@ -52,7 +52,7 @@ const ADMIN_USERS = {
   admin1: { id: "admin1", name: "ชัยวัฒน์", role: "Admin" },
   admin2: { id: "admin2", name: "ธนาวุฒิ", role: "Admin" },
 };
-const PAGE_SIZE = 10;
+const PAGE_SIZE = 5;
 const RECORDS_STORAGE_KEY = "hpc9_lm_health_records_v1";
 const AUDIT_STORAGE_KEY = "hpc9_lm_audit_logs_v1";
 
