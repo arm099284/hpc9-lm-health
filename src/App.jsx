@@ -1704,20 +1704,69 @@ function CompareTable({ record, title, icon, list, withFitnessInterpretation = f
 }
 
 function OhsTable({ record }) {
-  const chart = record.sessions.map((s) => {
-    const normal = ohsSummary(s).normal;
+  const [selectedRoundIndex, setSelectedRoundIndex] = useState(0);
+  const selectedSession = record.sessions[selectedRoundIndex] || record.sessions[0];
+  const selectedSummary = ohsSummary(selectedSession);
 
-    return {
-      name: `ครั้ง ${s.no}`,
-      normal,
-      fill:
-        normal >= 5
-          ? "#10b981"
-          : normal >= 3
-            ? "#f59e0b"
-            : "#f43f5e",
-    };
-  });
+  const statusOf = (index) => selectedSession?.ohs?.[index] || "ปกติ";
+
+  const colorOf = (status) => {
+    if (status === "ปกติ") return "#94a3b8";
+    if (status === "ต้องระวัง") return "#f59e0b";
+    return "#f43f5e";
+  };
+
+  const softColorOf = (status) => {
+    if (status === "ปกติ") return "#f8fafc";
+    if (status === "ต้องระวัง") return "#fffbeb";
+    return "#fff1f2";
+  };
+
+  const toneOf = (status) => {
+    if (status === "ปกติ") return "good";
+    if (status === "ต้องระวัง") return "warn";
+    return "bad";
+  };
+
+  const bodyParts = [
+    {
+      label: "แขน / ไหล่",
+      sub: "Overhead position",
+      status: statusOf(4),
+    },
+    {
+      label: "ลำตัว",
+      sub: "Torso control",
+      status: statusOf(0),
+    },
+    {
+      label: "สะโพก",
+      sub: "Hip depth",
+      status: statusOf(2),
+    },
+    {
+      label: "เข่า",
+      sub: "Knee tracking",
+      status: statusOf(1),
+    },
+    {
+      label: "ส้นเท้า / ข้อเท้า",
+      sub: "Heel & ankle",
+      status: statusOf(3),
+    },
+    {
+      label: "สมดุล",
+      sub: "Balance control",
+      status: statusOf(5),
+    },
+  ];
+
+  const armsColor = colorOf(statusOf(4));
+  const torsoColor = colorOf(statusOf(0));
+  const hipColor = colorOf(statusOf(2));
+  const kneeColor = colorOf(statusOf(1));
+  const footColor = colorOf(statusOf(3));
+  const balanceColor = colorOf(statusOf(5));
 
   return (
     <Card title="Overhead Deep Squat ครั้งที่ 1–4" icon={ClipboardIcon}>
@@ -1752,17 +1801,7 @@ function OhsTable({ record }) {
 
                   {record.sessions.map((s) => (
                     <td key={s.no} className="px-2 py-2 text-center">
-                      <Pill
-                        tone={
-                          s.ohs[i] === "ปกติ"
-                            ? "good"
-                            : s.ohs[i] === "ต้องระวัง"
-                              ? "warn"
-                              : "bad"
-                        }
-                      >
-                        {s.ohs[i]}
-                      </Pill>
+                      <Pill tone={toneOf(s.ohs[i])}>{s.ohs[i]}</Pill>
                     </td>
                   ))}
                 </tr>
@@ -1790,67 +1829,250 @@ function OhsTable({ record }) {
         </div>
 
         <div className="rounded-2xl border border-slate-200 bg-gradient-to-br from-white via-slate-50 to-sky-50/30 p-3 shadow-[0_8px_24px_rgba(15,23,42,0.05)]">
-          <div className="mb-2 flex items-center justify-between">
+          <div className="mb-3 flex items-start justify-between gap-3">
             <div>
               <div className="text-sm font-black text-slate-900">
-                แนวโน้ม OHS
+                OHS Body Map
               </div>
               <div className="text-[10px] font-semibold text-slate-400">
-                จำนวนรายการที่ปกติ จากทั้งหมด 6 รายการ
+                แผนที่ตำแหน่งที่ควรติดตามจากท่า Overhead Deep Squat
               </div>
             </div>
 
-            <span className="rounded-full border border-slate-200 bg-white px-2 py-0.5 text-[10px] font-black text-slate-500 shadow-sm">
-              /6
-            </span>
+            <Pill tone={selectedSummary.tone}>
+              {selectedSummary.normal}/6
+            </Pill>
           </div>
 
-          <div className="h-64 rounded-2xl bg-white p-2 shadow-inner ring-1 ring-slate-100">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart
-                data={chart}
-                barCategoryGap="42%"
-                margin={{ top: 12, right: 8, left: -12, bottom: 0 }}
-              >
-                <CartesianGrid
-                  strokeDasharray="3 3"
-                  stroke="#e2e8f0"
-                  vertical={false}
-                />
+          <div className="mb-3 rounded-2xl border border-slate-200 bg-white/80 p-1 shadow-sm">
+            <div className="grid grid-cols-4 gap-1">
+              {record.sessions.map((s, index) => {
+                const active = selectedRoundIndex === index;
 
-                <XAxis
-                  dataKey="name"
-                  tick={{ fontSize: 11, fill: "#64748b", fontWeight: 700 }}
-                  axisLine={false}
-                  tickLine={false}
-                />
+                return (
+                  <button
+                    key={s.no}
+                    type="button"
+                    onClick={() => setSelectedRoundIndex(index)}
+                    className={`rounded-xl px-2 py-1.5 text-[11px] font-black transition ${
+                      active
+                        ? "bg-slate-900 text-white shadow-sm"
+                        : "text-slate-500 hover:bg-slate-100"
+                    }`}
+                  >
+                    ครั้ง {s.no}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
 
-                <YAxis
-                  domain={[0, 6]}
-                  ticks={[0, 2, 4, 6]}
-                  tick={{ fontSize: 11, fill: "#64748b" }}
-                  axisLine={false}
-                  tickLine={false}
-                />
+          <div className="rounded-3xl border border-slate-200 bg-white p-3 shadow-inner">
+            <div className="grid gap-3 md:grid-cols-[1fr_.9fr] lg:grid-cols-1 xl:grid-cols-[1fr_.9fr]">
+              <div className="flex items-center justify-center rounded-2xl bg-gradient-to-b from-slate-50 to-white p-2 ring-1 ring-slate-100">
+                <svg
+                  viewBox="0 0 260 260"
+                  className="h-[260px] w-full max-w-[260px]"
+                  role="img"
+                  aria-label="Overhead Deep Squat body map"
+                >
+                  <line
+                    x1="130"
+                    y1="28"
+                    x2="130"
+                    y2="230"
+                    stroke={balanceColor}
+                    strokeWidth="2"
+                    strokeDasharray="5 5"
+                    opacity="0.5"
+                  />
 
-                <Tooltip
-                  formatter={(value) => [`${value}/6`, "ปกติ"]}
-                  contentStyle={{
-                    borderRadius: "14px",
-                    border: "1px solid #e2e8f0",
-                    backgroundColor: "#ffffff",
-                    boxShadow: "0 10px 28px rgba(15,23,42,0.08)",
-                    fontSize: "12px",
-                  }}
-                />
+                  <circle
+                    cx="130"
+                    cy="55"
+                    r="16"
+                    fill="#ffffff"
+                    stroke="#cbd5e1"
+                    strokeWidth="4"
+                  />
 
-                <Bar dataKey="normal" barSize={34} radius={[10, 10, 0, 0]}>
-                  {chart.map((entry) => (
-                    <Cell key={entry.name} fill={entry.fill} />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
+                  <line
+                    x1="110"
+                    y1="86"
+                    x2="84"
+                    y2="38"
+                    stroke={armsColor}
+                    strokeWidth="9"
+                    strokeLinecap="round"
+                  />
+                  <line
+                    x1="150"
+                    y1="86"
+                    x2="176"
+                    y2="38"
+                    stroke={armsColor}
+                    strokeWidth="9"
+                    strokeLinecap="round"
+                  />
+                  <line
+                    x1="110"
+                    y1="86"
+                    x2="150"
+                    y2="86"
+                    stroke={armsColor}
+                    strokeWidth="8"
+                    strokeLinecap="round"
+                  />
+
+                  <line
+                    x1="130"
+                    y1="75"
+                    x2="130"
+                    y2="138"
+                    stroke={torsoColor}
+                    strokeWidth="10"
+                    strokeLinecap="round"
+                  />
+
+                  <line
+                    x1="106"
+                    y1="140"
+                    x2="154"
+                    y2="140"
+                    stroke={hipColor}
+                    strokeWidth="10"
+                    strokeLinecap="round"
+                  />
+
+                  <line
+                    x1="110"
+                    y1="143"
+                    x2="92"
+                    y2="184"
+                    stroke={kneeColor}
+                    strokeWidth="9"
+                    strokeLinecap="round"
+                  />
+                  <line
+                    x1="150"
+                    y1="143"
+                    x2="168"
+                    y2="184"
+                    stroke={kneeColor}
+                    strokeWidth="9"
+                    strokeLinecap="round"
+                  />
+
+                  <circle
+                    cx="92"
+                    cy="184"
+                    r="9"
+                    fill={softColorOf(statusOf(1))}
+                    stroke={kneeColor}
+                    strokeWidth="4"
+                  />
+                  <circle
+                    cx="168"
+                    cy="184"
+                    r="9"
+                    fill={softColorOf(statusOf(1))}
+                    stroke={kneeColor}
+                    strokeWidth="4"
+                  />
+
+                  <line
+                    x1="92"
+                    y1="184"
+                    x2="72"
+                    y2="222"
+                    stroke={footColor}
+                    strokeWidth="8"
+                    strokeLinecap="round"
+                  />
+                  <line
+                    x1="168"
+                    y1="184"
+                    x2="188"
+                    y2="222"
+                    stroke={footColor}
+                    strokeWidth="8"
+                    strokeLinecap="round"
+                  />
+
+                  <line
+                    x1="58"
+                    y1="224"
+                    x2="90"
+                    y2="224"
+                    stroke={footColor}
+                    strokeWidth="8"
+                    strokeLinecap="round"
+                  />
+                  <line
+                    x1="170"
+                    y1="224"
+                    x2="202"
+                    y2="224"
+                    stroke={footColor}
+                    strokeWidth="8"
+                    strokeLinecap="round"
+                  />
+
+                  <circle
+                    cx="130"
+                    cy="138"
+                    r="8"
+                    fill={softColorOf(statusOf(2))}
+                    stroke={hipColor}
+                    strokeWidth="4"
+                  />
+
+                  <circle
+                    cx="130"
+                    cy="108"
+                    r="5"
+                    fill={softColorOf(statusOf(0))}
+                    stroke={torsoColor}
+                    strokeWidth="3"
+                  />
+                </svg>
+              </div>
+
+              <div className="space-y-2">
+                {bodyParts.map((part) => (
+                  <div
+                    key={part.label}
+                    className="flex items-center justify-between gap-2 rounded-2xl border border-slate-100 bg-slate-50/60 px-3 py-2"
+                  >
+                    <div className="min-w-0">
+                      <div className="text-[11px] font-black leading-tight text-slate-900">
+                        {part.label}
+                      </div>
+                      <div className="mt-0.5 text-[9px] font-semibold leading-tight text-slate-400">
+                        {part.sub}
+                      </div>
+                    </div>
+
+                    <Pill tone={toneOf(part.status)}>{part.status}</Pill>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="mt-3 flex flex-wrap gap-2 border-t border-slate-100 pt-3 text-[10px] font-bold text-slate-500">
+              <span className="inline-flex items-center gap-1 rounded-full bg-slate-50 px-2 py-1 ring-1 ring-slate-200">
+                <span className="h-2 w-2 rounded-full bg-slate-400" />
+                ปกติ
+              </span>
+              <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-1 text-amber-700 ring-1 ring-amber-200">
+                <span className="h-2 w-2 rounded-full bg-amber-400" />
+                ต้องระวัง
+              </span>
+              <span className="inline-flex items-center gap-1 rounded-full bg-rose-50 px-2 py-1 text-rose-700 ring-1 ring-rose-200">
+                <span className="h-2 w-2 rounded-full bg-rose-500" />
+                ควรปรับแก้
+              </span>
+            </div>
           </div>
         </div>
       </div>
