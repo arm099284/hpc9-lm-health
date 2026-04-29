@@ -4505,21 +4505,53 @@ function lmAdminRow(record) {
               </div>
             </div>
 
-            <div className="h-[430px] rounded-2xl bg-gradient-to-b from-white to-slate-50 p-3">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart
-                  data={filteredChartData}
-                  margin={{ top: 24, right: 16, left: -10, bottom: 12 }}
-                >
-                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                  <XAxis dataKey="name" tick={{ fontSize: 12 }} />
-                  <YAxis allowDecimals={false} tick={{ fontSize: 12 }} />
-                  <Tooltip formatter={(value) => [`${value} เคส`, "จำนวน"]} />
-                  <Bar dataKey="value" barSize={58} radius={[14, 14, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
+            <div className="h-[430px] rounded-3xl border border-slate-200 bg-gradient-to-br from-slate-50 via-white to-slate-100 p-4 shadow-sm">
+              <div className="h-full rounded-2xl border border-slate-100 bg-white px-3 py-4 shadow-inner">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart
+                    data={filteredChartData}
+                    margin={{ top: 8, right: 12, left: -12, bottom: 0 }}
+                  >
+                    <CartesianGrid
+                      strokeDasharray="3 3"
+                      stroke="#e2e8f0"
+                      vertical={false}
+                    />
+            
+                    <XAxis
+                      dataKey="name"
+                      axisLine={false}
+                      tickLine={false}
+                      tick={{ fontSize: 12, fill: "#475569", fontWeight: 700 }}
+                    />
+            
+                    <YAxis
+                      allowDecimals={false}
+                      axisLine={false}
+                      tickLine={false}
+                      tick={{ fontSize: 12, fill: "#64748b" }}
+                    />
+            
+                    <Tooltip
+                      formatter={(value) => [`${value} เคส`, "จำนวน"]}
+                      contentStyle={{
+                        borderRadius: "14px",
+                        border: "1px solid #e2e8f0",
+                        boxShadow: "0 10px 30px rgba(15, 23, 42, 0.08)",
+                        backgroundColor: "#ffffff",
+                      }}
+                      labelStyle={{ color: "#0f172a", fontWeight: 700 }}
+                    />
+            
+                    <Bar dataKey="value" barSize={56} radius={[16, 16, 0, 0]}>
+                      <Cell fill="#10b981" />
+                      <Cell fill="#94a3b8" />
+                      <Cell fill="#ef4444" />
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
             </div>
-          </div>
           
           <div className="min-w-0 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
             <div className="mb-3 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
