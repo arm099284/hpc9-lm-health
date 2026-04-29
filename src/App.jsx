@@ -3616,13 +3616,13 @@ function AdminSummary({ records, auditLogs, onFullBackup, onRestoreBackup }) {
           </div>
         </div>
         
-        <div className="mt-3 rounded-2xl border border-slate-200 bg-gradient-to-br from-white to-slate-50 p-3 shadow-sm">
+        <div className="mt-4 rounded-3xl border border-slate-200 bg-gradient-to-br from-white via-slate-50 to-slate-100 p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-white/80">
           <div className="mb-3 flex items-center justify-between gap-3">
             <div>
-              <h3 className="text-sm font-black text-slate-900">
+              <h3 className="text-base font-black tracking-tight text-slate-900">
                 ผลลัพธ์ตามตัวกรอง
               </h3>
-              <p className="text-[11px] font-medium text-slate-500">
+              <p className="mt-0.5 text-xs font-medium text-slate-500">
                 สัดส่วนผลลัพธ์จากผู้ที่มีข้อมูลเทียบได้
               </p>
             </div>
@@ -3632,15 +3632,15 @@ function AdminSummary({ records, auditLogs, onFullBackup, onRestoreBackup }) {
             </span>
           </div>
         
-          <div className="space-y-2.5">
+          <div className="space-y-4">
             <div className="grid grid-cols-[88px_44px_minmax(120px,520px)_42px] items-center gap-2">
               <div className="text-[11px] font-bold text-emerald-700">ดีขึ้น</div>
               <div className="text-right text-[11px] font-black text-slate-700">
                 {improved} คน
               </div>
-              <div className="h-2.5 overflow-hidden rounded-full bg-slate-100 ring-1 ring-slate-200">
+              <div className="h-4 overflow-hidden rounded-full bg-slate-100 shadow-inner ring-1 ring-slate-200">
                 <div
-                  className="h-full rounded-full bg-emerald-500"
+                  className="h-full rounded-full bg-gradient-to-r from-emerald-400 to-emerald-600 shadow-sm"
                   style={{
                     width: `${Math.round((improved / Math.max(1, comparable.length)) * 100)}%`,
                   }}
@@ -3658,7 +3658,7 @@ function AdminSummary({ records, auditLogs, onFullBackup, onRestoreBackup }) {
               </div>
               <div className="h-2.5 overflow-hidden rounded-full bg-slate-100 ring-1 ring-slate-200">
                 <div
-                  className="h-full rounded-full bg-amber-400"
+                  className="h-full rounded-full bg-gradient-to-r from-amber-300 to-amber-500 shadow-sm"
                   style={{
                     width: `${Math.round((needFollow / Math.max(1, comparable.length)) * 100)}%`,
                   }}
@@ -3676,7 +3676,7 @@ function AdminSummary({ records, auditLogs, onFullBackup, onRestoreBackup }) {
               </div>
               <div className="h-2.5 overflow-hidden rounded-full bg-slate-100 ring-1 ring-slate-200">
                 <div
-                  className="h-full rounded-full bg-slate-400"
+                  className="h-full rounded-full bg-gradient-to-r from-slate-300 to-slate-500 shadow-sm"
                   style={{
                     width: `${Math.round((noChange / Math.max(1, comparable.length)) * 100)}%`,
                   }}
@@ -3843,28 +3843,6 @@ function AdminSummary({ records, auditLogs, onFullBackup, onRestoreBackup }) {
           </div>
         </div>
       </div>
-      </Card>
-
-      <Card title="ภาพรวมผลลัพธ์" icon={ActivityIcon}>
-        <div className="h-48">
-          <ResponsiveContainer>
-            <BarChart
-              data={summaryChartRows}
-              barCategoryGap="15%"
-              margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
-            >
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="name" tick={{ fontSize: 14 }} />
-              <YAxis allowDecimals={false} tick={{ fontSize: 12 }} />
-              <Tooltip />
-              <Bar dataKey="value" barSize={48} radius={[10, 10, 0, 0]}>
-                {summaryChartRows.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={outcomeColor(entry.name)} />
-                ))}
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
       </Card>
 
       <Card title="Key Insights / ผลลัพธ์เด่นและจุดที่ควรติดตาม" icon={ClipboardIcon}>
