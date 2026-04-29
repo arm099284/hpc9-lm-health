@@ -4158,6 +4158,48 @@ function lmAdminRow(record) {
   
     return matchSearch && matchDay && matchMonth && matchYear;
   });
+    
+    const filteredComparableRows = filteredRows.filter((row) => row.comparable);
+    
+    const filteredImprovedCount = filteredComparableRows.filter(
+      (row) => row.delta > 0
+    ).length;
+    
+    const filteredWorsenedCount = filteredComparableRows.filter(
+      (row) => row.delta < 0
+    ).length;
+    
+    const filteredUnchangedCount = filteredComparableRows.filter(
+      (row) => row.delta === 0
+    ).length;
+    
+    const filteredLatestCompleteRows = filteredRows.filter(
+      (row) => row.latestComplete
+    );
+    
+    const filteredAverageLatest =
+      filteredLatestCompleteRows.length > 0
+        ? (
+            filteredLatestCompleteRows.reduce(
+              (sum, row) => sum + row.latestComplete.total,
+              0
+            ) / filteredLatestCompleteRows.length
+          ).toFixed(1)
+        : "-";
+    
+    const filteredAverageDelta =
+      filteredComparableRows.length > 0
+        ? (
+            filteredComparableRows.reduce((sum, row) => sum + row.delta, 0) /
+            filteredComparableRows.length
+          ).toFixed(1)
+        : "-";
+    
+    const filteredChartData = [
+      { name: "ดีขึ้น", value: filteredImprovedCount },
+      { name: "คงเดิม", value: filteredUnchangedCount },
+      { name: "ลดลง", value: filteredWorsenedCount },
+    ];
   const pageCount = Math.max(
     1,
     Math.ceil(filteredRows.length / LM_ADMIN_PAGE_SIZE)
@@ -4194,7 +4236,7 @@ function lmAdminRow(record) {
               ผู้มีข้อมูล LM
             </div>
             <div className="mt-1 text-3xl font-black text-slate-900">
-              {rows.length}
+              {filteredRows.length}
             </div>
             <div className="mt-1 text-xs font-semibold text-slate-400">
               จากทั้งหมด {Object.values(records || {}).length} คน
@@ -4206,7 +4248,7 @@ function lmAdminRow(record) {
               มีข้อมูลครบ ≥2 ครั้ง
             </div>
             <div className="mt-1 text-3xl font-black text-sky-900">
-              {comparableRows.length}
+              {filteredComparableRows.length}
             </div>
             <div className="mt-1 text-xs font-semibold text-sky-700/70">
               ใช้วิเคราะห์ดีขึ้น/ลดลง
@@ -4218,7 +4260,7 @@ function lmAdminRow(record) {
               คะแนนดีขึ้น
             </div>
             <div className="mt-1 text-3xl font-black text-emerald-900">
-              {improvedCount}
+              {filteredImprovedCount}
             </div>
             <div className="mt-1 text-xs font-semibold text-emerald-700/70">
               เคส
@@ -4230,7 +4272,7 @@ function lmAdminRow(record) {
               คะแนนลดลง
             </div>
             <div className="mt-1 text-3xl font-black text-rose-900">
-              {worsenedCount}
+              {filteredWorsenedCount}
             </div>
             <div className="mt-1 text-xs font-semibold text-rose-700/70">
               เคส
@@ -4242,10 +4284,10 @@ function lmAdminRow(record) {
               เฉลี่ยล่าสุด / เปลี่ยนแปลง
             </div>
             <div className="mt-1 text-2xl font-black text-indigo-900">
-              {averageLatest}/50
+              {filteredAverageLatest}/50
             </div>
             <div className="mt-1 text-xs font-semibold text-indigo-700/70">
-              เฉลี่ยเปลี่ยนแปลง {averageDelta === "-" ? "-" : `${averageDelta} คะแนน`}
+              เฉลี่ยเปลี่ยนแปลง {filteredAverageDelta === "-" ? "-" : `${filteredAverageDelta} คะแนน`}
             </div>
           </div>
         </div>
@@ -4263,7 +4305,7 @@ function lmAdminRow(record) {
 
             <div className="h-64">
               <ResponsiveContainer>
-                <BarChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                <BarChart data={filteredChartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                   <XAxis dataKey="name" tick={{ fontSize: 12 }} />
                   <YAxis allowDecimals={false} tick={{ fontSize: 12 }} />
