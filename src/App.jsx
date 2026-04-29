@@ -52,7 +52,7 @@ const ADMIN_USERS = {
   admin1: { id: "admin1", name: "ชัยวัฒน์", role: "Admin" },
   admin2: { id: "admin2", name: "ธนาวุฒิ", role: "Admin" },
 };
-const PAGE_SIZE = 5;
+const PAGE_SIZE = 10;
 const RECORDS_STORAGE_KEY = "hpc9_lm_health_records_v1";
 const AUDIT_STORAGE_KEY = "hpc9_lm_audit_logs_v1";
 
@@ -1352,11 +1352,11 @@ function runSelfTests() {
 
 function Pill({ children, tone = "gray" }) {
   const cls = {
-    gray: "border-slate-200 bg-slate-50 text-slate-700",
+    gray: "border-slate-300 bg-slate-100 text-slate-700",
     dark: "border-slate-900 bg-slate-900 text-white",
-    good: "border-emerald-200 bg-emerald-50 text-emerald-700",
-    warn: "border-amber-200 bg-amber-50 text-amber-700",
-    bad: "border-rose-200 bg-rose-50 text-rose-700",
+    good: "border-emerald-300 bg-emerald-100 text-emerald-800",
+    warn: "border-amber-300 bg-amber-100 text-amber-800",
+    bad: "border-rose-300 bg-rose-100 text-rose-800",
   }[tone];
   return <span className={`inline-flex items-center whitespace-nowrap rounded-full border px-2 py-0.5 text-[11px] font-bold leading-none ${cls}`}>{children}</span>;
 }
@@ -2871,10 +2871,30 @@ function Dashboard({ record, back }) {
 }
 
 function Info({ label, value, tone = "default" }) {
+  const toneClass = {
+    navy: "border-slate-300 bg-slate-900 text-white",
+    sky: "border-sky-300 bg-sky-100 text-sky-950",
+    emerald: "border-emerald-300 bg-emerald-100 text-emerald-950",
+    amber: "border-amber-300 bg-amber-100 text-amber-950",
+    violet: "border-violet-300 bg-violet-100 text-violet-950",
+    rose: "border-rose-300 bg-rose-100 text-rose-950",
+    default: "border-slate-200 bg-slate-50 text-slate-900",
+  }[tone] || "border-slate-200 bg-slate-50 text-slate-900";
+
+  const labelClass =
+    tone === "navy" ? "text-slate-200" : "text-slate-600";
+
+  const valueClass =
+    tone === "navy" ? "text-white" : "text-slate-950";
+
   return (
-    <div className={`flex h-full min-h-[5.4rem] flex-col justify-between rounded-xl border p-3 ${panelToneClass(tone)}`}>
-      <div className="whitespace-nowrap text-[11px] font-semibold text-slate-500">{label}</div>
-      <div className="mt-1 text-xl font-black text-slate-900">{value}</div>
+    <div className={`rounded-2xl border p-4 shadow-sm ${toneClass}`}>
+      <div className={`text-[11px] font-black ${labelClass}`}>
+        {label}
+      </div>
+      <div className={`mt-2 text-2xl font-black tracking-tight ${valueClass}`}>
+        {value}
+      </div>
     </div>
   );
 }
@@ -3496,11 +3516,11 @@ function AdminSummary({ records, auditLogs, onFullBackup, onRestoreBackup }) {
         </div>
 
         <div className="grid gap-3 md:grid-cols-5">
-          <Info label="ทั้งหมด" value={`${rows.length} คน`} />
-          <Info label="เทียบได้ ≥2 ครั้ง" value={`${comparable.length} คน`} tone="admin" />
-          <Info label="ดีขึ้น" value={`${improved} คน`} tone="good" />
-          <Info label="ต้องติดตาม" value={`${needFollow} คน`} tone={needFollow ? "fat" : "default"} />
-          <Info label="คงเดิม" value={`${noChange} คน`} />
+          <Info label="ทั้งหมด" value={`${filteredRecords.length} คน`} tone="navy" />
+          <Info label="เทียบได้ ≥2 ครั้ง" value={`${filteredComparable.length} คน`} tone="sky" />
+          <Info label="ดีขึ้น" value={`${improved} คน`} tone="emerald" />
+          <Info label="ต้องติดตาม" value={`${needsFollowUp} คน`} tone="amber" />
+          <Info label="คงเดิม" value={`${noChange} คน`} tone="violet" />
         </div>
         <div className="mt-5 rounded-3xl border border-slate-200 bg-gradient-to-br from-white via-slate-50 to-slate-100 p-4 shadow-[0_12px_35px_rgba(15,23,42,0.08)] ring-1 ring-white/70">
         <div className="mb-3 flex items-center justify-between gap-3 border-b border-slate-200 pb-3">
