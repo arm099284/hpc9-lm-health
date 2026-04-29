@@ -3408,11 +3408,11 @@ function AdminSummary({ records, auditLogs, onFullBackup, onRestoreBackup }) {
   return (
     <main className="mx-auto max-w-7xl space-y-5 px-4 py-6">
       <Card title="สรุปภาพรวมแอดมิน" icon={ClipboardIcon}>
-        <div className="mb-4 flex flex-wrap items-center gap-2">
+        <div className="mb-4 flex flex-nowrap items-center gap-2 overflow-x-auto whitespace-nowrap pb-1">
           <select
             value={yearFilter}
             onChange={(e) => setYearFilter(e.target.value)}
-            className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-base font-semibold text-slate-700 outline-none"
+            className="h-10 w-[105px] shrink-0 rounded-xl border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700 outline-none"
           >
             <option value="all">ทุกปี</option>
             {availableYears.map((year) => (
@@ -3421,11 +3421,11 @@ function AdminSummary({ records, auditLogs, onFullBackup, onRestoreBackup }) {
               </option>
             ))}
           </select>
-
+        
           <select
             value={monthFilter}
             onChange={(e) => setMonthFilter(e.target.value)}
-            className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-base font-semibold text-slate-700 outline-none"
+            className="h-10 w-[120px] shrink-0 rounded-xl border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700 outline-none"
           >
             <option value="all">ทุกเดือน</option>
             {thaiMonths.map((month, index) => (
@@ -3434,11 +3434,11 @@ function AdminSummary({ records, auditLogs, onFullBackup, onRestoreBackup }) {
               </option>
             ))}
           </select>
-
+        
           <select
             value={ageFilter}
             onChange={(e) => setAgeFilter(e.target.value)}
-            className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-base font-semibold text-slate-700 outline-none"
+            className="h-10 w-[130px] shrink-0 rounded-xl border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700 outline-none"
           >
             {ageOptions.map((opt) => (
               <option key={opt.value} value={opt.value}>
@@ -3446,42 +3446,42 @@ function AdminSummary({ records, auditLogs, onFullBackup, onRestoreBackup }) {
               </option>
             ))}
           </select>
-
+        
           <input
             value={adminSearch}
             onChange={(e) => setAdminSearch(e.target.value)}
             placeholder="ค้นหา HN / ชื่อ"
-            className="min-w-[220px] rounded-xl border border-slate-200 bg-white px-3 py-2 text-base outline-none focus:border-slate-700"
+            className="h-10 w-[180px] shrink-0 rounded-xl border border-slate-200 bg-white px-3 text-sm outline-none focus:border-slate-700"
           />
-
+        
           <button
             onClick={() => exportRecordsCSV(records)}
-            className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-base font-bold text-slate-700 hover:bg-slate-50"
+            className="h-10 shrink-0 rounded-xl border border-slate-200 bg-white px-3 text-sm font-bold text-slate-700 hover:bg-slate-50"
           >
             Export Excel/CSV
           </button>
-
+        
           <button
             onClick={onFullBackup}
-            className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2 text-base font-bold text-emerald-700 hover:bg-emerald-100"
+            className="h-10 shrink-0 rounded-xl border border-emerald-200 bg-emerald-50 px-3 text-sm font-bold text-emerald-700 hover:bg-emerald-100"
           >
             Backup JSON
           </button>
-
+        
           <button
             onClick={() => restoreInputRef.current?.click()}
-            className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-2 text-base font-bold text-amber-700 hover:bg-amber-100"
+            className="h-10 shrink-0 rounded-xl border border-amber-200 bg-amber-50 px-3 text-sm font-bold text-amber-700 hover:bg-amber-100"
           >
             Restore JSON
           </button>
-
+        
           <button
             onClick={printPage}
-            className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-base font-bold text-slate-700 hover:bg-slate-50"
+            className="h-10 shrink-0 rounded-xl border border-slate-200 bg-white px-3 text-sm font-bold text-slate-700 hover:bg-slate-50"
           >
             พิมพ์ / PDF
           </button>
-
+        
           <input
             ref={restoreInputRef}
             type="file"
