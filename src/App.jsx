@@ -6463,15 +6463,15 @@ function LmAssessmentForm({ draft, update }) {
                           return (
                             <div
                               key={question.id}
-                              className="rounded-2xl border border-slate-200 bg-white p-4"
+                              className="rounded-2xl border border-slate-200 bg-white p-3"
                             >
-                              <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-                                <div>
-                                  <div className="inline-flex rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-[11px] font-black text-slate-500">
+                              <div className="flex items-start justify-between gap-3">
+                                <div className="min-w-0 flex items-start gap-2">
+                                  <div className="mt-0.5 shrink-0 rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 text-[11px] font-black text-slate-500">
                                     ข้อ {questionNo}
                                   </div>
-
-                                  <div className="mt-1 text-base font-bold leading-6 text-slate-900">
+                              
+                                  <div className="min-w-0 text-[15px] font-bold leading-snug text-slate-900">
                                     {question.text}
                                   </div>
                                 </div>
@@ -6484,7 +6484,7 @@ function LmAssessmentForm({ draft, update }) {
                                 </Pill>
                               </div>
 
-                              <div className="mt-3 grid grid-cols-6 gap-1.5 lg:grid-cols-11">
+                              <div className="mt-3 grid grid-cols-6 gap-1 md:grid-cols-11">
                                 {question.options.map(
                                   (option, optionIndex) => {
                                     const optionScore =
@@ -6508,7 +6508,7 @@ function LmAssessmentForm({ draft, update }) {
                                             optionIndex
                                           )
                                         }
-                                        className={`rounded-xl border px-1.5 py-2 text-center transition ${
+                                        className={`rounded-xl border px-1 py-1.5 text-center transition ${
                                           disabled
                                             ? "cursor-not-allowed border-slate-100 bg-slate-50 text-slate-300"
                                             : selected
@@ -6516,7 +6516,7 @@ function LmAssessmentForm({ draft, update }) {
                                               : "border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50"
                                         }`}
                                       >
-                                        <div className="text-[13px] font-black leading-tight">
+                                        <div className="text-[12px] font-black leading-tight">
                                           {option}
                                         </div>
 
