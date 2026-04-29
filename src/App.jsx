@@ -97,6 +97,30 @@ function formatDateOnlyThai(value) {
   return text;
 }
 
+function shortThaiDate(value) {
+  const text = String(value || "").trim();
+  if (!text) return "-";
+
+  if (text.includes("/")) {
+    const parts = text.split("/");
+    const dd = String(parts[0] || "").padStart(2, "0");
+    const mm = String(parts[1] || "").padStart(2, "0");
+    const yy = String(parts[2] || "").slice(-2);
+    return `${dd}/${mm}/${yy}`;
+  }
+
+  if (text.includes("-")) {
+    const parts = text.split("-");
+    const yyyy = String(parts[0] || "");
+    const mm = String(parts[1] || "").padStart(2, "0");
+    const dd = String(parts[2] || "").slice(0, 2).padStart(2, "0");
+    const yy = yyyy.slice(-2);
+    return `${dd}/${mm}/${yy}`;
+  }
+
+  return text;
+}
+
 function sessionHasAnyData(s) {
   if (!s) return false;
   const inbodyValues = Object.values(s.inbody || {});
@@ -3578,18 +3602,20 @@ function AdminSummary({ records, auditLogs, onFullBackup, onRestoreBackup }) {
           <table className="w-full table-fixed text-left text-[10px]">
             <thead className="bg-slate-900 text-[10px] font-black uppercase tracking-wide text-white">
               <tr>
-                <th className="px-2.5 py-2">HN / ชื่อ</th>
+                <th className="px-1.5 py-2">HN / ชื่อ</th>
                 <th className="px-1.5 py-2">ครั้ง</th>
                 <th className="px-1.5 py-2">เทียบ</th>
+                <th className="px-1.5 py-2">WT</th>
                 <th className="px-1.5 py-2">BF%</th>
                 <th className="px-1.5 py-2">FM</th>
                 <th className="px-1.5 py-2">SMM</th>
                 <th className="px-1.5 py-2">STEP</th>
+                <th className="px-1.5 py-2">GRIP</th>
                 <th className="px-1.5 py-2">STS</th>
                 <th className="px-1.5 py-2">SAR</th>
-                <th className="px-2.5 py-2">TUG</th>
-                <th className="px-2.5 py-2">OHS</th>
-                <th className="px-2.5 py-2">สรุป</th>
+                <th className="px-1.5 py-2">TUG</th>
+                <th className="px-1.5 py-2">OHS</th>
+                <th className="px-1.5 py-2">สรุป</th>
               </tr>
             </thead>
       
@@ -3614,8 +3640,16 @@ function AdminSummary({ records, auditLogs, onFullBackup, onRestoreBackup }) {
                     <Pill>{r.sessions.length} ครั้ง</Pill>
                   </td>
       
-                  <td className="px-1.5 py-2 whitespace-nowrap text-center text-[10px] font-bold text-slate-700">
-                    {r.first?.no || "-"} → {r.last?.no || "-"}
+                  <td className="px-1.5 py-2 text-center text-[10px] font-bold leading-tight text-slate-700">
+                    <div className="whitespace-nowrap">
+                      {r.first?.no || "-"} → {r.last?.no || "-"}
+                    </div>
+                    <div className="mt-0.5 whitespace-nowrap text-[9px] font-semibold text-slate-500">
+                      {shortThaiDate(r.first?.date)}
+                    </div>
+                    <div className="whitespace-nowrap text-[9px] font-semibold text-slate-500">
+                      {shortThaiDate(r.last?.date)}
+                    </div>
                   </td>
       
                   <td className="px-2.5 py-2">
