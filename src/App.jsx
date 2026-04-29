@@ -6484,7 +6484,7 @@ function LmAssessmentForm({ draft, update }) {
                                 </Pill>
                               </div>
 
-                              <div className="mt-3 grid grid-cols-6 gap-2 sm:grid-cols-11">
+                              <div className="mt-3 grid grid-cols-6 gap-1.5 lg:grid-cols-11">
                                 {question.options.map(
                                   (option, optionIndex) => {
                                     const optionScore =
@@ -6508,7 +6508,7 @@ function LmAssessmentForm({ draft, update }) {
                                             optionIndex
                                           )
                                         }
-                                        className={`rounded-xl border px-2 py-2 text-center transition ${
+                                        className={`rounded-xl border px-1.5 py-2 text-center transition ${
                                           disabled
                                             ? "cursor-not-allowed border-slate-100 bg-slate-50 text-slate-300"
                                             : selected
@@ -6516,7 +6516,7 @@ function LmAssessmentForm({ draft, update }) {
                                               : "border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50"
                                         }`}
                                       >
-                                        <div className="text-sm font-black leading-tight">
+                                        <div className="text-[13px] font-black leading-tight">
                                           {option}
                                         </div>
 
