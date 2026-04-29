@@ -4225,31 +4225,71 @@ function LmAdminDashboard({ records }) {
                 </div>
               </div>
 
-              <input
-                value={lmSearch}
-                onChange={(e) => setLmSearch(e.target.value)}
-                placeholder="ค้นหา HN / ชื่อ"
-                className="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm font-semibold outline-none focus:border-slate-700 lg:w-72"
-              />
-            </div>
-
+              <div className="flex gap-2 items-center mb-3">
+              
+                <input
+                  value={lmSearch}
+                  onChange={(e) => setLmSearch(e.target.value)}
+                  placeholder="ค้นหา HN / ชื่อ"
+                  className="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm font-semibold outline-none focus:border-slate-700 lg:w-72"
+                />
+              
+                <input
+                  type="number"
+                  placeholder="วัน"
+                  value={day}
+                  onChange={(e) => setDay(e.target.value)}
+                  className="h-11 w-16 rounded-xl border border-slate-200 bg-white px-2 text-sm font-semibold outline-none focus:border-slate-700"
+                />
+              
+                <input
+                  type="number"
+                  placeholder="เดือน"
+                  value={month}
+                  onChange={(e) => setMonth(e.target.value)}
+                  className="h-11 w-16 rounded-xl border border-slate-200 bg-white px-2 text-sm font-semibold outline-none focus:border-slate-700"
+                />
+              
+                <input
+                  type="number"
+                  placeholder="ปี"
+                  value={year}
+                  onChange={(e) => setYear(e.target.value)}
+                  className="h-11 w-20 rounded-xl border border-slate-200 bg-white px-2 text-sm font-semibold outline-none focus:border-slate-700"
+                />
+              
+              </div>
+                const rowsToShow = (lmRows || []).filter((row) => {
+                  const matchSearch =
+                    row.hn?.includes(lmSearch) ||
+                    row.name?.includes(lmSearch);
+                
+                  const d = row.date ? new Date(row.date) : null;
+                
+                  const matchDay = !day || (d && d.getDate() === Number(day));
+                  const matchMonth = !month || (d && d.getMonth() + 1 === Number(month));
+                  const matchYear = !year || (d && d.getFullYear() === Number(year));
+                
+                  return matchSearch && matchDay && matchMonth && matchYear;
+                });
+              
             <div className="overflow-x-auto rounded-xl border border-slate-200">
-              <table className="w-full min-w-[720px] text-left text-xs">
-                <thead className="bg-slate-50 text-xs font-bold text-slate-500">
-                  <tr>
-                    <th className="px-2 py-2 whitespace-nowrap">HN / ชื่อ</th>
-                    <th className="px-2 py-2 whitespace-nowrap">ครั้งที่ 1</th>
-                    <th className="px-2 py-2 whitespace-nowrap">ครั้งที่ 2</th>
-                    <th className="px-2 py-2 whitespace-nowrap">ครั้งที่ 3</th>
-                    <th className="px-2 py-2 whitespace-nowrap">ครั้งที่ 4</th>
-                    <th className="px-2 py-2 whitespace-nowrap">เปลี่ยนแปลง</th>
-                    <th className="px-2 py-2 whitespace-nowrap">สถานะ</th>
-                    <th className="px-2 py-2 whitespace-nowrap">ควรปรับ</th>
-                  </tr>
-                </thead>
-
-                <tbody>
-                  {pagedRows.map((row) => (
+              <tbody>
+                {(lmRows || [])
+                  .filter((row) => {
+                    const matchSearch =
+                      row.hn?.includes(lmSearch) ||
+                      row.name?.includes(lmSearch);
+              
+                    const d = row.date ? new Date(row.date) : null;
+              
+                    const matchDay = !day || (d && d.getDate() === Number(day));
+                    const matchMonth = !month || (d && d.getMonth() + 1 === Number(month));
+                    const matchYear = !year || (d && d.getFullYear() === Number(year));
+              
+                    return matchSearch && matchDay && matchMonth && matchYear;
+                  })
+                  .map((row) => (
                     <tr key={row.hn} className="border-t border-slate-100">
                       <td className="px-2 py-2 align-top">
                         <div className="whitespace-nowrap text-[11px] font-black leading-tight text-slate-900">
@@ -4259,31 +4299,23 @@ function LmAdminDashboard({ records }) {
                           {row.name || "-"}
                         </div>
                       </td>
-
+              
                       {row.rounds.map((round) => (
                         <td key={round.no} className="px-2 py-2 whitespace-nowrap align-top text-[11px]">
                           {roundText(round)}
                         </td>
                       ))}
-
+              
                       <td className="px-2 py-2 whitespace-nowrap align-top">
-                        <Pill
-                          tone={
-                            row.delta > 0
-                              ? "good"
-                              : row.delta < 0
-                                ? "bad"
-                                : "gray"
-                          }
-                        >
+                        <Pill tone={row.delta > 0 ? "good" : row.delta < 0 ? "bad" : "gray"}>
                           {deltaText(row)}
                         </Pill>
                       </td>
-
+              
                       <td className="px-2 py-2 whitespace-nowrap align-top">
                         <Pill tone={row.tone}>{row.status}</Pill>
                       </td>
-
+              
                       <td className="px-2 py-2 align-top">
                         <div className="flex flex-wrap gap-1">
                           {row.improvements.length ? (
@@ -4301,16 +4333,7 @@ function LmAdminDashboard({ records }) {
                       </td>
                     </tr>
                   ))}
-
-                  {pagedRows.length === 0 && (
-                    <tr>
-                      <td colSpan="8" className="px-3 py-4 text-center text-xs text-slate-500">
-                        ยังไม่มีข้อมูล LM
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
+              </tbody>
             </div>
 
             <div className="mt-4 flex flex-wrap items-center justify-between gap-3 text-sm text-slate-500">
