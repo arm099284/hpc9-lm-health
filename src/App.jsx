@@ -6218,7 +6218,7 @@ function LmAssessmentForm({ draft, update }) {
           </div>
         </div>
 
-        <div className="rounded-2xl border border-slate-200 bg-gradient-to-br from-white via-slate-50 to-white p-4 shadow-[0_8px_24px_rgba(15,23,42,0.05)]">
+        <div className="rounded-2xl border border-slate-200 bg-gradient-to-br from-white via-slate-50 to-sky-50/30 p-4 shadow-[0_10px_28px_rgba(15,23,42,0.06)]">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div>
               <div className="text-sm font-bold text-slate-500">
@@ -6226,7 +6226,7 @@ function LmAssessmentForm({ draft, update }) {
               </div>
         
               <div className="mt-1 flex flex-wrap items-end gap-2">
-                <div className="text-3xl font-black text-slate-900">
+                <div className="text-3xl font-black tracking-tight text-slate-950">
                   {totalForDisplay === null ? "-" : totalForDisplay} / 50
                 </div>
         
@@ -6247,7 +6247,7 @@ function LmAssessmentForm({ draft, update }) {
             </div>
           </div>
         
-          <div className="mt-3 rounded-xl border border-slate-100 bg-slate-50 px-3 py-2 text-xs font-semibold leading-5 text-slate-500">
+          <div className="mt-3 rounded-xl border border-slate-200 bg-white/80 px-3 py-2 text-xs font-semibold leading-5 text-slate-500 shadow-inner">
             {interpretation.text}
           </div>
         
@@ -6256,11 +6256,11 @@ function LmAssessmentForm({ draft, update }) {
               ประวัติคะแนน 4 ครั้ง
             </div>
         
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-1.5">
               {roundScores.map((item) => (
                 <span
                   key={item.no}
-                  className="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-bold text-slate-600"
+                  className="inline-flex items-center rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-bold text-slate-600 shadow-sm"
                 >
                   <span className="mr-1 text-slate-400">
                     ครั้ง {item.no}:
