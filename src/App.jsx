@@ -2882,64 +2882,74 @@ return (
         )}
       </div>
 
-      <div className="grid items-stretch gap-4 md:grid-cols-2">
-        <div className="flex h-full flex-col rounded-2xl border border-sky-200 bg-gradient-to-br from-sky-50 via-white to-sky-50/70 p-4 shadow-[0_8px_22px_rgba(14,165,233,0.07)]">
-          <div className="flex items-center justify-between gap-3">
+      <div className="grid items-stretch gap-3 md:grid-cols-2">
+        <div className="flex h-full flex-col rounded-2xl border border-sky-200 bg-gradient-to-br from-white via-sky-50/70 to-white p-3 shadow-[0_8px_20px_rgba(14,165,233,0.06)]">
+          <div className="flex items-start justify-between gap-2">
             <div>
-              <div className="text-sm font-black text-blue-700">
+              <div className="text-xs font-black text-sky-700">
                 Strength Plan
               </div>
-
-              <div className="mt-1 text-xl font-black text-slate-900">
+      
+              <div className="mt-1 text-lg font-black leading-tight text-slate-900">
                 {program.strengthFrequency
                   ? `${program.strengthFrequency} วัน/สัปดาห์`
                   : "ยังไม่กำหนดวันฝึก"}
               </div>
             </div>
+      
+            <span className="rounded-full border border-sky-200 bg-white px-2 py-0.5 text-[10px] font-bold text-sky-700 shadow-sm">
+              Strength
+            </span>
           </div>
-
-          <div className="mt-3 rounded-2xl border border-sky-100 bg-white px-4 py-3 text-sm font-bold leading-6 text-slate-800 shadow-sm">
+      
+          <div className="mt-2 rounded-xl border border-sky-100 bg-white px-3 py-2 text-xs font-bold leading-5 text-slate-800 shadow-sm">
             {setsReps || "-"}
           </div>
-
-          <div className="mt-3">
-            <span className="inline-flex rounded-full border border-blue-200 bg-white px-3 py-1 text-xs font-bold text-blue-700">
+      
+          <div className="mt-2">
+            <span className="inline-flex rounded-full border border-sky-200 bg-white px-2.5 py-0.5 text-[11px] font-bold text-sky-700 shadow-sm">
               {show(program.intensity)}
             </span>
           </div>
         </div>
-
-        <div className="flex h-full flex-col rounded-2xl border border-emerald-200 bg-gradient-to-br from-emerald-50 via-white to-emerald-50/70 p-3.5 shadow-[0_8px_22px_rgba(16,185,129,0.07)]">
-          <div>
-            <div className="text-sm font-black text-emerald-700">
-              Cardio Plan
+      
+        <div className="flex h-full flex-col rounded-2xl border border-emerald-200 bg-gradient-to-br from-white via-emerald-50/70 to-white p-3 shadow-[0_8px_20px_rgba(16,185,129,0.06)]">
+          <div className="flex items-start justify-between gap-2">
+            <div>
+              <div className="text-xs font-black text-emerald-700">
+                Cardio Plan
+              </div>
+      
+              <div className="mt-1 text-lg font-black leading-tight text-slate-900">
+                {show(program.cardioType)}
+                {program.cardioDuration && (
+                  <span className="text-slate-600">
+                    {" "}• {program.cardioDuration} นาที/ครั้ง
+                  </span>
+                )}
+              </div>
             </div>
-        
-            <div className="mt-1 text-lg font-black leading-snug text-slate-900">
-              {show(program.cardioType)}
-              {program.cardioDuration && (
-                <span className="text-slate-600">
-                  {" "}• {program.cardioDuration} นาที/ครั้ง
-                </span>
-              )}
-            </div>
+      
+            <span className="rounded-full border border-emerald-200 bg-white px-2 py-0.5 text-[10px] font-bold text-emerald-700 shadow-sm">
+              Cardio
+            </span>
           </div>
-        
+      
           <div className="mt-2 flex items-center gap-1.5 whitespace-nowrap">
-            <span className="inline-flex shrink-0 rounded-full border border-emerald-200 bg-white px-2.5 py-0.5 text-[11px] font-bold text-emerald-700">
+            <span className="inline-flex shrink-0 rounded-full border border-emerald-200 bg-white px-2.5 py-0.5 text-[11px] font-bold text-emerald-700 shadow-sm">
               {show(program.intensity)}
             </span>
-        
-            <span className="inline-flex shrink-0 rounded-full border border-slate-200 bg-white px-2.5 py-0.5 text-[11px] font-bold text-slate-700">
+      
+            <span className="inline-flex shrink-0 rounded-full border border-slate-200 bg-white px-2.5 py-0.5 text-[11px] font-bold text-slate-700 shadow-sm">
               RPE {show(program.rpe)}
             </span>
           </div>
-        
-          <div className="mt-2 grid gap-1.5 text-[12px] font-bold text-slate-700">
+      
+          <div className="mt-2 grid gap-1.5 text-xs font-bold text-slate-700">
             <div className="rounded-xl border border-emerald-100 bg-white px-3 py-2 leading-5 shadow-sm">
               Talk Test: {show(program.talk)}
             </div>
-        
+      
             <div className="rounded-xl border border-emerald-100 bg-white px-3 py-2 leading-5 shadow-sm">
               Target HR: {program.intensity ? targetHrText(record.age, program.intensity) : "-"}
             </div>
