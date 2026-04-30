@@ -1881,7 +1881,7 @@ function OhsTable({ record }) {
             </div>
           </div>
 
-          <div className="grid gap-3 xl:grid-cols-[minmax(0,1.65fr)_minmax(280px,.85fr)]">
+          <div className="grid gap-3 xl:grid-cols-[minmax(0,1.9fr)_minmax(240px,.65fr)]">
             <div className="grid gap-3 md:grid-cols-2">
               <ImageWithMarkers
                 type="front"
