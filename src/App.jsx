@@ -1392,14 +1392,29 @@ function Pill({ children, tone = "gray" }) {
 
 function Card({ title, icon: Icon, right, children }) {
   return (
-    <section className="rounded-2xl border border-slate-300 bg-white p-5 shadow-md">
-      <div className="mb-4 flex items-center justify-between gap-3 border-b border-slate-100 pb-3">
-        <div className="flex items-center gap-2">
-          {Icon && <Icon className="h-6 w-6 text-slate-500" />}
-          <h2 className="text-xl font-bold tracking-tight text-slate-900">{title}</h2>
+    <section className="relative overflow-hidden rounded-3xl border border-slate-200 bg-gradient-to-br from-white via-slate-50/60 to-white p-4 shadow-[0_12px_32px_rgba(15,23,42,0.06)]">
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-sky-400/70 via-emerald-400/70 to-slate-300/70" />
+
+      <div className="mb-4 flex items-center justify-between gap-3 border-b border-slate-200/70 pb-3">
+        <div className="flex min-w-0 items-center gap-3">
+          {Icon && (
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl border border-slate-200 bg-white shadow-sm">
+              <Icon className="h-5 w-5 text-slate-600" />
+            </div>
+          )}
+
+          <div className="min-w-0">
+            <h2 className="truncate text-lg font-black tracking-tight text-slate-950">
+              {title}
+            </h2>
+
+            <div className="mt-0.5 h-0.5 w-10 rounded-full bg-gradient-to-r from-sky-400 to-emerald-400" />
+          </div>
         </div>
-        {right}
+
+        {right && <div className="shrink-0">{right}</div>}
       </div>
+
       {children}
     </section>
   );
