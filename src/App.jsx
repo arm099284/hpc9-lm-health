@@ -1744,15 +1744,13 @@ function OhsTable({ record }) {
 
     { view: "front", label: "ลำตัว", status: statusOf(0), top: "47%", left: "48%" },
 
-    { view: "front", label: "สะโพก", status: statusOf(2), top: "61%", left: "48%" },
-
     { view: "front", label: "เข่าซ้าย", status: statusOf(1), top: "68%", left: "35%" },
     { view: "front", label: "เข่าขวา", status: statusOf(1), top: "68%", left: "61%" },
 
-    { view: "front", label: "ข้อเท้าซ้าย", status: statusOf(3), top: "87%", left: "36%" },
-    { view: "front", label: "ข้อเท้าขวา", status: statusOf(3), top: "87%", left: "60%" },
+    { view: "front", label: "ข้อเท้าซ้าย", status: statusOf(3), top: "81%", left: "36%" },
+    { view: "front", label: "ข้อเท้าขวา", status: statusOf(3), top: "81%", left: "60%" },
 
-    { view: "front", label: "สมดุล", status: statusOf(5), top: "54%", left: "50%" },
+    { view: "front", label: "สมดุล", status: statusOf(5), top: "56%", left: "45%", kind: "balance" },
 
     // ===== Side view =====
     { view: "side", label: "ไหล่", status: statusOf(4), top: "34%", left: "52%" },
@@ -1763,7 +1761,7 @@ function OhsTable({ record }) {
 
     { view: "side", label: "เข่า", status: statusOf(1), top: "67%", left: "58%" },
 
-    { view: "side", label: "ข้อเท้า", status: statusOf(3), top: "84%", left: "60%" },
+    { view: "side", label: "ข้อเท้า", status: statusOf(3), top: "83%", left: "44%" },
   ].filter((marker) => marker.status !== "ปกติ");
 
   const bodyParts = [
@@ -1807,26 +1805,40 @@ function OhsTable({ record }) {
 
         {problemMarkers
           .filter((marker) => marker.view === type)
-          .map((marker, index) => (
-            <div
-              key={`${type}-${marker.label}-${index}`}
-              title={`${marker.label}: ${marker.status}`}
-              className="absolute flex h-6 w-6 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border-2"
-              style={{
-                top: marker.top,
-                left: marker.left,
-                ...markerStyle(marker.status),
-              }}
-            >
-              <span
-                className="h-2 w-2 rounded-full"
+          .map((marker, index) => {
+            const isBalanceMarker = marker.kind === "balance";
+        
+            return (
+              <div
+                key={`${type}-${marker.label}-${index}`}
+                title={`${marker.label}: ${marker.status}`}
+                className="absolute -translate-x-1/2 -translate-y-1/2"
                 style={{
-                  backgroundColor:
-                    marker.status === "ต้องระวัง" ? "#f59e0b" : "#fb7185",
+                  top: marker.top,
+                  left: marker.left,
                 }}
-              />
-            </div>
-          ))}
+              >
+                {isBalanceMarker ? (
+                  <div className="flex h-7 w-7 rotate-45 items-center justify-center rounded-lg border-2 border-amber-300 bg-amber-50 text-[13px] font-black text-amber-600 shadow-sm">
+                    <span className="-rotate-45">!</span>
+                  </div>
+                ) : (
+                  <div
+                    className="flex h-6 w-6 items-center justify-center rounded-full border-2"
+                    style={markerStyle(marker.status)}
+                  >
+                    <span
+                      className="h-2 w-2 rounded-full"
+                      style={{
+                        backgroundColor:
+                          marker.status === "ต้องระวัง" ? "#f59e0b" : "#fb7185",
+                      }}
+                    />
+                  </div>
+                )}
+              </div>
+            );
+          })}
       </div>
     </div>
   );
