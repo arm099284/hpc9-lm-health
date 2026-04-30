@@ -4614,22 +4614,63 @@ function AdminSummary({ records, auditLogs, onFullBackup, onRestoreBackup }) {
       
         <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_8px_22px_rgba(15,23,42,0.04)]">
           <table className="w-full text-left text-[10px]">
-            <thead className="bg-gradient-to-r from-slate-50 via-sky-50/70 to-slate-50 text-[10px] font-black uppercase tracking-wide text-slate-500">
-              <tr>
-                <th className="px-2 py-2 text-center whitespace-nowrap">HN / ชื่อ</th>
-                <th className="px-2 py-2 text-center whitespace-nowrap">ครั้ง</th>
-                <th className="px-2 py-2 text-center whitespace-nowrap">เทียบ</th>
-                <th className="px-2 py-2 text-center whitespace-nowrap">WT</th>
-                <th className="px-2 py-2 text-center whitespace-nowrap">BF%</th>
-                <th className="px-2 py-2 text-center whitespace-nowrap">FM</th>
-                <th className="px-2 py-2 text-center whitespace-nowrap">SMM</th>
-                <th className="px-2 py-2 text-center whitespace-nowrap">STEP</th>
-                <th className="px-2 py-2 text-center whitespace-nowrap">GRIP</th>
-                <th className="px-2 py-2 text-center whitespace-nowrap">STS</th>
-                <th className="px-2 py-2 text-center whitespace-nowrap">SAR</th>
-                <th className="px-2 py-2 text-center whitespace-nowrap">TUG</th>
-                <th className="px-2 py-2 text-center whitespace-nowrap">OHS</th>
-                <th className="px-2 py-2 text-center whitespace-nowrap">สรุป</th>
+            <thead className="border-b border-sky-100 bg-gradient-to-r from-sky-50 via-white to-cyan-50 text-[11px] font-black uppercase tracking-wide text-slate-700">
+              <tr className="[&>th]:border-b [&>th]:border-slate-100 [&>th]:px-2.5 [&>th]:py-2.5 [&>th]:align-middle">
+                <th className="whitespace-nowrap text-left">
+                  HN / ชื่อ
+                </th>
+            
+                <th className="whitespace-nowrap text-center">
+                  ครั้ง
+                </th>
+            
+                <th className="whitespace-nowrap text-center">
+                  เทียบ
+                </th>
+            
+                <th className="whitespace-nowrap text-center">
+                  WT
+                </th>
+            
+                <th className="whitespace-nowrap text-center">
+                  BF%
+                </th>
+            
+                <th className="whitespace-nowrap text-center">
+                  FM
+                </th>
+            
+                <th className="whitespace-nowrap text-center">
+                  SMM
+                </th>
+            
+                <th className="whitespace-nowrap text-center">
+                  STEP
+                </th>
+            
+                <th className="whitespace-nowrap text-center">
+                  GRIP
+                </th>
+            
+                <th className="whitespace-nowrap text-center">
+                  STS
+                </th>
+            
+                <th className="whitespace-nowrap text-center">
+                  SAR
+                </th>
+            
+                <th className="whitespace-nowrap text-center">
+                  TUG
+                </th>
+            
+                <th className="whitespace-nowrap text-center">
+                  OHS
+                </th>
+            
+                <th className="whitespace-nowrap text-center">
+                  สรุป
+                </th>
               </tr>
             </thead>
       
