@@ -4674,24 +4674,36 @@ function AdminSummary({ records, auditLogs, onFullBackup, onRestoreBackup }) {
           </table>
         </div>
       
-        <div className="mt-3 flex flex-wrap items-center justify-between gap-3 text-xs text-slate-500">
-          <div>
-            แสดง {pagedComparable.length} รายการต่อหน้า จากทั้งหมด {filteredComparable.length} รายการ • หน้า {safePage}/{pageCount}
+        <div className="mt-3 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white px-3 py-2 text-xs shadow-sm">
+          <div className="font-semibold text-slate-500">
+            แสดง{" "}
+            <span className="font-black text-slate-800">
+              {pagedComparable.length}
+            </span>{" "}
+            รายการ จากทั้งหมด{" "}
+            <span className="font-black text-slate-800">
+              {filteredComparable.length}
+            </span>{" "}
+            รายการ
           </div>
-      
-          <div className="flex gap-2">
+
+          <div className="flex items-center gap-1.5">
             <button
               disabled={safePage <= 1}
               onClick={() => setPage((p) => Math.max(1, p - 1))}
-              className="rounded-xl border border-slate-200 bg-white px-3 py-1.5 font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-40"
+              className="rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-black text-slate-600 shadow-sm transition-all duration-200 hover:bg-slate-50 hover:text-slate-900 disabled:cursor-not-allowed disabled:opacity-40"
             >
               ก่อนหน้า
             </button>
-      
+
+            <span className="rounded-xl border border-sky-100 bg-sky-50 px-3 py-1.5 text-xs font-black text-sky-700">
+              หน้า {safePage}/{pageCount}
+            </span>
+
             <button
               disabled={safePage >= pageCount}
               onClick={() => setPage((p) => Math.min(pageCount, p + 1))}
-              className="rounded-xl border border-slate-200 bg-white px-3 py-1.5 font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-40"
+              className="rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-black text-slate-600 shadow-sm transition-all duration-200 hover:bg-slate-50 hover:text-slate-900 disabled:cursor-not-allowed disabled:opacity-40"
             >
               ถัดไป
             </button>
