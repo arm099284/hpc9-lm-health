@@ -5739,10 +5739,7 @@ const menuProgress = Math.round((menuDoneCount / allMenuItems.length) * 100);
         {tab === "lm" && <LmAssessmentForm draft={draft} update={update} />}
         {tab === "parq" && <ParqForm draft={draft} update={update} />}
         {tab === "program" && (
-          <>
-            <OhsTable record={draft} />
-            <ProgramForm draft={draft} update={updateProgramAndExerciseLog} />
-          </>
+          <ProgramForm draft={draft} update={updateProgramAndExerciseLog} />
         )}
         
         {tab === "exerciseLog" && (
