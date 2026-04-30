@@ -1738,38 +1738,36 @@ function OhsTable({ record }) {
   };
 
   const problemMarkers = [
-    { view: "front", label: "ไหล่", status: statusOf(4), top: "24%", left: "31%" },
-    { view: "front", label: "ไหล่", status: statusOf(4), top: "24%", left: "69%" },
-    { view: "side", label: "ไหล่", status: statusOf(4), top: "24%", left: "58%" },
-
+    // ===== Front view =====
+    { view: "front", label: "ไหล่ซ้าย", status: statusOf(4), top: "27%", left: "34%" },
+    { view: "front", label: "ไหล่ขวา", status: statusOf(4), top: "27%", left: "66%" },
+  
     { view: "front", label: "ลำตัว", status: statusOf(0), top: "45%", left: "50%" },
-    { view: "side", label: "ลำตัว", status: statusOf(0), top: "43%", left: "55%" },
-
-    { view: "front", label: "สะโพก", status: statusOf(2), top: "58%", left: "50%" },
-    { view: "side", label: "สะโพก", status: statusOf(2), top: "58%", left: "48%" },
-
-    { view: "front", label: "เข่า", status: statusOf(1), top: "67%", left: "35%" },
-    { view: "front", label: "เข่า", status: statusOf(1), top: "67%", left: "65%" },
-    { view: "side", label: "เข่า", status: statusOf(1), top: "68%", left: "58%" },
-
-    { view: "front", label: "ข้อเท้า", status: statusOf(3), top: "83%", left: "34%" },
-    { view: "front", label: "ข้อเท้า", status: statusOf(3), top: "83%", left: "66%" },
-    { view: "side", label: "ข้อเท้า", status: statusOf(3), top: "84%", left: "62%" },
-
-    { view: "front", label: "สมดุล", status: statusOf(5), top: "52%", left: "50%" },
+  
+    { view: "front", label: "สะโพก", status: statusOf(2), top: "59%", left: "50%" },
+  
+    { view: "front", label: "เข่าซ้าย", status: statusOf(1), top: "71%", left: "36%" },
+    { view: "front", label: "เข่าขวา", status: statusOf(1), top: "71%", left: "64%" },
+  
+    { view: "front", label: "ข้อเท้าซ้าย", status: statusOf(3), top: "84%", left: "34%" },
+    { view: "front", label: "ข้อเท้าขวา", status: statusOf(3), top: "84%", left: "66%" },
+  
+    { view: "front", label: "สมดุล", status: statusOf(5), top: "53%", left: "50%" },
+  
+    // ===== Side view =====
+    { view: "side", label: "ไหล่", status: statusOf(4), top: "26%", left: "57%" },
+  
+    { view: "side", label: "ลำตัว", status: statusOf(0), top: "42%", left: "52%" },
+  
+    { view: "side", label: "สะโพก", status: statusOf(2), top: "60%", left: "47%" },
+  
+    { view: "side", label: "เข่า", status: statusOf(1), top: "73%", left: "60%" },
+  
+    { view: "side", label: "ข้อเท้า", status: statusOf(3), top: "86%", left: "63%" },
   ].filter((marker) => marker.status !== "ปกติ");
 
-  const bodyParts = [
-    { label: "แขน / ไหล่", sub: "Overhead position", status: statusOf(4) },
-    { label: "ลำตัว", sub: "Torso control", status: statusOf(0) },
-    { label: "สะโพก", sub: "Hip depth", status: statusOf(2) },
-    { label: "เข่า", sub: "Knee tracking", status: statusOf(1) },
-    { label: "ส้นเท้า / ข้อเท้า", sub: "Heel & ankle", status: statusOf(3) },
-    { label: "สมดุล", sub: "Balance control", status: statusOf(5) },
-  ];
-
   const ImageWithMarkers = ({ type, src, title }) => (
-    <div className="rounded-2xl border border-slate-200 bg-gradient-to-b from-white to-slate-50 p-2 shadow-sm">
+    <div className="rounded-2xl border border-slate-300 bg-gradient-to-b from-white via-slate-50 to-slate-100 p-2.5 shadow-[0_8px_18px_rgba(15,23,42,0.06)]">
       <div className="mb-2 flex items-center justify-between">
         <div className="text-[11px] font-black text-slate-700">{title}</div>
 
@@ -1778,7 +1776,7 @@ function OhsTable({ record }) {
         </span>
       </div>
 
-      <div className="relative aspect-square overflow-hidden rounded-xl bg-white ring-1 ring-slate-100">
+      <div className="relative aspect-square overflow-hidden rounded-xl bg-slate-50 ring-1 ring-slate-200">
         <img
           src={src}
           alt={title}
@@ -1792,7 +1790,7 @@ function OhsTable({ record }) {
             <div
               key={`${type}-${marker.label}-${index}`}
               title={`${marker.label}: ${marker.status}`}
-              className="absolute flex h-5 w-5 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border-2"
+              className="absolute flex h-6 w-6 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border-2"
               style={{
                 top: marker.top,
                 left: marker.left,
@@ -1800,7 +1798,7 @@ function OhsTable({ record }) {
               }}
             >
               <span
-                className="h-1.5 w-1.5 rounded-full"
+                className="h-2 w-2 rounded-full"
                 style={{
                   backgroundColor:
                     marker.status === "ต้องระวัง" ? "#f59e0b" : "#f43f5e",
@@ -1823,7 +1821,7 @@ function OhsTable({ record }) {
       }
     >
       <div className="space-y-3">
-        <div className="rounded-3xl border border-slate-200 bg-gradient-to-br from-white via-slate-50 to-sky-50/30 p-3 shadow-[0_8px_24px_rgba(15,23,42,0.05)]">
+        <div className="rounded-3xl border border-slate-300 bg-gradient-to-br from-white via-slate-50 to-sky-50 p-4 shadow-[0_12px_30px_rgba(15,23,42,0.08)]">
           <div className="mb-3 flex items-start justify-between gap-3">
             <div>
               <div className="text-sm font-black text-slate-900">
@@ -5741,7 +5739,10 @@ const menuProgress = Math.round((menuDoneCount / allMenuItems.length) * 100);
         {tab === "lm" && <LmAssessmentForm draft={draft} update={update} />}
         {tab === "parq" && <ParqForm draft={draft} update={update} />}
         {tab === "program" && (
-          <ProgramForm draft={draft} update={updateProgramAndExerciseLog} />
+          <>
+            <OhsTable record={draft} />
+            <ProgramForm draft={draft} update={updateProgramAndExerciseLog} />
+          </>
         )}
         
         {tab === "exerciseLog" && (
