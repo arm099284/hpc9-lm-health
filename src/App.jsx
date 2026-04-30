@@ -1685,22 +1685,22 @@ function Summary({ record }) {
   };
 
   return (
-    <div className="grid gap-3 md:grid-cols-5">
+    <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 xl:grid-cols-5">
       {items.map((item) => {
         const t = toneClass[item.tone] || toneClass.gray;
 
         return (
           <div
             key={item.label}
-            className={`group relative overflow-hidden rounded-2xl border p-3.5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg ${t.card}`}
+            className={`group relative min-w-0 overflow-hidden rounded-2xl border p-3 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg sm:p-3.5 ${t.card}`}
           >
             <div className={`absolute inset-x-0 top-0 h-1 bg-gradient-to-r ${t.bar}`} />
 
-            <div className="flex min-h-[108px] flex-col justify-between">
+            <div className="flex min-h-[96px] flex-col justify-between sm:min-h-[108px]">
               <div>
                 <div className="flex items-start justify-between gap-2">
                   <span
-                    className={`inline-flex max-w-[130px] items-center truncate rounded-full border px-2 py-0.5 text-[10px] font-black leading-none ${t.chip}`}
+                    className={`inline-flex max-w-[105px] items-center truncate rounded-full border px-2 py-0.5 text-[9px] font-black leading-none sm:max-w-[130px] sm:text-[10px] ${t.chip}`}
                   >
                     {item.label}
                   </span>
@@ -1708,18 +1708,18 @@ function Summary({ record }) {
                   <span className={`mt-0.5 h-2 w-2 shrink-0 rounded-full ${t.dot}`} />
                 </div>
 
-                <div className="mt-3 text-[32px] font-black leading-none tracking-tight text-slate-950">
+                <div className="mt-2.5 text-[26px] font-black leading-none tracking-tight text-slate-950 sm:mt-3 sm:text-[32px]">
                   {item.value}
                 </div>
               </div>
 
-              <div className="mt-3 flex items-end justify-between gap-2">
+              <div className="mt-2.5 flex flex-wrap items-end justify-between gap-1.5 sm:mt-3 sm:gap-2">
                 <div className="text-[11px] font-bold leading-tight text-slate-500">
                   {item.sub}
                 </div>
 
                 <span
-                  className={`shrink-0 rounded-full border px-2 py-0.5 text-[10px] font-black leading-none shadow-sm ${t.status}`}
+                  className={`shrink-0 rounded-full border px-1.5 py-0.5 text-[9px] font-black leading-none shadow-sm sm:px-2 sm:text-[10px] ${t.status}`}
                 >
                   {item.status}
                 </span>
