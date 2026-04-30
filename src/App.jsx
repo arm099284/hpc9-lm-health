@@ -1648,9 +1648,27 @@ function Trend({ record }) {
   const yDomain = closeYAxisDomain(values);
   const d = delta(record, item);
   return (
-    <Card title="กราฟแนวโน้ม ครั้งที่ 1–4" icon={ActivityIcon} right={<div className="flex flex-wrap gap-2"><Pill>Auto zoom scale</Pill><Pill tone={d.tone}>เปลี่ยนแปลง {d.text}</Pill></div>}>
-      <div className="mb-4 max-w-sm"><Select label="เลือกตัวชี้วัด" value={key} onChange={setKey} options={all.map((m) => ({ value: m[0], label: m[1] }))} /></div>
-      <div className="h-80">
+    <Card
+      title="กราฟแนวโน้ม ครั้งที่ 1–4"
+      icon={ActivityIcon}
+      right={
+        <div className="flex flex-wrap gap-2">
+          <Pill>Auto zoom scale</Pill>
+          <Pill tone={d.tone}>เปลี่ยนแปลง {d.text}</Pill>
+        </div>
+      }
+    >
+      <div className="rounded-3xl border border-slate-200 bg-gradient-to-br from-white via-slate-50 to-sky-50/40 p-4 shadow-[0_10px_28px_rgba(15,23,42,0.05)]">
+        <div className="mb-4 max-w-sm">
+          <Select
+            label="เลือกตัวชี้วัด"
+            value={key}
+            onChange={setKey}
+            options={all.map((m) => ({ value: m[0], label: m[1] }))}
+          />
+        </div>
+    
+        <div className="h-80 rounded-2xl border border-slate-100 bg-white p-3 shadow-inner">
         <ResponsiveContainer>
           <LineChart data={data} margin={{ top: 12, right: 18, left: 8, bottom: 6 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
@@ -1660,8 +1678,12 @@ function Trend({ record }) {
             <Line type="monotone" dataKey="value" stroke="#0f172a" strokeWidth={4} dot={{ r: 6 }} activeDot={{ r: 8 }} />
           </LineChart>
         </ResponsiveContainer>
+         </div>
+
+        <p className="mt-3 rounded-2xl border border-slate-100 bg-white/80 px-3 py-2 text-sm font-semibold text-slate-500">
+          หมายเหตุ: กราฟนี้ใช้สเกลอัตโนมัติแบบใกล้ข้อมูล เพื่อให้เห็นแนวโน้มการเปลี่ยนแปลงชัดขึ้น
+        </p>
       </div>
-      <p className="mt-2 text-sm text-slate-500">หมายเหตุ: กราฟนี้ใช้สเกลอัตโนมัติแบบใกล้ข้อมูล เพื่อให้เห็นแนวโน้มการเปลี่ยนแปลงชัดขึ้น</p>
     </Card>
   );
 }
@@ -1767,7 +1789,7 @@ function OhsTable({ record }) {
 
     { view: "side", label: "สะโพก", status: statusOf(2), top: "59%", left: "37%" },
 
-    { view: "side", label: "เข่า", status: statusOf(1), top: "68%", left: "58%" },
+    { view: "side", label: "เข่า", status: statusOf(1), top: "64%", left: "58%" },
 
     { view: "side", label: "ข้อเท้า", status: statusOf(3), top: "82%", left: "47%" },
   ];
