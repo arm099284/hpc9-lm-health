@@ -1725,38 +1725,45 @@ function OhsTable({ record }) {
     if (status === "ต้องระวัง") {
       return {
         borderColor: "#f59e0b",
-        backgroundColor: "rgba(245, 158, 11, 0.16)",
-        boxShadow: "0 0 0 4px rgba(245, 158, 11, 0.10)",
+        backgroundColor: "rgba(245, 158, 11, 0.18)",
+        boxShadow: "0 0 0 4px rgba(245, 158, 11, 0.12)",
       };
     }
 
     return {
-      borderColor: "#f43f5e",
-      backgroundColor: "rgba(244, 63, 94, 0.16)",
-      boxShadow: "0 0 0 4px rgba(244, 63, 94, 0.10)",
+      borderColor: "#fb7185",
+      backgroundColor: "rgba(251, 113, 133, 0.18)",
+      boxShadow: "0 0 0 4px rgba(251, 113, 133, 0.12)",
     };
   };
 
   const problemMarkers = [
-    { view: "front", label: "ไหล่", status: statusOf(4), top: "24%", left: "31%" },
-    { view: "front", label: "ไหล่", status: statusOf(4), top: "24%", left: "69%" },
-    { view: "side", label: "ไหล่", status: statusOf(4), top: "24%", left: "58%" },
+    // ===== Front view =====
+    { view: "front", label: "ไหล่ซ้าย", status: statusOf(4), top: "29%", left: "36%" },
+    { view: "front", label: "ไหล่ขวา", status: statusOf(4), top: "29%", left: "64%" },
 
     { view: "front", label: "ลำตัว", status: statusOf(0), top: "45%", left: "50%" },
-    { view: "side", label: "ลำตัว", status: statusOf(0), top: "43%", left: "55%" },
 
-    { view: "front", label: "สะโพก", status: statusOf(2), top: "58%", left: "50%" },
-    { view: "side", label: "สะโพก", status: statusOf(2), top: "58%", left: "48%" },
+    { view: "front", label: "สะโพก", status: statusOf(2), top: "59%", left: "50%" },
 
-    { view: "front", label: "เข่า", status: statusOf(1), top: "67%", left: "35%" },
-    { view: "front", label: "เข่า", status: statusOf(1), top: "67%", left: "65%" },
-    { view: "side", label: "เข่า", status: statusOf(1), top: "68%", left: "58%" },
+    { view: "front", label: "เข่าซ้าย", status: statusOf(1), top: "70%", left: "36%" },
+    { view: "front", label: "เข่าขวา", status: statusOf(1), top: "70%", left: "64%" },
 
-    { view: "front", label: "ข้อเท้า", status: statusOf(3), top: "83%", left: "34%" },
-    { view: "front", label: "ข้อเท้า", status: statusOf(3), top: "83%", left: "66%" },
-    { view: "side", label: "ข้อเท้า", status: statusOf(3), top: "84%", left: "62%" },
+    { view: "front", label: "ข้อเท้าซ้าย", status: statusOf(3), top: "84%", left: "35%" },
+    { view: "front", label: "ข้อเท้าขวา", status: statusOf(3), top: "84%", left: "65%" },
 
-    { view: "front", label: "สมดุล", status: statusOf(5), top: "52%", left: "50%" },
+    { view: "front", label: "สมดุล", status: statusOf(5), top: "53%", left: "50%" },
+
+    // ===== Side view =====
+    { view: "side", label: "ไหล่", status: statusOf(4), top: "28%", left: "56%" },
+
+    { view: "side", label: "ลำตัว", status: statusOf(0), top: "43%", left: "53%" },
+
+    { view: "side", label: "สะโพก", status: statusOf(2), top: "60%", left: "48%" },
+
+    { view: "side", label: "เข่า", status: statusOf(1), top: "72%", left: "59%" },
+
+    { view: "side", label: "ข้อเท้า", status: statusOf(3), top: "85%", left: "62%" },
   ].filter((marker) => marker.status !== "ปกติ");
 
   const bodyParts = [
@@ -1768,21 +1775,33 @@ function OhsTable({ record }) {
     { label: "สมดุล", sub: "Balance control", status: statusOf(5) },
   ];
 
-  const ImageWithMarkers = ({ type, src, title }) => (
-    <div className="rounded-2xl border border-slate-200 bg-gradient-to-b from-white to-slate-50 p-2 shadow-sm">
-      <div className="mb-2 flex items-center justify-between">
-        <div className="text-[11px] font-black text-slate-700">{title}</div>
+  const problemCount = bodyParts.filter((part) => part.status !== "ปกติ").length;
+  const warningCount = bodyParts.filter((part) => part.status === "ต้องระวัง").length;
+  const badCount = bodyParts.filter((part) => part.status !== "ปกติ" && part.status !== "ต้องระวัง").length;
+  const normalCount = bodyParts.filter((part) => part.status === "ปกติ").length;
 
-        <span className="rounded-full bg-slate-50 px-2 py-0.5 text-[9px] font-bold text-slate-500 ring-1 ring-slate-200">
+  const ImageWithMarkers = ({ type, src, title }) => (
+    <div className="rounded-2xl border border-slate-200 bg-gradient-to-br from-white via-slate-50 to-sky-50/40 p-2.5 shadow-[0_10px_24px_rgba(15,23,42,0.06)]">
+      <div className="mb-2 flex items-center justify-between gap-2">
+        <div className="min-w-0">
+          <div className="text-[11px] font-black leading-tight text-slate-800">
+            {title}
+          </div>
+          <div className="text-[9px] font-semibold leading-tight text-slate-400">
+            Overhead Deep Squat
+          </div>
+        </div>
+
+        <span className="shrink-0 rounded-full bg-white px-2 py-0.5 text-[9px] font-bold text-slate-500 ring-1 ring-slate-200 shadow-sm">
           OHS
         </span>
       </div>
 
-      <div className="relative aspect-[4/3] max-h-[260px] overflow-hidden rounded-xl bg-white ring-1 ring-slate-200 shadow-inner">
+      <div className="relative aspect-[4/3] overflow-hidden rounded-xl bg-white ring-1 ring-slate-200 shadow-inner">
         <img
           src={src}
           alt={title}
-          className="h-full w-full object-contain p-2"
+          className="h-full w-full object-contain p-1"
           draggable={false}
         />
 
@@ -1792,7 +1811,7 @@ function OhsTable({ record }) {
             <div
               key={`${type}-${marker.label}-${index}`}
               title={`${marker.label}: ${marker.status}`}
-              className="absolute flex h-5 w-5 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border-2"
+              className="absolute flex h-6 w-6 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border-2"
               style={{
                 top: marker.top,
                 left: marker.left,
@@ -1800,10 +1819,10 @@ function OhsTable({ record }) {
               }}
             >
               <span
-                className="h-1.5 w-1.5 rounded-full"
+                className="h-2 w-2 rounded-full"
                 style={{
                   backgroundColor:
-                    marker.status === "ต้องระวัง" ? "#f59e0b" : "#f43f5e",
+                    marker.status === "ต้องระวัง" ? "#f59e0b" : "#fb7185",
                 }}
               />
             </div>
@@ -1823,13 +1842,13 @@ function OhsTable({ record }) {
       }
     >
       <div className="space-y-3">
-        <div className="rounded-3xl border border-slate-200 bg-gradient-to-br from-white via-slate-50 to-sky-50/30 p-3 shadow-[0_8px_24px_rgba(15,23,42,0.05)]">
+        <div className="rounded-3xl border border-slate-200 bg-gradient-to-br from-white via-slate-50 to-sky-50/70 p-3.5 shadow-[0_12px_30px_rgba(15,23,42,0.07)]">
           <div className="mb-3 flex items-start justify-between gap-3">
             <div>
-              <div className="text-sm font-black text-slate-900">
+              <div className="text-sm font-black leading-tight text-slate-900">
                 OHS Body Map
               </div>
-              <div className="text-[10px] font-semibold text-slate-400">
+              <div className="mt-0.5 text-[10px] font-semibold leading-tight text-slate-400">
                 รูปท่า Overhead Deep Squat พร้อมจุดที่ควรติดตาม
               </div>
             </div>
@@ -1862,50 +1881,103 @@ function OhsTable({ record }) {
             </div>
           </div>
 
-          <div className="grid gap-3 md:grid-cols-2">
-            <ImageWithMarkers
-              type="front"
-              title="มุมหน้า"
-              src="/images/overhead-squat_anterior.png.webp"
-            />
+          <div className="grid gap-3 xl:grid-cols-[minmax(0,1.65fr)_minmax(280px,.85fr)]">
+            <div className="grid gap-3 md:grid-cols-2">
+              <ImageWithMarkers
+                type="front"
+                title="มุมหน้า"
+                src="/images/overhead-squat_anterior.png.webp"
+              />
 
-            <ImageWithMarkers
-              type="side"
-              title="มุมข้าง"
-              src="/images/overhead-squat_lateral.png.webp"
-            />
-          </div>
+              <ImageWithMarkers
+                type="side"
+                title="มุมข้าง"
+                src="/images/overhead-squat_lateral.png.webp"
+              />
+            </div>
 
-          <div className="mt-3 flex flex-wrap gap-2">
-            {bodyParts.map((part) => (
-              <div
-                key={part.label}
-                className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-2.5 py-1.5 shadow-sm"
-              >
-                <span className="text-[11px] font-black text-slate-800">
-                  {part.label}
+            <div className="rounded-2xl border border-slate-200 bg-white/90 p-3 shadow-sm">
+              <div className="mb-3 flex items-center justify-between gap-2">
+                <div>
+                  <div className="text-sm font-black text-slate-900">
+                    สรุปผล OHS
+                  </div>
+                  <div className="text-[10px] font-semibold text-slate-400">
+                    ตำแหน่งที่ควรติดตามในครั้งนี้
+                  </div>
+                </div>
+
+                <span className="rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-[10px] font-black text-slate-600">
+                  {problemCount} จุด
+                </span>
+              </div>
+
+              <div className="grid grid-cols-3 gap-2">
+                <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-2.5 py-2">
+                  <div className="text-[10px] font-bold text-emerald-700">
+                    ปกติ
+                  </div>
+                  <div className="mt-0.5 text-base font-black text-emerald-950">
+                    {normalCount}
+                  </div>
+                </div>
+
+                <div className="rounded-2xl border border-amber-200 bg-amber-50 px-2.5 py-2">
+                  <div className="text-[10px] font-bold text-amber-700">
+                    ระวัง
+                  </div>
+                  <div className="mt-0.5 text-base font-black text-amber-950">
+                    {warningCount}
+                  </div>
+                </div>
+
+                <div className="rounded-2xl border border-rose-200 bg-rose-50 px-2.5 py-2">
+                  <div className="text-[10px] font-bold text-rose-700">
+                    ควรปรับ
+                  </div>
+                  <div className="mt-0.5 text-base font-black text-rose-950">
+                    {badCount}
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-3 space-y-1.5">
+                {bodyParts.map((part) => (
+                  <div
+                    key={part.label}
+                    className="flex items-center justify-between gap-2 rounded-2xl border border-slate-100 bg-slate-50/70 px-3 py-2"
+                  >
+                    <div className="min-w-0">
+                      <div className="text-[11px] font-black leading-tight text-slate-900">
+                        {part.label}
+                      </div>
+                      <div className="mt-0.5 text-[9px] font-semibold leading-tight text-slate-400">
+                        {part.sub}
+                      </div>
+                    </div>
+
+                    <Pill tone={toneOf(part.status)}>{part.status}</Pill>
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-3 flex flex-wrap gap-2 border-t border-slate-100 pt-3 text-[10px] font-bold text-slate-500">
+                <span className="inline-flex items-center gap-1 rounded-full bg-slate-50 px-2 py-1 ring-1 ring-slate-200">
+                  <span className="h-2 w-2 rounded-full bg-slate-400" />
+                  ปกติ
                 </span>
 
-                <Pill tone={toneOf(part.status)}>{part.status}</Pill>
+                <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-1 text-amber-700 ring-1 ring-amber-200">
+                  <span className="h-2 w-2 rounded-full bg-amber-400" />
+                  ต้องระวัง
+                </span>
+
+                <span className="inline-flex items-center gap-1 rounded-full bg-rose-50 px-2 py-1 text-rose-700 ring-1 ring-rose-200">
+                  <span className="h-2 w-2 rounded-full bg-rose-500" />
+                  ควรปรับแก้
+                </span>
               </div>
-            ))}
-          </div>
-
-          <div className="mt-3 flex flex-wrap gap-2 border-t border-slate-100 pt-3 text-[10px] font-bold text-slate-500">
-            <span className="inline-flex items-center gap-1 rounded-full bg-slate-50 px-2 py-1 ring-1 ring-slate-200">
-              <span className="h-2 w-2 rounded-full bg-slate-400" />
-              ปกติ
-            </span>
-
-            <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-1 text-amber-700 ring-1 ring-amber-200">
-              <span className="h-2 w-2 rounded-full bg-amber-400" />
-              ต้องระวัง
-            </span>
-
-            <span className="inline-flex items-center gap-1 rounded-full bg-rose-50 px-2 py-1 text-rose-700 ring-1 ring-rose-200">
-              <span className="h-2 w-2 rounded-full bg-rose-500" />
-              ควรปรับแก้
-            </span>
+            </div>
           </div>
         </div>
 
