@@ -1494,7 +1494,7 @@ function Header({ mode, setMode, isAdmin, adminUser, onLogout }) {
             </h1>
 
             <p className="truncate text-xs font-semibold text-slate-500">
-              ระบบติดตามสุขภาพและสมรรถภาพรายบุคคล • 4 ครั้ง • HN Login
+              ระบบติดตามสุขภาพและสมรรถภาพรายบุคคล
             </p>
           </div>
         </div>
