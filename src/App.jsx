@@ -4543,26 +4543,26 @@ function AdminSummary({ records, auditLogs, onFullBackup, onRestoreBackup }) {
             </div>
           </div>
         </div>
-        <div className="mt-5 rounded-3xl border border-slate-200 bg-gradient-to-br from-white via-slate-50 to-slate-100 p-4 shadow-[0_12px_35px_rgba(15,23,42,0.08)] ring-1 ring-white/70">
-        <div className="mb-3 flex items-center justify-between gap-3 border-b border-slate-200 pb-3">
-          <div>
-            <h3 className="text-base font-black text-slate-900">
-              ตารางสรุปทุกคน สำหรับแอดมิน
-            </h3>
-            <p className="mt-0.5 text-xs font-medium text-slate-500">
-              ภาพรวมรายบุคคลตามตัวกรองที่เลือก
-            </p>
+        <div className="mt-5 rounded-3xl border border-slate-200 bg-white p-4 shadow-[0_10px_28px_rgba(15,23,42,0.055)]">
+          <div className="mb-3 flex items-center justify-between gap-3 border-b border-slate-100 pb-3">
+            <div>
+              <h3 className="text-base font-black text-slate-950">
+                ตารางสรุปทุกคน สำหรับแอดมิน
+              </h3>
+              <p className="mt-0.5 text-xs font-semibold text-slate-500">
+                ภาพรวมรายบุคคลตามตัวกรองที่เลือก
+              </p>
+            </div>
+
+            <span className="rounded-full border border-sky-100 bg-sky-50 px-3 py-1 text-xs font-black text-sky-700 shadow-sm">
+              Admin table
+            </span>
           </div>
       
-          <span className="rounded-full border border-slate-200 bg-slate-900 px-3 py-1 text-xs font-bold text-white shadow-sm">
-            Admin table
-          </span>
-        </div>
-      
-        <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-inner">
-          <table className="w-full text-left text-[10px]">
-            <thead className="bg-slate-900 text-[10px] font-black uppercase tracking-wide text-white">
-              <tr>
+              <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-[0_8px_22px_rgba(15,23,42,0.04)]">
+                <table className="w-full min-w-[1460px] border-separate border-spacing-0 text-left text-xs">
+                  <thead className="bg-gradient-to-r from-slate-50 via-sky-50/60 to-slate-50 text-[10px] font-black uppercase tracking-wide text-slate-500">
+                <tr>
                 <th className="px-2 py-2 text-center whitespace-nowrap">HN / ชื่อ</th>
                 <th className="px-2 py-2 text-center whitespace-nowrap">ครั้ง</th>
                 <th className="px-2 py-2 text-center whitespace-nowrap">เทียบ</th>
@@ -5666,26 +5666,36 @@ function lmAdminRow(record) {
               </table>
             </div>
 
-            <div className="mt-4 flex flex-wrap items-center justify-between gap-3 text-sm text-slate-500">
-              <div>
-                แสดง {pagedRows.length} รายการ จากทั้งหมด {filteredRows.length} รายการ • หน้า {safePage}/{pageCount}
+            <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white px-3 py-2.5 text-xs shadow-sm">
+              <div className="font-semibold text-slate-500">
+                แสดง{" "}
+                <span className="font-black text-slate-800">
+                  {pagedComparable.length}
+                </span>{" "}
+                รายการ จากทั้งหมด{" "}
+                <span className="font-black text-slate-800">
+                  {filteredComparable.length}
+                </span>{" "}
+                รายการ
               </div>
-
-              <div className="flex gap-2">
+    
+              <div className="flex items-center gap-1.5">
                 <button
-                  type="button"
                   disabled={safePage <= 1}
-                  onClick={() => setLmPage((p) => Math.max(1, p - 1))}
-                  className="rounded-xl border border-slate-200 bg-white px-4 py-2 font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-40"
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  className="rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-black text-slate-600 shadow-sm transition-all duration-200 hover:bg-slate-50 hover:text-slate-900 disabled:cursor-not-allowed disabled:opacity-40"
                 >
                   ก่อนหน้า
                 </button>
-
+    
+                <span className="rounded-xl border border-sky-100 bg-sky-50 px-3 py-1.5 text-xs font-black text-sky-700">
+                  หน้า {safePage}/{pageCount}
+                </span>
+    
                 <button
-                  type="button"
                   disabled={safePage >= pageCount}
-                  onClick={() => setLmPage((p) => Math.min(pageCount, p + 1))}
-                  className="rounded-xl border border-slate-200 bg-white px-4 py-2 font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-40"
+                  onClick={() => setPage((p) => Math.min(pageCount, p + 1))}
+                  className="rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-black text-slate-600 shadow-sm transition-all duration-200 hover:bg-slate-50 hover:text-slate-900 disabled:cursor-not-allowed disabled:opacity-40"
                 >
                   ถัดไป
                 </button>
