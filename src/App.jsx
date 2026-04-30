@@ -3410,17 +3410,17 @@ function Dashboard({ record, back }) {
             </p>
           </div>
 
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-slate-200 bg-white/80 p-1.5 shadow-sm">
             <button
               onClick={printPage}
-              className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-base font-semibold text-slate-700 hover:bg-slate-50"
+              className="rounded-xl border border-sky-200 bg-gradient-to-br from-white via-sky-50 to-cyan-50 px-4 py-2.5 text-sm font-black text-slate-900 shadow-sm ring-1 ring-sky-100 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_8px_18px_rgba(14,165,233,0.14)]"
             >
               พิมพ์ / PDF รายบุคคล
             </button>
-
+          
             <button
               onClick={back}
-              className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-base font-semibold text-slate-700 hover:bg-slate-100"
+              className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-bold text-slate-600 shadow-sm transition-all duration-200 hover:bg-slate-50 hover:text-slate-900"
             >
               กลับไปกรอก HN
             </button>
