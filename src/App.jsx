@@ -3716,28 +3716,22 @@ function InsightListPanel({ title, rows, tone = "default" }) {
 
   const styles = {
     good: {
-      card: "border-emerald-200/80 bg-gradient-to-br from-emerald-50 via-white to-white",
-      iconWrap: "bg-white text-emerald-600 ring-1 ring-emerald-200",
-      soft: "bg-emerald-50 text-emerald-700 ring-emerald-200",
-      bar: "from-emerald-300 to-emerald-500",
-      title: "text-emerald-950",
-      icon: "✓",
+      card: "border-emerald-200 bg-gradient-to-br from-white via-emerald-50/60 to-white",
+      title: "text-emerald-800",
+      badge: "border-emerald-200 bg-emerald-50 text-emerald-700",
+      bar: "bg-emerald-300",
     },
     bad: {
-      card: "border-rose-200/80 bg-gradient-to-br from-rose-50 via-white to-white",
-      iconWrap: "bg-white text-rose-600 ring-1 ring-rose-200",
-      soft: "bg-rose-50 text-rose-700 ring-rose-200",
-      bar: "from-rose-300 to-rose-500",
-      title: "text-rose-950",
-      icon: "!",
+      card: "border-rose-200 bg-gradient-to-br from-white via-rose-50/60 to-white",
+      title: "text-rose-800",
+      badge: "border-rose-200 bg-rose-50 text-rose-700",
+      bar: "bg-rose-300",
     },
     default: {
-      card: "border-slate-200 bg-gradient-to-br from-slate-50 via-white to-white",
-      iconWrap: "bg-white text-slate-700 ring-1 ring-slate-200",
-      soft: "bg-slate-50 text-slate-600 ring-slate-200",
-      bar: "from-slate-300 to-slate-500",
-      title: "text-slate-950",
-      icon: "i",
+      card: "border-slate-200 bg-gradient-to-br from-white via-slate-50 to-white",
+      title: "text-slate-800",
+      badge: "border-slate-200 bg-slate-50 text-slate-600",
+      bar: "bg-sky-200",
     },
   };
 
@@ -3748,68 +3742,48 @@ function InsightListPanel({ title, rows, tone = "default" }) {
   );
 
   return (
-    <div className={`rounded-3xl border p-4 shadow-sm ${s.card}`}>
-      <div className="mb-3 flex items-center justify-between gap-3">
-        <div className="flex min-w-0 items-center gap-3">
-          <div
-            className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl text-base font-black shadow-sm ${s.iconWrap}`}
-          >
-            {s.icon}
-          </div>
+    <div className={`rounded-2xl border p-3.5 shadow-[0_8px_20px_rgba(15,23,42,0.045)] ${s.card}`}>
+      <div className="mb-3 flex items-center justify-between gap-2">
+        <h3 className={`truncate text-sm font-black leading-tight ${s.title}`}>
+          {title}
+        </h3>
 
-          <div className="min-w-0">
-            <h3 className={`whitespace-normal break-words text-sm font-black leading-tight ${s.title}`}>
-              {title}
-            </h3>
-            <p className="mt-0.5 text-[10px] font-semibold text-slate-400">
-              Top indicators
-            </p>
-          </div>
-        </div>
-
-        <span
-          className={`shrink-0 rounded-full px-2.5 py-1 text-[10px] font-black ring-1 ${s.soft}`}
-        >
-          {safeRows.length} รายการ
+        <span className="rounded-full border border-slate-200 bg-white px-2 py-0.5 text-[10px] font-black text-slate-500 shadow-sm">
+          Top 5
         </span>
       </div>
 
-      <div className="space-y-2.5">
+      <div className="space-y-2">
         {topRows.length ? (
           topRows.map((row, index) => {
             const label = row.label || row.nameTh || row.name || "-";
             const sub = row.sub || row.nameEn || "";
             const count = Number(row.count ?? row.value ?? 0);
-            const percent = Math.max(6, Math.round((count / maxCount) * 100));
+            const percent = Math.min(100, Math.round((count / maxCount) * 100));
 
             return (
-              <div
-                key={`${label}-${index}`}
-                className="rounded-xl bg-white/90 p-2 shadow-sm ring-1 ring-slate-100"
-              >
-                <div className="mb-1 flex items-center justify-between gap-2">
+              <div key={`${label}-${index}`} className="rounded-xl border border-slate-100 bg-white/85 px-3 py-2 shadow-sm">
+                <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0">
-                    <div className="whitespace-normal break-words text-[11px] font-black leading-tight text-slate-900">
+                    <div title={label} className="truncate text-xs font-black leading-tight text-slate-800">
                       {label}
                     </div>
 
                     {sub && (
-                      <div className="mt-0.5 whitespace-normal break-words text-[9px] font-medium leading-tight text-slate-400">
+                      <div title={sub} className="mt-0.5 truncate text-[10px] font-semibold leading-tight text-slate-400">
                         {sub}
                       </div>
                     )}
                   </div>
 
-                  <div
-                    className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-black ring-1 ${s.soft}`}
-                  >
+                  <span className={`shrink-0 rounded-full border px-2 py-0.5 text-[10px] font-black leading-none ${s.badge}`}>
                     {count} คน
-                  </div>
+                  </span>
                 </div>
 
-                <div className="h-1.5 overflow-hidden rounded-full bg-slate-100">
+                <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-slate-100">
                   <div
-                    className={`h-full rounded-full bg-gradient-to-r ${s.bar}`}
+                    className={`h-full rounded-full ${s.bar}`}
                     style={{ width: `${percent}%` }}
                   />
                 </div>
@@ -3817,7 +3791,7 @@ function InsightListPanel({ title, rows, tone = "default" }) {
             );
           })
         ) : (
-          <div className="rounded-2xl border border-slate-200 bg-white px-3 py-5 text-center text-xs font-semibold text-slate-400">
+          <div className="rounded-xl border border-slate-100 bg-white/85 px-3 py-4 text-center text-xs font-bold text-slate-400">
             ไม่มีข้อมูล
           </div>
         )}
