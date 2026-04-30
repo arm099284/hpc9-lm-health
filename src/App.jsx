@@ -3801,28 +3801,71 @@ function InsightListPanel({ title, rows, tone = "default" }) {
 }
 
 function AuditLogPanel({ auditLogs }) {
+  const logs = Array.isArray(auditLogs) ? auditLogs.slice(0, 10) : [];
+
+  const actionTone = (action = "") => {
+    if (action.includes("ลบ")) return "bad";
+    if (action.includes("สร้าง") || action.includes("กู้คืน")) return "good";
+    return "gray";
+  };
+
   return (
     <Card title="Audit Log / ประวัติการบันทึกและแก้ไข" icon={ClipboardIcon}>
-      <div className="overflow-x-auto rounded-xl border border-slate-200">
-        <table className="w-full min-w-[760px] text-left text-base">
-          <thead className="bg-slate-50 text-sm text-slate-500">
-            <tr><th className="p-3">เวลา</th><th className="p-3">ผู้ดำเนินการ</th><th className="p-3">Action</th><th className="p-3">HN</th><th className="p-3">รายละเอียด</th></tr>
-          </thead>
-          <tbody>
-            {auditLogs.slice(0, 10).map((log) => (
-              <tr key={log.id} className="border-t border-slate-100">
-                <td className="p-3 text-sm text-slate-600">{formatDateTimeThai(log.at)}</td>
-                <td className="p-3"><div className="font-bold text-slate-900">{log.adminName}</div><div className="text-sm text-slate-500">{log.adminId} • {log.role}</div></td>
-                <td className="p-3"><Pill tone={log.action.includes("ลบ") ? "bad" : log.action.includes("สร้าง") || log.action.includes("กู้คืน") ? "good" : "gray"}>{log.action}</Pill></td>
-                <td className="p-3 font-semibold text-slate-900">{log.hn}</td>
-                <td className="p-3 text-slate-600">{show(log.detail)}</td>
-              </tr>
-            ))}
-            {auditLogs.length === 0 && <tr><td className="p-4 text-center text-slate-500" colSpan="5">ยังไม่มีประวัติการบันทึก/แก้ไขในรอบการใช้งานนี้</td></tr>}
-          </tbody>
-        </table>
+      <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-[0_8px_22px_rgba(15,23,42,0.045)]">
+        <div className="grid min-w-[760px] grid-cols-[150px_190px_130px_100px_minmax(220px,1fr)] bg-gradient-to-r from-slate-50 via-sky-50/50 to-slate-50 px-3 py-3 text-[11px] font-black uppercase tracking-wide text-slate-500">
+          <div>เวลา</div>
+          <div>ผู้ดำเนินการ</div>
+          <div>Action</div>
+          <div>HN</div>
+          <div>รายละเอียด</div>
+        </div>
+
+        <div className="overflow-x-auto">
+          <div className="min-w-[760px] divide-y divide-slate-100">
+            {logs.length ? (
+              logs.map((log) => (
+                <div
+                  key={log.id}
+                  className="grid grid-cols-[150px_190px_130px_100px_minmax(220px,1fr)] items-center px-3 py-3 text-sm transition-colors hover:bg-slate-50/80"
+                >
+                  <div className="font-semibold text-slate-500">
+                    {formatDateTimeThai(log.at)}
+                  </div>
+
+                  <div>
+                    <div className="font-black leading-tight text-slate-900">
+                      {log.adminName}
+                    </div>
+                    <div className="mt-0.5 text-[11px] font-semibold text-slate-400">
+                      {log.adminId} • {log.role}
+                    </div>
+                  </div>
+
+                  <div>
+                    <Pill tone={actionTone(log.action)}>{log.action}</Pill>
+                  </div>
+
+                  <div className="font-black text-slate-800">
+                    {log.hn}
+                  </div>
+
+                  <div className="truncate font-semibold text-slate-500" title={show(log.detail)}>
+                    {show(log.detail)}
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="px-4 py-8 text-center text-sm font-bold text-slate-400">
+                ยังไม่มีประวัติการบันทึก/แก้ไขในรอบการใช้งานนี้
+              </div>
+            )}
+          </div>
+        </div>
       </div>
-      <p className="mt-3 text-sm text-slate-500">Prototype นี้เก็บ Audit Log ระหว่างเปิดหน้าเว็บเท่านั้น เว็บจริงควรบันทึกลงฐานข้อมูลถาวร</p>
+
+      <p className="mt-3 text-xs font-semibold leading-5 text-slate-400">
+        Prototype นี้เก็บ Audit Log ระหว่างเปิดหน้าเว็บเท่านั้น เว็บจริงควรบันทึกลงฐานข้อมูลถาวร
+      </p>
     </Card>
   );
 }
