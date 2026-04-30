@@ -1896,8 +1896,8 @@ function OhsTable({ record }) {
               />
             </div>
 
-            <div className="rounded-2xl border border-slate-200 bg-white/90 p-3 shadow-sm">
-              <div className="mb-3 flex items-center justify-between gap-2">
+            <div className="rounded-3xl border border-slate-200 bg-gradient-to-b from-white via-slate-50/80 to-sky-50/50 p-3 shadow-[0_12px_28px_rgba(15,23,42,0.07)]">
+              <div className="mb-3 flex items-start justify-between gap-2">
                 <div>
                   <div className="text-sm font-black text-slate-900">
                     สรุปผล OHS
@@ -1907,35 +1907,35 @@ function OhsTable({ record }) {
                   </div>
                 </div>
 
-                <span className="rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-[10px] font-black text-slate-600">
+                <span className="rounded-full border border-slate-200 bg-white px-2.5 py-1 text-[10px] font-black text-slate-700 shadow-sm">
                   {problemCount} จุด
                 </span>
               </div>
 
               <div className="grid grid-cols-3 gap-2">
-                <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-2.5 py-2">
+                <div className="rounded-2xl border border-emerald-200 bg-gradient-to-b from-emerald-50 to-white px-2.5 py-2.5 shadow-sm">
                   <div className="text-[10px] font-bold text-emerald-700">
                     ปกติ
                   </div>
-                  <div className="mt-0.5 text-base font-black text-emerald-950">
+                  <div className="mt-0.5 text-2xl font-black leading-none text-emerald-950">
                     {normalCount}
                   </div>
                 </div>
 
-                <div className="rounded-2xl border border-amber-200 bg-amber-50 px-2.5 py-2">
+                <div className="rounded-2xl border border-amber-200 bg-gradient-to-b from-amber-50 to-white px-2.5 py-2.5 shadow-sm">
                   <div className="text-[10px] font-bold text-amber-700">
                     ระวัง
                   </div>
-                  <div className="mt-0.5 text-base font-black text-amber-950">
+                  <div className="mt-0.5 text-2xl font-black leading-none text-amber-950">
                     {warningCount}
                   </div>
                 </div>
 
-                <div className="rounded-2xl border border-rose-200 bg-rose-50 px-2.5 py-2">
+                <div className="rounded-2xl border border-rose-200 bg-gradient-to-b from-rose-50 to-white px-2.5 py-2.5 shadow-sm">
                   <div className="text-[10px] font-bold text-rose-700">
                     ควรปรับ
                   </div>
-                  <div className="mt-0.5 text-base font-black text-rose-950">
+                  <div className="mt-0.5 text-2xl font-black leading-none text-rose-950">
                     {badCount}
                   </div>
                 </div>
@@ -1945,7 +1945,7 @@ function OhsTable({ record }) {
                 {bodyParts.map((part) => (
                   <div
                     key={part.label}
-                    className="flex items-center justify-between gap-2 rounded-2xl border border-slate-100 bg-slate-50/70 px-3 py-2"
+                    className="flex items-center justify-between gap-2 rounded-2xl border border-slate-200 bg-white/90 px-3 py-2 shadow-[0_4px_12px_rgba(15,23,42,0.04)]"
                   >
                     <div className="min-w-0">
                       <div className="text-[11px] font-black leading-tight text-slate-900">
@@ -1961,7 +1961,7 @@ function OhsTable({ record }) {
                 ))}
               </div>
 
-              <div className="mt-3 flex flex-wrap gap-2 border-t border-slate-100 pt-3 text-[10px] font-bold text-slate-500">
+              <div className="mt-3 flex flex-wrap gap-2 border-t border-slate-200 pt-3 text-[10px] font-bold text-slate-600">
                 <span className="inline-flex items-center gap-1 rounded-full bg-slate-50 px-2 py-1 ring-1 ring-slate-200">
                   <span className="h-2 w-2 rounded-full bg-slate-400" />
                   ปกติ
