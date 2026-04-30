@@ -1469,68 +1469,64 @@ function Select({ label, value, onChange, options }) {
 }
 
 function Header({ mode, setMode, isAdmin, adminUser, onLogout }) {
+  const tabClass = (targetMode) =>
+    `rounded-xl px-3.5 py-2 text-sm font-black transition-all duration-200 ${
+      mode === targetMode
+        ? "border border-slate-200 bg-white text-slate-950 shadow-sm ring-2 ring-sky-100"
+        : "text-slate-500 hover:bg-white/80 hover:text-slate-800"
+    }`;
+
   return (
-    <header className="border-b border-slate-200 bg-white">
-      <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4">
-        <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-slate-200 bg-slate-50"><HeartIcon className="h-6 w-6 text-slate-700" /></div>
-          <div>
-            <h1 className="text-2xl font-bold text-slate-900">คลินิกเวชศาสตร์วิถีชีวิต ศูนย์อนามัยที่ 9 นครราชสีมา</h1>
-            <p className="text-sm text-slate-500">ระบบติดตามสุขภาพและสมรรถภาพรายบุคคล • 4 ครั้ง • HN Login</p>
+    <header className="sticky top-0 z-40 border-b border-slate-200/80 bg-white/90 backdrop-blur-xl">
+      <div className="mx-auto flex max-w-7xl flex-col gap-3 px-4 py-3 lg:flex-row lg:items-center lg:justify-between">
+        <div className="flex min-w-0 items-center gap-3">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-slate-200 bg-gradient-to-br from-white via-sky-50 to-slate-50 shadow-sm">
+            <HeartIcon className="h-6 w-6 text-slate-700" />
+          </div>
+
+          <div className="min-w-0">
+            <div className="text-[11px] font-black uppercase tracking-wide text-sky-600">
+              HPC9 Lifestyle Medicine Clinic
+            </div>
+
+            <h1 className="truncate text-lg font-black tracking-tight text-slate-950 md:text-xl">
+              คลินิกเวชศาสตร์วิถีชีวิต ศูนย์อนามัยที่ 9 นครราชสีมา
+            </h1>
+
+            <p className="truncate text-xs font-semibold text-slate-500">
+              ระบบติดตามสุขภาพและสมรรถภาพรายบุคคล • 4 ครั้ง • HN Login
+            </p>
           </div>
         </div>
+
         {isAdmin && (
-          <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-slate-200 bg-gradient-to-br from-white via-slate-50 to-sky-50/50 p-1.5 text-sm font-bold shadow-[0_8px_22px_rgba(15,23,42,0.05)]">
-            <button
-              onClick={() => setMode("client")}
-              className={`rounded-xl px-4 py-2.5 transition-all duration-200 ${
-                mode === "client"
-                  ? "border border-slate-200 bg-white text-slate-950 shadow-sm ring-2 ring-sky-100"
-                  : "text-slate-500 hover:bg-white/80 hover:text-slate-800"
-              }`}
-            >
+          <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-slate-200 bg-gradient-to-br from-white via-slate-50 to-sky-50/40 p-1.5 text-sm font-bold shadow-[0_8px_22px_rgba(15,23,42,0.05)]">
+            <button onClick={() => setMode("client")} className={tabClass("client")}>
               ดูผลด้วย HN
             </button>
-          
-            <button
-              onClick={() => setMode("admin")}
-              className={`rounded-xl px-4 py-2.5 transition-all duration-200 ${
-                mode === "admin"
-                  ? "border border-slate-200 bg-white text-slate-950 shadow-sm ring-2 ring-sky-100"
-                  : "text-slate-500 hover:bg-white/80 hover:text-slate-800"
-              }`}
-            >
+
+            <button onClick={() => setMode("admin")} className={tabClass("admin")}>
               สรุปแอดมิน
             </button>
-          
-            <button
-              onClick={() => setMode("staff")}
-              className={`rounded-xl px-4 py-2.5 transition-all duration-200 ${
-                mode === "staff"
-                  ? "border border-slate-200 bg-white text-slate-950 shadow-sm ring-2 ring-sky-100"
-                  : "text-slate-500 hover:bg-white/80 hover:text-slate-800"
-              }`}
-            >
+
+            <button onClick={() => setMode("staff")} className={tabClass("staff")}>
               บันทึกข้อมูล
             </button>
-          
+
             {adminUser && (
-              <div className="ml-1 rounded-2xl border border-sky-100 bg-white/90 px-3 py-2 shadow-sm">
+              <div className="hidden rounded-2xl border border-sky-100 bg-white/90 px-3 py-1.5 shadow-sm xl:block">
                 <div className="text-[10px] font-black uppercase tracking-wide text-sky-600">
                   Admin
                 </div>
                 <div className="text-sm font-black leading-tight text-slate-900">
                   {adminUser.name}
                 </div>
-                <div className="text-[10px] font-semibold text-slate-400">
-                  ID: {adminUser.id} • {adminUser.role}
-                </div>
               </div>
             )}
-          
+
             <button
               onClick={onLogout}
-              className="rounded-xl border border-rose-100 bg-white/70 px-4 py-2.5 text-sm font-bold text-rose-600 transition-all duration-200 hover:bg-rose-50 hover:text-rose-700"
+              className="rounded-xl border border-rose-100 bg-white/80 px-3.5 py-2 text-sm font-bold text-rose-600 transition-all duration-200 hover:bg-rose-50 hover:text-rose-700"
             >
               ออกจากระบบ
             </button>
