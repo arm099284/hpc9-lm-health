@@ -2882,8 +2882,8 @@ return (
         )}
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2">
-        <div className="rounded-2xl border border-sky-200 bg-gradient-to-br from-sky-50 via-white to-sky-50/70 p-4 shadow-[0_8px_22px_rgba(14,165,233,0.07)]">
+      <div className="grid items-stretch gap-4 md:grid-cols-2">
+        <div className="flex h-full flex-col rounded-2xl border border-sky-200 bg-gradient-to-br from-sky-50 via-white to-sky-50/70 p-4 shadow-[0_8px_22px_rgba(14,165,233,0.07)]">
           <div className="flex items-center justify-between gap-3">
             <div>
               <div className="text-sm font-black text-blue-700">
@@ -2909,7 +2909,7 @@ return (
           </div>
         </div>
 
-        <div className="rounded-2xl border border-emerald-200 bg-gradient-to-br from-emerald-50 via-white to-emerald-50/70 p-4 shadow-[0_8px_22px_rgba(16,185,129,0.07)]">
+        <div className="flex h-full flex-col rounded-2xl border border-emerald-200 bg-gradient-to-br from-emerald-50 via-white to-emerald-50/70 p-4 shadow-[0_8px_22px_rgba(16,185,129,0.07)]">
           <div>
             <div className="text-sm font-black text-emerald-700">
               Cardio Plan
@@ -2925,7 +2925,7 @@ return (
             </div>
           </div>
 
-          <div className="mt-4 flex flex-wrap gap-2">
+          <div className="mt-3 flex flex-wrap gap-2">
             <span className="inline-flex rounded-full border border-emerald-200 bg-white px-3 py-1 text-xs font-bold text-emerald-700">
               {show(program.intensity)}
             </span>
@@ -2935,7 +2935,7 @@ return (
             </span>
           </div>
 
-          <div className="mt-4 grid gap-2 text-sm font-bold text-slate-700">
+          <div className="mt-3 grid gap-2 text-sm font-bold text-slate-700">
             <div className="rounded-2xl border border-emerald-100 bg-white px-4 py-3 shadow-sm">
               Talk Test: {show(program.talk)}
             </div>
