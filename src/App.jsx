@@ -2909,13 +2909,13 @@ return (
           </div>
         </div>
 
-        <div className="flex h-full flex-col rounded-2xl border border-emerald-200 bg-gradient-to-br from-emerald-50 via-white to-emerald-50/70 p-4 shadow-[0_8px_22px_rgba(16,185,129,0.07)]">
+        <div className="flex h-full flex-col rounded-2xl border border-emerald-200 bg-gradient-to-br from-emerald-50 via-white to-emerald-50/70 p-3.5 shadow-[0_8px_22px_rgba(16,185,129,0.07)]">
           <div>
             <div className="text-sm font-black text-emerald-700">
               Cardio Plan
             </div>
-
-            <div className="mt-1 text-xl font-black text-slate-900">
+        
+            <div className="mt-1 text-lg font-black leading-snug text-slate-900">
               {show(program.cardioType)}
               {program.cardioDuration && (
                 <span className="text-slate-600">
@@ -2924,23 +2924,23 @@ return (
               )}
             </div>
           </div>
-
-          <div className="mt-3 flex flex-wrap gap-2">
-            <span className="inline-flex rounded-full border border-emerald-200 bg-white px-3 py-1 text-xs font-bold text-emerald-700">
+        
+          <div className="mt-2 flex items-center gap-1.5 whitespace-nowrap">
+            <span className="inline-flex shrink-0 rounded-full border border-emerald-200 bg-white px-2.5 py-0.5 text-[11px] font-bold text-emerald-700">
               {show(program.intensity)}
             </span>
-
-            <span className="inline-flex rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-bold text-slate-700">
+        
+            <span className="inline-flex shrink-0 rounded-full border border-slate-200 bg-white px-2.5 py-0.5 text-[11px] font-bold text-slate-700">
               RPE {show(program.rpe)}
             </span>
           </div>
-
-          <div className="mt-3 grid gap-2 text-sm font-bold text-slate-700">
-            <div className="rounded-2xl border border-emerald-100 bg-white px-4 py-3 shadow-sm">
+        
+          <div className="mt-2 grid gap-1.5 text-[12px] font-bold text-slate-700">
+            <div className="rounded-xl border border-emerald-100 bg-white px-3 py-2 leading-5 shadow-sm">
               Talk Test: {show(program.talk)}
             </div>
-
-            <div className="rounded-2xl border border-emerald-100 bg-white px-4 py-3 shadow-sm">
+        
+            <div className="rounded-xl border border-emerald-100 bg-white px-3 py-2 leading-5 shadow-sm">
               Target HR: {program.intensity ? targetHrText(record.age, program.intensity) : "-"}
             </div>
           </div>
