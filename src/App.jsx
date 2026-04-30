@@ -1460,18 +1460,60 @@ function Header({ mode, setMode, isAdmin, adminUser, onLogout }) {
           </div>
         </div>
         {isAdmin && (
-          <div className="flex flex-wrap items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 p-1 text-base font-semibold">
-            <button onClick={() => setMode("client")} className={`rounded-lg px-4 py-3 ${mode === "client" ? "bg-white shadow-sm" : "text-slate-500"}`}>ดูผลด้วย HN</button>
-            <button onClick={() => setMode("admin")} className={`rounded-lg px-4 py-3 ${mode === "admin" ? "bg-white shadow-sm" : "text-slate-500"}`}>สรุปแอดมิน</button>
-            <button onClick={() => setMode("staff")} className={`rounded-lg px-4 py-3 ${mode === "staff" ? "bg-white shadow-sm" : "text-slate-500"}`}>บันทึกข้อมูล</button>
+          <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-slate-200 bg-gradient-to-br from-white via-slate-50 to-sky-50/50 p-1.5 text-sm font-bold shadow-[0_8px_22px_rgba(15,23,42,0.05)]">
+            <button
+              onClick={() => setMode("client")}
+              className={`rounded-xl px-4 py-2.5 transition-all duration-200 ${
+                mode === "client"
+                  ? "border border-slate-200 bg-white text-slate-950 shadow-sm ring-2 ring-sky-100"
+                  : "text-slate-500 hover:bg-white/80 hover:text-slate-800"
+              }`}
+            >
+              ดูผลด้วย HN
+            </button>
+          
+            <button
+              onClick={() => setMode("admin")}
+              className={`rounded-xl px-4 py-2.5 transition-all duration-200 ${
+                mode === "admin"
+                  ? "border border-slate-200 bg-white text-slate-950 shadow-sm ring-2 ring-sky-100"
+                  : "text-slate-500 hover:bg-white/80 hover:text-slate-800"
+              }`}
+            >
+              สรุปแอดมิน
+            </button>
+          
+            <button
+              onClick={() => setMode("staff")}
+              className={`rounded-xl px-4 py-2.5 transition-all duration-200 ${
+                mode === "staff"
+                  ? "border border-slate-200 bg-white text-slate-950 shadow-sm ring-2 ring-sky-100"
+                  : "text-slate-500 hover:bg-white/80 hover:text-slate-800"
+              }`}
+            >
+              บันทึกข้อมูล
+            </button>
+          
             {adminUser && (
-              <div className="rounded-xl border border-sky-200 bg-white px-4 py-2 shadow-sm">
-                <div className="text-xs font-bold uppercase tracking-wide text-sky-600">Logged in admin</div>
-                <div className="text-base font-bold text-slate-900">{adminUser.name}</div>
-                <div className="text-xs text-slate-500">ID: {adminUser.id} • {adminUser.role}</div>
+              <div className="ml-1 rounded-2xl border border-sky-100 bg-white/90 px-3 py-2 shadow-sm">
+                <div className="text-[10px] font-black uppercase tracking-wide text-sky-600">
+                  Admin
+                </div>
+                <div className="text-sm font-black leading-tight text-slate-900">
+                  {adminUser.name}
+                </div>
+                <div className="text-[10px] font-semibold text-slate-400">
+                  ID: {adminUser.id} • {adminUser.role}
+                </div>
               </div>
             )}
-            <button onClick={onLogout} className="rounded-lg px-4 py-3 text-rose-600 hover:bg-white">ออกจากระบบ</button>
+          
+            <button
+              onClick={onLogout}
+              className="rounded-xl border border-rose-100 bg-white/70 px-4 py-2.5 text-sm font-bold text-rose-600 transition-all duration-200 hover:bg-rose-50 hover:text-rose-700"
+            >
+              ออกจากระบบ
+            </button>
           </div>
         )}
       </div>
