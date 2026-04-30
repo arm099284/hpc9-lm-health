@@ -4427,7 +4427,9 @@ function AdminSummary({ records, auditLogs, onFullBackup, onRestoreBackup }) {
                 </div>
 
         <div className="mb-4">
-          <Pill tone="dark">{periodLabel}</Pill>
+          <span className="inline-flex items-center rounded-full border border-sky-100 bg-sky-50 px-3 py-1 text-[11px] font-black leading-none text-sky-700 shadow-sm">
+            {periodLabel}
+          </span>
         </div>
 
         <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
@@ -4554,14 +4556,14 @@ function AdminSummary({ records, auditLogs, onFullBackup, onRestoreBackup }) {
             </p>
           </div>
       
-          <span className="rounded-full border border-slate-200 bg-slate-900 px-3 py-1 text-xs font-bold text-white shadow-sm">
+          <span className="rounded-full border border-sky-100 bg-sky-50 px-3 py-1 text-xs font-black text-sky-700 shadow-sm">
             Admin table
           </span>
         </div>
       
-        <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-inner">
+        <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_8px_22px_rgba(15,23,42,0.04)]">
           <table className="w-full text-left text-[10px]">
-            <thead className="bg-slate-900 text-[10px] font-black uppercase tracking-wide text-white">
+            <thead className="bg-gradient-to-r from-slate-50 via-sky-50/70 to-slate-50 text-[10px] font-black uppercase tracking-wide text-slate-500">
               <tr>
                 <th className="px-2 py-2 text-center whitespace-nowrap">HN / ชื่อ</th>
                 <th className="px-2 py-2 text-center whitespace-nowrap">ครั้ง</th>
