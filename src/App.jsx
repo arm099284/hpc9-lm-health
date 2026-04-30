@@ -2896,7 +2896,8 @@ return (
                   ? `${program.strengthFrequency} วัน/สัปดาห์`
                   : "ยังไม่กำหนดวันฝึก"}
               </div>
-      
+            </div>
+
             <span className="rounded-full border border-sky-200 bg-white px-2 py-0.5 text-[10px] font-bold text-sky-700 shadow-sm">
               Strength
             </span>
@@ -2920,7 +2921,7 @@ return (
                 Cardio Plan
               </div>
       
-              <div className="mt-1 whitespace-nowrap text-[15px] font-black leading-tight text-slate-900">
+               <div className="mt-1 whitespace-nowrap text-[15px] font-black leading-tight text-slate-900">
                 {show(program.cardioType)}
                 {program.cardioDuration && (
                   <span className="text-slate-600">
@@ -2928,7 +2929,8 @@ return (
                   </span>
                 )}
               </div>
-      
+            </div>
+
             <span className="rounded-full border border-emerald-200 bg-white px-2 py-0.5 text-[10px] font-bold text-emerald-700 shadow-sm">
               Cardio
             </span>
@@ -3010,7 +3012,7 @@ return (
             </div>
           )}
         </div>
-      )}
+      )}  
     </div>
   </Card>
 );
