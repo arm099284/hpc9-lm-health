@@ -1750,16 +1750,16 @@ function OhsTable({ record }) {
     { view: "front", label: "ข้อเท้าซ้าย", status: statusOf(3), top: "81%", left: "36%" },
     { view: "front", label: "ข้อเท้าขวา", status: statusOf(3), top: "81%", left: "60%" },
 
-    { view: "front", label: "สมดุล", status: statusOf(5), top: "56%", left: "45%", kind: "balance" },
+    { view: "front", label: "สมดุล", status: statusOf(5), top: "56%", left: "48%", kind: "balance" },
 
     // ===== Side view =====
     { view: "side", label: "ไหล่", status: statusOf(4), top: "34%", left: "52%" },
     
-    { view: "side", label: "ลำตัว", status: statusOf(0), top: "47%", left: "53%" },
+    { view: "side", label: "ลำตัว", status: statusOf(0), top: "47%", left: "46%" },
 
-    { view: "side", label: "สะโพก", status: statusOf(2), top: "61%", left: "39%" },
+    { view: "side", label: "สะโพก", status: statusOf(2), top: "59%", left: "37%" },
 
-    { view: "side", label: "เข่า", status: statusOf(1), top: "67%", left: "58%" },
+    { view: "side", label: "เข่า", status: statusOf(1), top: "65.5%", left: "56.5%" },
 
     { view: "side", label: "ข้อเท้า", status: statusOf(3), top: "83%", left: "44%" },
   ].filter((marker) => marker.status !== "ปกติ");
