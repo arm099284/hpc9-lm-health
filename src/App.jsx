@@ -1845,37 +1845,132 @@ function Trend({ record }) {
 
 function CompareTable({ record, title, icon, list, withFitnessInterpretation = false }) {
   const latestSession = completedSessions(record).slice(-1)[0] || record.sessions[3];
+
+  const rowToneClass = (key) => {
+    const tone = metricTone(key);
+
+    if (tone === "fat") {
+      return {
+        row: "bg-amber-50/35 hover:bg-amber-50/60",
+        tag: "border-amber-200 bg-amber-50 text-amber-700",
+      };
+    }
+
+    if (tone === "muscle") {
+      return {
+        row: "bg-sky-50/35 hover:bg-sky-50/60",
+        tag: "border-sky-200 bg-sky-50 text-sky-700",
+      };
+    }
+
+    return {
+      row: "bg-white hover:bg-slate-50/80",
+      tag: "border-slate-200 bg-slate-50 text-slate-600",
+    };
+  };
+
   return (
     <Card title={title} icon={icon}>
-      <div className="overflow-x-auto rounded-xl border border-slate-200">
-        <table className="w-full min-w-[780px] text-left text-base">
-          <thead className="bg-slate-50 text-sm text-slate-500">
-            <tr>
-              <th className="p-3">รายการ</th>
-              {record.sessions.map((s) => <th key={s.no} className="p-3">ครั้งที่ {s.no}<br /><span className="font-normal">{s.date || "-"}</span></th>)}
-              <th className="p-3">สรุป 1→ล่าสุด</th>
-              {withFitnessInterpretation && <th className="p-3">แปลผลล่าสุด</th>}
-            </tr>
-          </thead>
-          <tbody>
-            {list.map((m) => {
-              const d = delta(record, m);
-              const rowTone = metricTone(m[0]);
-              const rowClass = rowTone === "fat" ? "bg-amber-50/55" : rowTone === "muscle" ? "bg-rose-50/55" : "";
-              const interpret = withFitnessInterpretation ? classifyFitness(record, m[0], valueOf(latestSession, m[0]), latestSession) : null;
-              return (
-                <tr key={m[0]} className={`border-t border-slate-100 ${rowClass}`}>
-                  <td className="p-3 font-semibold text-slate-900">{m[1]} <span className="font-normal text-slate-400">({m[2]})</span></td>
-                  {record.sessions.map((s) => <td key={s.no} className="p-3">{show(valueOf(s, m[0]))}</td>)}
-                  <td className="p-3"><Pill tone={d.tone}>{d.text}</Pill></td>
-                  {withFitnessInterpretation && <td className="p-3"><Pill tone={interpret.tone}>{interpret.label}</Pill><div className="mt-1 text-sm text-slate-500">{interpret.detail}</div></td>}
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
+      <div className="overflow-hidden rounded-3xl border border-slate-200 bg-gradient-to-br from-white via-slate-50/70 to-sky-50/30 p-2 shadow-[0_8px_24px_rgba(15,23,42,0.05)]">
+        <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-white">
+          <table className="w-full min-w-[820px] border-separate border-spacing-0 text-left text-sm">
+            <thead>
+              <tr className="bg-gradient-to-r from-slate-50 via-sky-50/60 to-slate-50 text-[11px] font-black uppercase tracking-wide text-slate-500">
+                <th className="sticky left-0 z-10 bg-gradient-to-r from-slate-50 via-sky-50/80 to-slate-50 px-3 py-3">
+                  รายการ
+                </th>
+
+                {record.sessions.map((s) => (
+                  <th key={s.no} className="px-3 py-3 text-center">
+                    <div className="font-black text-slate-700">
+                      ครั้งที่ {s.no}
+                    </div>
+                    <div className="mt-0.5 text-[10px] font-semibold normal-case text-slate-400">
+                      {s.date || "-"}
+                    </div>
+                  </th>
+                ))}
+
+                <th className="px-3 py-3 text-center">
+                  สรุป 1→ล่าสุด
+                </th>
+
+                {withFitnessInterpretation && (
+                  <th className="px-3 py-3 text-center">
+                    แปลผลล่าสุด
+                  </th>
+                )}
+              </tr>
+            </thead>
+
+            <tbody>
+              {list.map((m) => {
+                const d = delta(record, m);
+                const tone = rowToneClass(m[0]);
+                const interpret = withFitnessInterpretation
+                  ? classifyFitness(record, m[0], valueOf(latestSession, m[0]), latestSession)
+                  : null;
+
+                return (
+                  <tr
+                    key={m[0]}
+                    className={`group border-t border-slate-100 transition-colors ${tone.row}`}
+                  >
+                    <td className="sticky left-0 z-10 border-t border-slate-100 bg-inherit px-3 py-3">
+                      <div className="min-w-[220px]">
+                        <div className="font-black leading-tight text-slate-900">
+                          {m[1]}
+                        </div>
+                        <div className="mt-1 inline-flex rounded-full border px-2 py-0.5 text-[10px] font-bold leading-none shadow-sm">
+                          <span className={tone.tag}>
+                            {m[2]}
+                          </span>
+                        </div>
+                      </div>
+                    </td>
+
+                    {record.sessions.map((s) => {
+                      const value = show(valueOf(s, m[0]));
+
+                      return (
+                        <td
+                          key={s.no}
+                          className="border-t border-slate-100 px-3 py-3 text-center"
+                        >
+                          <span className="inline-flex min-w-[54px] justify-center rounded-xl border border-slate-100 bg-white px-2.5 py-1 text-sm font-black text-slate-800 shadow-sm">
+                            {value}
+                          </span>
+                        </td>
+                      );
+                    })}
+
+                    <td className="border-t border-slate-100 px-3 py-3 text-center">
+                      <Pill tone={d.tone}>{d.text}</Pill>
+                    </td>
+
+                    {withFitnessInterpretation && (
+                      <td className="border-t border-slate-100 px-3 py-3">
+                        <div className="flex min-w-[180px] flex-col items-start gap-1">
+                          <Pill tone={interpret.tone}>{interpret.label}</Pill>
+                          <div className="text-[11px] font-semibold leading-5 text-slate-500">
+                            {interpret.detail}
+                          </div>
+                        </div>
+                      </td>
+                    )}
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
       </div>
-      {withFitnessInterpretation && <p className="mt-3 text-sm leading-6 text-slate-500">การแปลผลนี้เทียบตามอายุ/เพศและ protocol ที่กำหนด ใช้เพื่อคัดกรองและติดตามแนวโน้ม ไม่ใช่การวินิจฉัยโรค</p>}
+
+      {withFitnessInterpretation && (
+        <p className="mt-3 rounded-2xl border border-slate-200 bg-slate-50/80 px-3 py-2 text-xs font-semibold leading-5 text-slate-500">
+          การแปลผลนี้เทียบตามอายุ/เพศและ protocol ที่กำหนด ใช้เพื่อคัดกรองและติดตามแนวโน้ม ไม่ใช่การวินิจฉัยโรค
+        </p>
+      )}
     </Card>
   );
 }
