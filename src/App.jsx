@@ -1739,18 +1739,18 @@ function OhsTable({ record }) {
 
   const problemMarkers = [
     // ===== Front view =====
-    { view: "front", label: "ไหล่ซ้าย", status: statusOf(4), top: "33%", left: "40%" },
-    { view: "front", label: "ไหล่ขวา", status: statusOf(4), top: "33%", left: "60%" },
+    { view: "front", label: "ไหล่ซ้าย", status: statusOf(4), top: "33%", left: "38%" },
+    { view: "front", label: "ไหล่ขวา", status: statusOf(4), top: "33%", left: "58%" },
 
-    { view: "front", label: "ลำตัว", status: statusOf(0), top: "47%", left: "50%" },
+    { view: "front", label: "ลำตัว", status: statusOf(0), top: "47%", left: "48%" },
 
-    { view: "front", label: "สะโพก", status: statusOf(2), top: "61%", left: "50%" },
+    { view: "front", label: "สะโพก", status: statusOf(2), top: "61%", left: "48%" },
 
-    { view: "front", label: "เข่าซ้าย", status: statusOf(1), top: "72%", left: "37%" },
-    { view: "front", label: "เข่าขวา", status: statusOf(1), top: "72%", left: "63%" },
+    { view: "front", label: "เข่าซ้าย", status: statusOf(1), top: "68%", left: "35%" },
+    { view: "front", label: "เข่าขวา", status: statusOf(1), top: "68%", left: "61%" },
 
-    { view: "front", label: "ข้อเท้าซ้าย", status: statusOf(3), top: "87%", left: "38%" },
-    { view: "front", label: "ข้อเท้าขวา", status: statusOf(3), top: "87%", left: "62%" },
+    { view: "front", label: "ข้อเท้าซ้าย", status: statusOf(3), top: "87%", left: "36%" },
+    { view: "front", label: "ข้อเท้าขวา", status: statusOf(3), top: "87%", left: "60%" },
 
     { view: "front", label: "สมดุล", status: statusOf(5), top: "54%", left: "50%" },
 
@@ -1759,9 +1759,9 @@ function OhsTable({ record }) {
     
     { view: "side", label: "ลำตัว", status: statusOf(0), top: "47%", left: "53%" },
 
-    { view: "side", label: "สะโพก", status: statusOf(2), top: "61%", left: "49%" },
+    { view: "side", label: "สะโพก", status: statusOf(2), top: "61%", left: "39%" },
 
-    { view: "side", label: "เข่า", status: statusOf(1), top: "72%", left: "58%" },
+    { view: "side", label: "เข่า", status: statusOf(1), top: "67%", left: "58%" },
 
     { view: "side", label: "ข้อเท้า", status: statusOf(3), top: "84%", left: "60%" },
   ].filter((marker) => marker.status !== "ปกติ");
