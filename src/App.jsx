@@ -4342,8 +4342,6 @@ function AdminSummary({ records, auditLogs, onFullBackup, onRestoreBackup }) {
     <main className="mx-auto max-w-7xl space-y-5 px-4 py-6">
       <Card title="สรุปภาพรวมแอดมิน" icon={ClipboardIcon}>
                 <div className="relative overflow-hidden rounded-3xl border border-slate-200 bg-white p-3 shadow-[0_10px_28px_rgba(15,23,42,0.045)] ring-1 ring-slate-100">
-                  <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-sky-200 via-indigo-100 to-cyan-200" />
-                
                   <div className="mb-3 flex flex-col gap-3 border-b border-slate-100 pb-3">
                     <div className="flex flex-col gap-2 lg:flex-row lg:items-start lg:justify-between">
                       <div>
