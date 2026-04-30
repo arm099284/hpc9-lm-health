@@ -4447,80 +4447,80 @@ function AdminSummary({ records, auditLogs, onFullBackup, onRestoreBackup }) {
             </span>
           </div>
         
-          <div className="grid gap-4 xl:grid-cols-[1.15fr_0.85fr]">
-            <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-              <div className="grid grid-cols-2 divide-y divide-slate-100 md:grid-cols-5 md:divide-x md:divide-y-0">
-                <div className="px-3 py-2.5">
-                  <div className="text-[10px] font-black uppercase tracking-wide text-sky-600">
-                    ทั้งหมด
-                  </div>
-                  <div className="mt-0.5 flex items-end gap-1">
-                    <span className="text-xl font-black leading-none text-slate-950">
-                      {rows.length}
-                    </span>
-                    <span className="text-[11px] font-bold text-slate-400">
-                      คน
-                    </span>
+                  <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+                    <div className="grid grid-cols-2 divide-y divide-slate-100 md:grid-cols-5 md:divide-x md:divide-y-0">
+                      <div className="px-3 py-2.5">
+                        <div className="text-[10px] font-black uppercase tracking-wide text-sky-600">
+                          ทั้งหมด
+                        </div>
+                        <div className="mt-0.5 flex items-end gap-1">
+                          <span className="text-xl font-black leading-none text-slate-950">
+                            {rows.length}
+                          </span>
+                          <span className="text-[11px] font-bold text-slate-400">
+                            คน
+                          </span>
+                        </div>
+                      </div>
+        
+                      <div className="px-3 py-2.5">
+                        <div className="text-[10px] font-black uppercase tracking-wide text-indigo-600">
+                          เทียบได้
+                        </div>
+                        <div className="mt-0.5 flex items-end gap-1">
+                          <span className="text-xl font-black leading-none text-slate-950">
+                            {comparable.length}
+                          </span>
+                          <span className="text-[11px] font-bold text-slate-400">
+                            ≥2 ครั้ง
+                          </span>
+                        </div>
+                      </div>
+        
+                      <div className="bg-emerald-50/35 px-3 py-2.5">
+                        <div className="text-[10px] font-black uppercase tracking-wide text-emerald-600">
+                          ดีขึ้น
+                        </div>
+                        <div className="mt-0.5 flex items-end gap-1">
+                          <span className="text-xl font-black leading-none text-slate-950">
+                            {improved}
+                          </span>
+                          <span className="text-[11px] font-bold text-slate-400">
+                            คน
+                          </span>
+                        </div>
+                      </div>
+        
+                      <div className="bg-amber-50/35 px-3 py-2.5">
+                        <div className="text-[10px] font-black uppercase tracking-wide text-amber-600">
+                          ต้องติดตาม
+                        </div>
+                        <div className="mt-0.5 flex items-end gap-1">
+                          <span className="text-xl font-black leading-none text-slate-950">
+                            {needFollow}
+                          </span>
+                          <span className="text-[11px] font-bold text-slate-400">
+                            คน
+                          </span>
+                        </div>
+                      </div>
+        
+                      <div className="bg-slate-50/70 px-3 py-2.5">
+                        <div className="text-[10px] font-black uppercase tracking-wide text-slate-500">
+                          คงเดิม
+                        </div>
+                        <div className="mt-0.5 flex items-end gap-1">
+                          <span className="text-xl font-black leading-none text-slate-950">
+                            {noChange}
+                          </span>
+                          <span className="text-[11px] font-bold text-slate-400">
+                            คน
+                          </span>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
-            
-                <div className="px-3 py-2.5">
-                  <div className="text-[10px] font-black uppercase tracking-wide text-indigo-600">
-                    เทียบได้
-                  </div>
-                  <div className="mt-0.5 flex items-end gap-1">
-                    <span className="text-xl font-black leading-none text-slate-950">
-                      {comparable.length}
-                    </span>
-                    <span className="text-[11px] font-bold text-slate-400">
-                      ≥2 ครั้ง
-                    </span>
-                  </div>
-                </div>
-            
-                <div className="px-3 py-2.5 bg-emerald-50/35">
-                  <div className="text-[10px] font-black uppercase tracking-wide text-emerald-600">
-                    ดีขึ้น
-                  </div>
-                  <div className="mt-0.5 flex items-end gap-1">
-                    <span className="text-xl font-black leading-none text-slate-950">
-                      {improved}
-                    </span>
-                    <span className="text-[11px] font-bold text-slate-400">
-                      คน
-                    </span>
-                  </div>
-                </div>
-            
-                <div className="px-3 py-2.5 bg-amber-50/35">
-                  <div className="text-[10px] font-black uppercase tracking-wide text-amber-600">
-                    ต้องติดตาม
-                  </div>
-                  <div className="mt-0.5 flex items-end gap-1">
-                    <span className="text-xl font-black leading-none text-slate-950">
-                      {needFollow}
-                    </span>
-                    <span className="text-[11px] font-bold text-slate-400">
-                      คน
-                    </span>
-                  </div>
-                </div>
-            
-                <div className="px-3 py-2.5 bg-slate-50/70">
-                  <div className="text-[10px] font-black uppercase tracking-wide text-slate-500">
-                    คงเดิม
-                  </div>
-                  <div className="mt-0.5 flex items-end gap-1">
-                    <span className="text-xl font-black leading-none text-slate-950">
-                      {noChange}
-                    </span>
-                    <span className="text-[11px] font-bold text-slate-400">
-                      คน
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
             
         <div className="mt-5 rounded-3xl border border-slate-200 bg-gradient-to-br from-white via-slate-50 to-slate-100 p-4 shadow-[0_12px_35px_rgba(15,23,42,0.08)] ring-1 ring-white/70">
         <div className="mb-3 flex items-center justify-between gap-3 border-b border-slate-200 pb-3">
