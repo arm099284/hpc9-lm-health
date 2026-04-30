@@ -1781,7 +1781,7 @@ function OhsTable({ record }) {
   const normalCount = bodyParts.filter((part) => part.status === "ปกติ").length;
 
   const ImageWithMarkers = ({ type, src, title }) => (
-    <div className="rounded-2xl border border-slate-200 bg-gradient-to-br from-white via-slate-50 to-sky-50/40 p-2.5 shadow-[0_10px_24px_rgba(15,23,42,0.06)]">
+    <div className="flex h-full flex-col rounded-2xl border border-slate-200 bg-gradient-to-br from-white via-slate-50 to-sky-50/40 p-2.5 shadow-[0_10px_24px_rgba(15,23,42,0.06)]">
       <div className="mb-2 flex items-center justify-between gap-2">
         <div className="min-w-0">
           <div className="text-[11px] font-black leading-tight text-slate-800">
@@ -1797,11 +1797,11 @@ function OhsTable({ record }) {
         </span>
       </div>
 
-      <div className="relative aspect-[4/3] overflow-hidden rounded-xl bg-white ring-1 ring-slate-200 shadow-inner">
+      <div className="relative min-h-[360px] flex-1 overflow-hidden rounded-xl bg-white ring-1 ring-slate-200 shadow-inner">
         <img
           src={src}
           alt={title}
-          className="h-full w-full object-contain p-1"
+          className="h-full w-full object-contain p-0"
           draggable={false}
         />
 
