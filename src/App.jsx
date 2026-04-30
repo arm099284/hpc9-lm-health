@@ -1747,16 +1747,16 @@ function OhsTable({ record }) {
 
   const problemMarkers = [
     // ===== Front view =====
-    { view: "front", label: "ไหล่ซ้าย", status: statusOf(4), top: "33%", left: "38%" },
-    { view: "front", label: "ไหล่ขวา", status: statusOf(4), top: "33%", left: "58%" },
+    { view: "front", label: "ไหล่ซ้าย", status: statusOf(4), top: "34%", left: "38%" },
+    { view: "front", label: "ไหล่ขวา", status: statusOf(4), top: "34%", left: "58%" },
 
     { view: "front", label: "ลำตัว", status: statusOf(0), top: "47%", left: "48%" },
 
-    { view: "front", label: "เข่าซ้าย", status: statusOf(1), top: "68%", left: "35%" },
-    { view: "front", label: "เข่าขวา", status: statusOf(1), top: "68%", left: "61%" },
-
-    { view: "front", label: "ข้อเท้าซ้าย", status: statusOf(3), top: "81%", left: "36%" },
-    { view: "front", label: "ข้อเท้าขวา", status: statusOf(3), top: "81%", left: "60%" },
+    { view: "front", label: "เข่าซ้าย", status: statusOf(1), top: "67%", left: "35%" },
+    { view: "front", label: "เข่าขวา", status: statusOf(1), top: "67%", left: "61%" },
+    
+    { view: "front", label: "ข้อเท้าซ้าย", status: statusOf(3), top: "80%", left: "36%" },
+    { view: "front", label: "ข้อเท้าขวา", status: statusOf(3), top: "80%", left: "60%" },
 
     { view: "front", label: "สมดุล", status: statusOf(5), top: "56%", left: "48%", kind: "balance" },
 
@@ -1767,9 +1767,9 @@ function OhsTable({ record }) {
 
     { view: "side", label: "สะโพก", status: statusOf(2), top: "59%", left: "37%" },
 
-    { view: "side", label: "เข่า", status: statusOf(1), top: "65.5%", left: "56.5%" },
+    { view: "side", label: "เข่า", status: statusOf(1), top: "66%", left: "58%" },
 
-    { view: "side", label: "ข้อเท้า", status: statusOf(3), top: "83%", left: "44%" },
+    { view: "side", label: "ข้อเท้า", status: statusOf(3), top: "82%", left: "45%" },
   ];
 
   const bodyParts = [
