@@ -1623,20 +1623,66 @@ function Summary({ record }) {
     ["OHS ล่าสุด", ohs.text, `ปกติ ${ohs.normal}/6 ข้อ`, ohs.tone],
   ];
 
-  return (
-    <div className="grid gap-4 md:grid-cols-5">
-      {items.map(([a, b, c, t]) => (
-        <div key={a} className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-          <div className="mb-2">
-            <Pill tone={t}>{a}</Pill>
-          </div>
-          <div className="text-3xl font-bold text-slate-900">{b}</div>
-          <div className="mt-1 text-sm font-semibold text-slate-500">{c}</div>
-        </div>
-      ))}
-    </div>
-  );
-}
+    return (
+      <div className="grid gap-3 md:grid-cols-5">
+        {items.map(([a, b, c, t]) => {
+          const toneClass = {
+            good: {
+              card: "border-emerald-200 bg-gradient-to-br from-emerald-50 via-white to-white shadow-[0_10px_24px_rgba(16,185,129,0.10)]",
+              chip: "border-emerald-200 bg-emerald-100 text-emerald-700",
+              bar: "from-emerald-500 to-teal-500",
+            },
+            warn: {
+              card: "border-amber-200 bg-gradient-to-br from-amber-50 via-white to-white shadow-[0_10px_24px_rgba(245,158,11,0.10)]",
+              chip: "border-amber-200 bg-amber-100 text-amber-700",
+              bar: "from-amber-500 to-yellow-500",
+            },
+            bad: {
+              card: "border-rose-200 bg-gradient-to-br from-rose-50 via-white to-white shadow-[0_10px_24px_rgba(244,63,94,0.10)]",
+              chip: "border-rose-200 bg-rose-100 text-rose-700",
+              bar: "from-rose-500 to-pink-500",
+            },
+            gray: {
+              card: "border-slate-200 bg-gradient-to-br from-slate-50 via-white to-white shadow-[0_10px_24px_rgba(15,23,42,0.08)]",
+              chip: "border-slate-200 bg-slate-100 text-slate-700",
+              bar: "from-slate-400 to-slate-600",
+            },
+          }[t] || {
+            card: "border-sky-200 bg-gradient-to-br from-sky-50 via-white to-white shadow-[0_10px_24px_rgba(14,165,233,0.10)]",
+            chip: "border-sky-200 bg-sky-100 text-sky-700",
+            bar: "from-sky-500 to-cyan-500",
+          };
+  
+          return (
+            <div
+              key={a}
+              className={`group relative overflow-hidden rounded-2xl border p-4 transition-all duration-200 hover:-translate-y-0.5 ${toneClass.card}`}
+            >
+              <div className={`absolute inset-x-0 top-0 h-1 bg-gradient-to-r ${toneClass.bar}`} />
+  
+              <div className="flex min-h-[96px] flex-col justify-between">
+                <div>
+                  <div
+                    className={`inline-flex rounded-full border px-2.5 py-1 text-[11px] font-black leading-none ${toneClass.chip}`}
+                  >
+                    {a}
+                  </div>
+  
+                  <div className="mt-3 text-[34px] font-black leading-none tracking-tight text-slate-950">
+                    {b}
+                  </div>
+                </div>
+  
+                <div className="mt-3 text-xs font-semibold text-slate-500">
+                  {c}
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    );
+  }
 
 function Trend({ record }) {
   const all = [...metrics.inbody, ...metrics.fitness, ["ohs", "คะแนน OHS ปกติ", "/6", "higher"]];
