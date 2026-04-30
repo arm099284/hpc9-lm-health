@@ -1706,6 +1706,7 @@ function CompareTable({ record, title, icon, list, withFitnessInterpretation = f
 function OhsTable({ record }) {
   const sessions = record?.sessions || [];
   const [selectedRoundIndex, setSelectedRoundIndex] = useState(0);
+  const [showOhsDetail, setShowOhsDetail] = useState(false);
 
   const selectedSession =
     sessions[selectedRoundIndex] || sessions[0] || { no: 1, ohs: [] };
@@ -1771,6 +1772,7 @@ function OhsTable({ record }) {
     <div className="rounded-2xl border border-slate-200 bg-gradient-to-b from-white to-slate-50 p-2 shadow-sm">
       <div className="mb-2 flex items-center justify-between">
         <div className="text-[11px] font-black text-slate-700">{title}</div>
+
         <span className="rounded-full bg-slate-50 px-2 py-0.5 text-[9px] font-bold text-slate-500 ring-1 ring-slate-200">
           OHS
         </span>
@@ -1780,7 +1782,7 @@ function OhsTable({ record }) {
         <img
           src={src}
           alt={title}
-          className="h-full w-full object-contain p-2"
+          className="h-full w-full object-contain p-1.5"
           draggable={false}
         />
 
@@ -1811,64 +1813,17 @@ function OhsTable({ record }) {
   );
 
   return (
-    <Card title="Overhead Deep Squat ครั้งที่ 1–4" icon={ClipboardIcon}>
-      <div className="grid gap-4 lg:grid-cols-[1.15fr_.85fr]">
-        <div className="overflow-hidden rounded-2xl border border-slate-200 bg-gradient-to-br from-white to-slate-50 shadow-sm">
-          <table className="w-full table-fixed text-left text-[11px]">
-            <colgroup>
-              <col className="w-[36%]" />
-              <col className="w-[16%]" />
-              <col className="w-[16%]" />
-              <col className="w-[16%]" />
-              <col className="w-[16%]" />
-            </colgroup>
-
-            <thead className="bg-slate-50 text-[10px] font-black uppercase tracking-wide text-slate-500">
-              <tr>
-                <th className="px-3 py-2">รายการ</th>
-                {sessions.map((s) => (
-                  <th key={s.no} className="px-2 py-2 text-center">
-                    ครั้ง {s.no}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-
-            <tbody>
-              {ohsItems.map((x, i) => (
-                <tr key={x} className="border-t border-slate-100">
-                  <td className="px-3 py-2 font-bold leading-tight text-slate-900">
-                    {x}
-                  </td>
-
-                  {sessions.map((s) => (
-                    <td key={s.no} className="px-2 py-2 text-center">
-                      <Pill tone={toneOf(s.ohs[i])}>{s.ohs[i]}</Pill>
-                    </td>
-                  ))}
-                </tr>
-              ))}
-
-              <tr className="border-t border-slate-200 bg-slate-50/80">
-                <td className="px-3 py-2 font-black text-slate-900">สรุป</td>
-
-                {sessions.map((s) => {
-                  const o = ohsSummary(s);
-
-                  return (
-                    <td key={s.no} className="px-2 py-2 text-center">
-                      <Pill tone={o.tone}>
-                        {o.text} {o.normal}/6
-                      </Pill>
-                    </td>
-                  );
-                })}
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-        <div className="rounded-2xl border border-slate-200 bg-gradient-to-br from-white via-slate-50 to-sky-50/30 p-3 shadow-[0_8px_24px_rgba(15,23,42,0.05)]">
+    <Card
+      title="Overhead Deep Squat ครั้งที่ 1–4"
+      icon={ClipboardIcon}
+      right={
+        <Pill tone={selectedSummary.tone}>
+          {selectedSummary.normal}/6
+        </Pill>
+      }
+    >
+      <div className="space-y-3">
+        <div className="rounded-3xl border border-slate-200 bg-gradient-to-br from-white via-slate-50 to-sky-50/30 p-3 shadow-[0_8px_24px_rgba(15,23,42,0.05)]">
           <div className="mb-3 flex items-start justify-between gap-3">
             <div>
               <div className="text-sm font-black text-slate-900">
@@ -1879,9 +1834,9 @@ function OhsTable({ record }) {
               </div>
             </div>
 
-            <Pill tone={selectedSummary.tone}>
-              {selectedSummary.normal}/6
-            </Pill>
+            <div className="shrink-0 rounded-full border border-slate-200 bg-white px-2.5 py-1 text-[10px] font-black text-slate-600 shadow-sm">
+              ครั้งที่ {selectedSession.no}
+            </div>
           </div>
 
           <div className="mb-3 rounded-2xl border border-slate-200 bg-white/80 p-1 shadow-sm">
@@ -1907,58 +1862,133 @@ function OhsTable({ record }) {
             </div>
           </div>
 
-          <div className="rounded-3xl border border-slate-200 bg-white p-3 shadow-inner">
-            <div className="grid gap-3 sm:grid-cols-2">
-              <ImageWithMarkers
-                type="front"
-                title="มุมหน้า"
-                src="/images/overhead-squat_anterior.png.webp"
-              />
+          <div className="grid gap-3 md:grid-cols-2">
+            <ImageWithMarkers
+              type="front"
+              title="มุมหน้า"
+              src="/images/overhead-squat_anterior.png.webp"
+            />
 
-              <ImageWithMarkers
-                type="side"
-                title="มุมข้าง"
-                src="/images/overhead-squat_lateral.png.webp"
-              />
-            </div>
-
-            <div className="mt-3 space-y-2 border-t border-slate-100 pt-3">
-              {bodyParts.map((part) => (
-                <div
-                  key={part.label}
-                  className="flex items-center justify-between gap-2 rounded-2xl border border-slate-100 bg-slate-50/60 px-3 py-2"
-                >
-                  <div className="min-w-0">
-                    <div className="text-[11px] font-black leading-tight text-slate-900">
-                      {part.label}
-                    </div>
-                    <div className="mt-0.5 text-[9px] font-semibold leading-tight text-slate-400">
-                      {part.sub}
-                    </div>
-                  </div>
-
-                  <Pill tone={toneOf(part.status)}>{part.status}</Pill>
-                </div>
-              ))}
-            </div>
-
-            <div className="mt-3 flex flex-wrap gap-2 border-t border-slate-100 pt-3 text-[10px] font-bold text-slate-500">
-              <span className="inline-flex items-center gap-1 rounded-full bg-slate-50 px-2 py-1 ring-1 ring-slate-200">
-                <span className="h-2 w-2 rounded-full bg-slate-400" />
-                ปกติ
-              </span>
-
-              <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-1 text-amber-700 ring-1 ring-amber-200">
-                <span className="h-2 w-2 rounded-full bg-amber-400" />
-                ต้องระวัง
-              </span>
-
-              <span className="inline-flex items-center gap-1 rounded-full bg-rose-50 px-2 py-1 text-rose-700 ring-1 ring-rose-200">
-                <span className="h-2 w-2 rounded-full bg-rose-500" />
-                ควรปรับแก้
-              </span>
-            </div>
+            <ImageWithMarkers
+              type="side"
+              title="มุมข้าง"
+              src="/images/overhead-squat_lateral.png.webp"
+            />
           </div>
+
+          <div className="mt-3 flex flex-wrap gap-2">
+            {bodyParts.map((part) => (
+              <div
+                key={part.label}
+                className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-2.5 py-1.5 shadow-sm"
+              >
+                <span className="text-[11px] font-black text-slate-800">
+                  {part.label}
+                </span>
+
+                <Pill tone={toneOf(part.status)}>{part.status}</Pill>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-3 flex flex-wrap gap-2 border-t border-slate-100 pt-3 text-[10px] font-bold text-slate-500">
+            <span className="inline-flex items-center gap-1 rounded-full bg-slate-50 px-2 py-1 ring-1 ring-slate-200">
+              <span className="h-2 w-2 rounded-full bg-slate-400" />
+              ปกติ
+            </span>
+
+            <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-1 text-amber-700 ring-1 ring-amber-200">
+              <span className="h-2 w-2 rounded-full bg-amber-400" />
+              ต้องระวัง
+            </span>
+
+            <span className="inline-flex items-center gap-1 rounded-full bg-rose-50 px-2 py-1 text-rose-700 ring-1 ring-rose-200">
+              <span className="h-2 w-2 rounded-full bg-rose-500" />
+              ควรปรับแก้
+            </span>
+          </div>
+        </div>
+
+        <div className="rounded-2xl border border-slate-200 bg-white shadow-sm">
+          <button
+            type="button"
+            onClick={() => setShowOhsDetail((value) => !value)}
+            className="flex w-full items-center justify-between gap-3 px-3.5 py-2.5 text-left"
+          >
+            <div>
+              <div className="text-sm font-black text-slate-900">
+                รายละเอียดรายครั้ง
+              </div>
+              <div className="text-[10px] font-semibold text-slate-400">
+                ตารางผลการประเมิน OHS ครั้งที่ 1–4
+              </div>
+            </div>
+
+            <span className="rounded-full bg-slate-50 px-2.5 py-1 text-[11px] font-black text-slate-500 ring-1 ring-slate-200">
+              {showOhsDetail ? "ซ่อน" : "แสดง"} {showOhsDetail ? "−" : "+"}
+            </span>
+          </button>
+
+          {showOhsDetail && (
+            <div className="border-t border-slate-100 p-3">
+              <div className="overflow-hidden rounded-2xl border border-slate-200 bg-gradient-to-br from-white to-slate-50">
+                <table className="w-full table-fixed text-left text-[11px]">
+                  <colgroup>
+                    <col className="w-[36%]" />
+                    <col className="w-[16%]" />
+                    <col className="w-[16%]" />
+                    <col className="w-[16%]" />
+                    <col className="w-[16%]" />
+                  </colgroup>
+
+                  <thead className="bg-slate-50 text-[10px] font-black uppercase tracking-wide text-slate-500">
+                    <tr>
+                      <th className="px-3 py-2">รายการ</th>
+                      {sessions.map((s) => (
+                        <th key={s.no} className="px-2 py-2 text-center">
+                          ครั้ง {s.no}
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+
+                  <tbody>
+                    {ohsItems.map((x, i) => (
+                      <tr key={x} className="border-t border-slate-100">
+                        <td className="px-3 py-2 font-bold leading-tight text-slate-900">
+                          {x}
+                        </td>
+
+                        {sessions.map((s) => (
+                          <td key={s.no} className="px-2 py-2 text-center">
+                            <Pill tone={toneOf(s.ohs[i])}>{s.ohs[i]}</Pill>
+                          </td>
+                        ))}
+                      </tr>
+                    ))}
+
+                    <tr className="border-t border-slate-200 bg-slate-50/80">
+                      <td className="px-3 py-2 font-black text-slate-900">
+                        สรุป
+                      </td>
+
+                      {sessions.map((s) => {
+                        const o = ohsSummary(s);
+
+                        return (
+                          <td key={s.no} className="px-2 py-2 text-center">
+                            <Pill tone={o.tone}>
+                              {o.text} {o.normal}/6
+                            </Pill>
+                          </td>
+                        );
+                      })}
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </Card>
