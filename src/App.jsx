@@ -1769,16 +1769,16 @@ function OhsTable({ record }) {
 
   const problemMarkers = [
     // ===== Front view =====
-    { view: "front", label: "ไหล่ซ้าย", status: statusOf(4), top: "34%", left: "38%" },
-    { view: "front", label: "ไหล่ขวา", status: statusOf(4), top: "34%", left: "58%" },
+    { view: "front", label: "ไหล่ซ้าย", status: statusOf(4), top: "36%", left: "38%" },
+    { view: "front", label: "ไหล่ขวา", status: statusOf(4), top: "36%", left: "58%" },
 
     { view: "front", label: "ลำตัว", status: statusOf(0), top: "47%", left: "48%" },
 
-    { view: "front", label: "เข่าซ้าย", status: statusOf(1), top: "67%", left: "35%" },
-    { view: "front", label: "เข่าขวา", status: statusOf(1), top: "67%", left: "61%" },
+    { view: "front", label: "เข่าซ้าย", status: statusOf(1), top: "65%", left: "35%" },
+    { view: "front", label: "เข่าขวา", status: statusOf(1), top: "65%", left: "61%" },
     
-    { view: "front", label: "ข้อเท้าซ้าย", status: statusOf(3), top: "80%", left: "36%" },
-    { view: "front", label: "ข้อเท้าขวา", status: statusOf(3), top: "80%", left: "60%" },
+    { view: "front", label: "ข้อเท้าซ้าย", status: statusOf(3), top: "78%", left: "36%" },
+    { view: "front", label: "ข้อเท้าขวา", status: statusOf(3), top: "78%", left: "60%" },
 
     { view: "front", label: "สมดุล", status: statusOf(5), top: "56%", left: "48%", kind: "balance" },
 
@@ -1787,11 +1787,11 @@ function OhsTable({ record }) {
     
     { view: "side", label: "ลำตัว", status: statusOf(0), top: "47%", left: "46%" },
 
-    { view: "side", label: "สะโพก", status: statusOf(2), top: "59%", left: "37%" },
+    { view: "side", label: "สะโพก", status: statusOf(2), top: "58%", left: "37%" },
 
-    { view: "side", label: "เข่า", status: statusOf(1), top: "64%", left: "58%" },
+    { view: "side", label: "เข่า", status: statusOf(1), top: "62%", left: "56%" },
 
-    { view: "side", label: "ข้อเท้า", status: statusOf(3), top: "82%", left: "47%" },
+    { view: "side", label: "ข้อเท้า", status: statusOf(3), top: "80%", left: "47%" },
   ];
 
   const bodyParts = [
@@ -2947,17 +2947,17 @@ return (
         </div>
       </div>
 
-      <div className="rounded-2xl border border-slate-200 bg-white/90 p-4 shadow-sm">
+      <div className="rounded-2xl border border-slate-200 bg-gradient-to-br from-white via-slate-50 to-white p-3.5 shadow-sm">
         <div className="text-sm font-black text-slate-500">
           Focus / จุดเน้น
         </div>
 
-        <div className="mt-3 flex flex-wrap gap-2">
+        <div className="mt-2 flex flex-wrap gap-1.5">
           {focusItems.length ? (
             focusItems.map((item) => (
               <span
                 key={item}
-                className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-sm font-bold text-slate-700"
+                className="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-bold text-slate-700 shadow-sm"
               >
                 {item}
               </span>
@@ -2971,26 +2971,31 @@ return (
       </div>
 
       {(program.precaution || program.followUp) && (
-        <div className="grid gap-4 md:grid-cols-2">
+        <div className="grid items-stretch gap-3 md:grid-cols-2">
           {program.precaution && (
-            <div className="rounded-2xl border border-amber-200 bg-gradient-to-br from-amber-50 via-white to-amber-50/70 p-4 shadow-[0_8px_22px_rgba(245,158,11,0.07)]">
-              <div className="text-sm font-black text-amber-700">
+            <div className="flex h-full flex-col rounded-2xl border border-amber-200 bg-gradient-to-br from-amber-50 via-white to-amber-50/70 p-3.5 shadow-[0_8px_22px_rgba(245,158,11,0.07)]">
+              <div className="flex items-center gap-2 text-sm font-black text-amber-700">
+                <span className="flex h-7 w-7 items-center justify-center rounded-xl border border-amber-200 bg-white text-xs shadow-sm">
+                  !
+                </span>
                 ข้อควรระวัง
               </div>
 
-              <div className="mt-2 text-base font-bold leading-7 text-slate-800">
+              <div className="mt-2 rounded-2xl border border-amber-100 bg-white/80 px-3 py-2.5 text-sm font-bold leading-6 text-slate-800 shadow-sm">
                 {program.precaution}
               </div>
             </div>
           )}
 
           {program.followUp && (
-            <div className="rounded-2xl border border-sky-200 bg-gradient-to-br from-sky-50 via-white to-sky-50/70 p-4 shadow-[0_8px_22px_rgba(14,165,233,0.07)]">
-              <div className="text-sm font-black text-sky-700">
+            <div className="flex h-full flex-col rounded-2xl border border-sky-200 bg-gradient-to-br from-sky-50 via-white to-sky-50/70 p-3.5 shadow-[0_8px_22px_rgba(14,165,233,0.07)]">
+              <div className="flex items-center gap-2 text-sm font-black text-sky-700">
+                <span className="flex h-7 w-7 items-center justify-center rounded-xl border border-sky-200 bg-white text-xs shadow-sm">
+                  i
+                </span>
                 คำแนะนำเพิ่มเติม
               </div>
-
-              <div className="mt-2 text-base font-bold leading-7 text-slate-800">
+              <div className="mt-2 rounded-2xl border border-sky-100 bg-white/80 px-3 py-2.5 text-sm font-bold leading-6 text-slate-800 shadow-sm">
                 {program.followUp}
               </div>
             </div>
