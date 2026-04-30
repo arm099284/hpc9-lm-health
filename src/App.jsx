@@ -3645,10 +3645,67 @@ function Dashboard({ record, back }) {
 }
 
 function Info({ label, value, tone = "default" }) {
+  const styles = {
+    default: {
+      card: "border-slate-200 bg-white",
+      label: "text-slate-500",
+      value: "text-slate-950",
+      bar: "from-slate-200 to-slate-300",
+      dot: "bg-slate-300",
+    },
+    admin: {
+      card: "border-sky-200 bg-gradient-to-br from-white via-sky-50/70 to-white",
+      label: "text-sky-700",
+      value: "text-slate-950",
+      bar: "from-sky-300 to-cyan-300",
+      dot: "bg-sky-300",
+    },
+    good: {
+      card: "border-emerald-200 bg-gradient-to-br from-white via-emerald-50/70 to-white",
+      label: "text-emerald-700",
+      value: "text-slate-950",
+      bar: "from-emerald-300 to-teal-300",
+      dot: "bg-emerald-300",
+    },
+    fat: {
+      card: "border-amber-200 bg-gradient-to-br from-white via-amber-50/70 to-white",
+      label: "text-amber-700",
+      value: "text-slate-950",
+      bar: "from-amber-300 to-yellow-300",
+      dot: "bg-amber-300",
+    },
+    muscle: {
+      card: "border-sky-200 bg-gradient-to-br from-white via-sky-50/70 to-white",
+      label: "text-sky-700",
+      value: "text-slate-950",
+      bar: "from-sky-300 to-cyan-300",
+      dot: "bg-sky-300",
+    },
+  };
+
+  const s = styles[tone] || styles.default;
+
   return (
-    <div className={`rounded-2xl border p-4 shadow-sm ${panelToneClass(tone)}`}>
-      <div className="text-[11px] font-bold text-slate-500">{label}</div>
-      <div className="mt-2 text-2xl font-black text-slate-900">{value}</div>
+    <div
+      className={`relative overflow-hidden rounded-2xl border px-3.5 py-3 shadow-[0_8px_20px_rgba(15,23,42,0.045)] ${s.card}`}
+    >
+      <div className={`absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r ${s.bar}`} />
+
+      <div className="flex items-start justify-between gap-2">
+        <div className="min-w-0">
+          <div className={`truncate text-[11px] font-black leading-tight ${s.label}`}>
+            {label}
+          </div>
+
+          <div className={`mt-1.5 text-2xl font-black leading-none tracking-tight ${s.value}`}>
+            {value}
+          </div>
+        </div>
+
+        <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-white bg-white shadow-sm">
+          <span className={`h-2 w-2 rounded-full ${s.dot}`} />
+        </span>
+      </div>
     </div>
   );
 }
