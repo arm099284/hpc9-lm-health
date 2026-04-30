@@ -2896,11 +2896,7 @@ return (
                   ? `${program.strengthFrequency} วัน/สัปดาห์`
                   : "ยังไม่กำหนดวันฝึก"}
               </div>
-            </div>
-
-            <span className="rounded-full border border-sky-200 bg-white px-2 py-0.5 text-[10px] font-bold text-sky-700 shadow-sm">
-              Strength
-            </span>
+            </div>       
           </div>
       
           <div className="mt-2 rounded-xl border border-sky-100 bg-white px-3 py-2 text-xs font-bold leading-5 text-slate-800 shadow-sm">
@@ -2930,10 +2926,6 @@ return (
                 )}
               </div>
             </div>
-
-            <span className="rounded-full border border-emerald-200 bg-white px-2 py-0.5 text-[10px] font-bold text-emerald-700 shadow-sm">
-              Cardio
-            </span>
           </div>
       
           <div className="mt-2 flex items-center gap-1.5 whitespace-nowrap">
