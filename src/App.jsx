@@ -4448,50 +4448,60 @@ function AdminSummary({ records, auditLogs, onFullBackup, onRestoreBackup }) {
           </div>
         
           <div className="rounded-2xl border border-slate-200 bg-gradient-to-br from-white via-slate-50/70 to-sky-50/20 p-3 shadow-sm">
-            <div className="grid gap-2 md:grid-cols-3">
-              <div className="rounded-xl border border-slate-100 bg-white/80 px-3 py-2">
-                <div className="text-[10px] font-black text-sky-600">
-                  ผู้รับบริการทั้งหมด
-                </div>
-                <div className="mt-0.5 flex items-end gap-1">
-                  <span className="text-xl font-black leading-none text-slate-950">
+            <div className="rounded-2xl border border-slate-100 bg-white/80 px-3 py-2">
+              <div className="grid grid-cols-2 gap-2 md:grid-cols-5">
+                <div>
+                  <div className="text-[10px] font-black text-sky-600">
+                    ทั้งหมด
+                  </div>
+                  <div className="mt-0.5 text-lg font-black leading-none text-slate-950">
                     {rows.length}
-                  </span>
-                  <span className="text-[11px] font-bold text-slate-400">
-                    คน
-                  </span>
+                    <span className="ml-1 text-[10px] font-bold text-slate-400">คน</span>
+                  </div>
                 </div>
-              </div>
-        
-              <div className="rounded-xl border border-slate-100 bg-white/80 px-3 py-2">
-                <div className="text-[10px] font-black text-indigo-600">
-                  เทียบผลได้
-                </div>
-                <div className="mt-0.5 flex items-end gap-1">
-                  <span className="text-xl font-black leading-none text-slate-950">
+            
+                <div>
+                  <div className="text-[10px] font-black text-indigo-600">
+                    เทียบผลได้
+                  </div>
+                  <div className="mt-0.5 text-lg font-black leading-none text-slate-950">
                     {comparable.length}
-                  </span>
-                  <span className="text-[11px] font-bold text-slate-400">
-                    คน
-                  </span>
+                    <span className="ml-1 text-[10px] font-bold text-slate-400">คน</span>
+                  </div>
                 </div>
-              </div>
-        
-              <div className="rounded-xl border border-slate-100 bg-white/80 px-3 py-2">
-                <div className="text-[10px] font-black text-slate-500">
-                  ข้อมูลยังไม่พอ
+            
+                <div>
+                  <div className="text-[10px] font-black text-emerald-600">
+                    ดีขึ้น
+                  </div>
+                  <div className="mt-0.5 text-lg font-black leading-none text-slate-950">
+                    {improved}
+                    <span className="ml-1 text-[10px] font-bold text-slate-400">คน</span>
+                  </div>
                 </div>
-                <div className="mt-0.5 flex items-end gap-1">
-                  <span className="text-xl font-black leading-none text-slate-950">
+            
+                <div>
+                  <div className="text-[10px] font-black text-amber-600">
+                    ต้องติดตาม
+                  </div>
+                  <div className="mt-0.5 text-lg font-black leading-none text-slate-950">
+                    {needFollow}
+                    <span className="ml-1 text-[10px] font-bold text-slate-400">คน</span>
+                  </div>
+                </div>
+            
+                <div>
+                  <div className="text-[10px] font-black text-slate-500">
+                    ข้อมูลไม่พอ
+                  </div>
+                  <div className="mt-0.5 text-lg font-black leading-none text-slate-950">
                     {notEnough.length}
-                  </span>
-                  <span className="text-[11px] font-bold text-slate-400">
-                    คน
-                  </span>
+                    <span className="ml-1 text-[10px] font-bold text-slate-400">คน</span>
+                  </div>
                 </div>
               </div>
             </div>
-        
+                    
             <div className="mt-3 border-t border-slate-100 pt-3">
               <div className="mb-2 flex items-center justify-between gap-3">
                 <div>
