@@ -4452,8 +4452,8 @@ function AdminSummary({ records, auditLogs, onFullBackup, onRestoreBackup }) {
                   </div>
                 
                   <div className="grid gap-4 lg:grid-cols-[0.28fr_0.72fr]">
-                    <div className="rounded-2xl border border-sky-100 bg-gradient-to-br from-white via-sky-50/45 to-indigo-50/30 p-3 shadow-sm ring-1 ring-white/70">
-                      <div className="mb-2.5 border-b border-sky-100/70 pb-2">
+                    <div className="rounded-2xl border border-slate-100 bg-gradient-to-br from-white via-slate-50/70 to-sky-50/25 p-3 shadow-sm">
+                      <div className="mb-2.5 border-b border-slate-100 pb-2">
                         <div className="text-[10px] font-black uppercase tracking-wide text-sky-700">
                           Overview
                         </div>
@@ -4475,7 +4475,7 @@ function AdminSummary({ records, auditLogs, onFullBackup, onRestoreBackup }) {
                           </div>
                         </div>
                 
-                        <div className="grid grid-cols-2 gap-2 border-t border-sky-100/70 pt-2">
+                        <div className="grid grid-cols-2 gap-2 border-t border-slate-100 pt-2">
                           <div>
                             <div className="text-[10px] font-bold text-slate-500">
                               เทียบผลได้
