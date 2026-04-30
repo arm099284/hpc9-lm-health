@@ -5589,9 +5589,9 @@ function lmAdminRow(record) {
              </div>
             </div>
               
-            <div className="overflow-x-auto rounded-xl border border-slate-200">
-              <table className="w-full min-w-[720px] text-left text-xs">
-                <thead className="bg-slate-100/80 text-[11px] font-black uppercase tracking-wide text-slate-500">
+            <div className="overflow-x-auto rounded-3xl border border-slate-200 bg-white shadow-[0_8px_22px_rgba(15,23,42,0.045)]">
+              <table className="w-full min-w-[1380px] border-separate border-spacing-0 text-left text-sm">
+                <thead className="bg-gradient-to-r from-slate-50 via-sky-50/60 to-slate-50 text-[11px] font-black uppercase tracking-wide text-slate-500">
                   <tr>
                     <th className="px-2 py-2 whitespace-nowrap">HN / ชื่อ</th>
                     <th className="px-2 py-2 whitespace-nowrap">ครั้งที่ 1</th>
@@ -5606,7 +5606,7 @@ function lmAdminRow(record) {
             
                 <tbody>
                   {pagedRows.map((row) => (
-                    <tr key={row.hn} className="border-t border-slate-100">
+                    <tr key={row.hn} className="border-t border-slate-100 transition-colors hover:bg-slate-50/80">
                       <td className="px-2 py-2 align-top">
                         <div className="whitespace-nowrap text-[11px] font-black leading-tight text-slate-900">
                           {row.hn}
