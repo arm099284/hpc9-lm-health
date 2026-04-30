@@ -2852,31 +2852,32 @@ if (!hasProgramData) {
 return (
   <Card title="โปรแกรมที่ได้รับ" icon={ClipboardIcon}>
     <div className="space-y-4 rounded-3xl border border-slate-200 bg-gradient-to-br from-white via-slate-50 to-sky-50/50 p-4 shadow-[0_10px_28px_rgba(15,23,42,0.05)]">
-      <div className="rounded-2xl border border-slate-200 bg-white/90 p-4 shadow-sm">
-        <div className="text-sm font-bold text-slate-500">
-          โปรแกรมหลัก
-        </div>
-
-        <div className="mt-1 flex flex-wrap items-center gap-2">
-          <div className="text-3xl font-black tracking-tight text-slate-900">
-            {show(program.type)}
-          </div>
-
-          {program.strengthFrequency && (
-            <span className="text-2xl font-black text-slate-400">
-              •
-            </span>
-          )}
-
-          {program.strengthFrequency && (
-            <div className="text-2xl font-black text-slate-600">
-              {program.strengthFrequency} วัน/สัปดาห์
+      <div className="rounded-2xl border border-slate-200 bg-gradient-to-br from-white via-slate-50 to-white p-3.5 shadow-sm">
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <div className="text-xs font-bold text-slate-500">
+              โปรแกรมหลัก
             </div>
-          )}
+      
+            <div className="mt-1 flex min-w-0 items-center gap-1.5 whitespace-nowrap">
+              <span className="text-2xl font-black tracking-tight text-slate-950">
+                {show(program.type)}
+              </span>
+      
+              {program.strengthFrequency && (
+                <>
+                  <span className="text-lg font-black text-slate-300">•</span>
+                  <span className="text-lg font-black text-slate-700">
+                    {program.strengthFrequency} วัน/สัปดาห์
+                  </span>
+                </>
+              )}
+            </div>
+          </div>
         </div>
-
+      
         {record.goal && (
-          <div className="mt-3 inline-flex items-center rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-700">
+          <div className="mt-2 inline-flex max-w-full items-center rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-0.5 text-[11px] font-bold text-emerald-700">
             เป้าหมาย: {record.goal}
           </div>
         )}
@@ -2890,12 +2891,11 @@ return (
                 Strength Plan
               </div>
       
-              <div className="mt-1 text-lg font-black leading-tight text-slate-900">
+              <div className="mt-1 whitespace-nowrap text-base font-black leading-tight text-slate-900">
                 {program.strengthFrequency
                   ? `${program.strengthFrequency} วัน/สัปดาห์`
                   : "ยังไม่กำหนดวันฝึก"}
               </div>
-            </div>
       
             <span className="rounded-full border border-sky-200 bg-white px-2 py-0.5 text-[10px] font-bold text-sky-700 shadow-sm">
               Strength
@@ -2920,7 +2920,7 @@ return (
                 Cardio Plan
               </div>
       
-              <div className="mt-1 text-lg font-black leading-tight text-slate-900">
+              <div className="mt-1 whitespace-nowrap text-[15px] font-black leading-tight text-slate-900">
                 {show(program.cardioType)}
                 {program.cardioDuration && (
                   <span className="text-slate-600">
@@ -2928,7 +2928,6 @@ return (
                   </span>
                 )}
               </div>
-            </div>
       
             <span className="rounded-full border border-emerald-200 bg-white px-2 py-0.5 text-[10px] font-bold text-emerald-700 shadow-sm">
               Cardio
