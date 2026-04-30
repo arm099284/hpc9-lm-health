@@ -4438,7 +4438,7 @@ function AdminSummary({ records, auditLogs, onFullBackup, onRestoreBackup }) {
               </h3>
         
               <p className="mt-0.5 text-[11px] font-semibold text-slate-500">
-                สรุปจำนวนผู้รับบริการและแนวโน้มผลลัพธ์ในช่วงที่เลือก
+                สรุปจำนวนผู้รับบริการ การเทียบผล และแนวโน้มสุขภาพในช่วงที่เลือก
               </p>
             </div>
         
@@ -4447,114 +4447,78 @@ function AdminSummary({ records, auditLogs, onFullBackup, onRestoreBackup }) {
             </span>
           </div>
         
-          <div className="grid items-start gap-3 lg:grid-cols-[1fr_0.92fr]">
-            <div className="flex h-full items-center rounded-2xl border border-slate-200 bg-gradient-to-br from-white via-slate-50/70 to-sky-50/20 px-3 py-2.5 shadow-sm">
-              <div className="grid w-full grid-cols-5 items-center divide-x divide-slate-200">
-                <div className="px-3">
-                  <div className="text-[10px] font-black text-sky-600">
-                    ทั้งหมด
-                  </div>
-                  <div className="mt-0.5 flex items-end gap-1">
-                    <span className="text-lg font-black leading-none text-slate-950">
-                      {rows.length}
-                    </span>
-                    <span className="text-[10px] font-bold text-slate-400">
-                      คน
-                    </span>
-                  </div>
+          <div className="rounded-2xl border border-slate-200 bg-gradient-to-br from-white via-slate-50/70 to-sky-50/20 p-3 shadow-sm">
+            <div className="grid gap-2 md:grid-cols-3">
+              <div className="rounded-xl border border-slate-100 bg-white/80 px-3 py-2">
+                <div className="text-[10px] font-black text-sky-600">
+                  ผู้รับบริการทั้งหมด
                 </div>
-        
-         
-        
-                <div className="px-3">
-                  <div className="text-[10px] font-black text-indigo-600">
-                    เทียบได้
-                  </div>
-                  <div className="mt-0.5 flex items-end gap-1">
-                    <span className="text-lg font-black leading-none text-slate-950">
-                      {comparable.length}
-                    </span>
-                    <span className="text-[10px] font-bold text-slate-400">
-                      ≥2 ครั้ง
-                    </span>
-                  </div>
+                <div className="mt-0.5 flex items-end gap-1">
+                  <span className="text-xl font-black leading-none text-slate-950">
+                    {rows.length}
+                  </span>
+                  <span className="text-[11px] font-bold text-slate-400">
+                    คน
+                  </span>
                 </div>
+              </div>
         
-      
-        
-                <div className="px-3">
-                  <div className="text-[10px] font-black text-emerald-600">
-                    ดีขึ้น
-                  </div>
-                  <div className="mt-0.5 flex items-end gap-1">
-                    <span className="text-lg font-black leading-none text-slate-950">
-                      {improved}
-                    </span>
-                    <span className="text-[10px] font-bold text-slate-400">
-                      คน
-                    </span>
-                  </div>
+              <div className="rounded-xl border border-slate-100 bg-white/80 px-3 py-2">
+                <div className="text-[10px] font-black text-indigo-600">
+                  เทียบผลได้
                 </div>
-        
-
-        
-                <div className="px-3">
-                  <div className="text-[10px] font-black text-amber-600">
-                    ต้องติดตาม
-                  </div>
-                  <div className="mt-0.5 flex items-end gap-1">
-                    <span className="text-lg font-black leading-none text-slate-950">
-                      {needFollow}
-                    </span>
-                    <span className="text-[10px] font-bold text-slate-400">
-                      คน
-                    </span>
-                  </div>
+                <div className="mt-0.5 flex items-end gap-1">
+                  <span className="text-xl font-black leading-none text-slate-950">
+                    {comparable.length}
+                  </span>
+                  <span className="text-[11px] font-bold text-slate-400">
+                    คน
+                  </span>
                 </div>
+              </div>
         
- 
-        
-                <div className="px-3">
-                  <div className="text-[10px] font-black text-slate-500">
-                    คงเดิม
-                  </div>
-                  <div className="mt-0.5 flex items-end gap-1">
-                    <span className="text-lg font-black leading-none text-slate-950">
-                      {noChange}
-                    </span>
-                    <span className="text-[10px] font-bold text-slate-400">
-                      คน
-                    </span>
-                  </div>
+              <div className="rounded-xl border border-slate-100 bg-white/80 px-3 py-2">
+                <div className="text-[10px] font-black text-slate-500">
+                  ข้อมูลยังไม่พอ
+                </div>
+                <div className="mt-0.5 flex items-end gap-1">
+                  <span className="text-xl font-black leading-none text-slate-950">
+                    {notEnough.length}
+                  </span>
+                  <span className="text-[11px] font-bold text-slate-400">
+                    คน
+                  </span>
                 </div>
               </div>
             </div>
         
-            <div className="rounded-2xl border border-slate-200 bg-white px-3 py-2.5 shadow-sm">
+            <div className="mt-3 border-t border-slate-100 pt-3">
               <div className="mb-2 flex items-center justify-between gap-3">
                 <div>
                   <div className="text-xs font-black text-slate-900">
-                    สัดส่วนผลลัพธ์
+                    ผลลัพธ์จากผู้ที่เทียบผลได้
                   </div>
                   <div className="mt-0.5 text-[10px] font-semibold text-slate-500">
-                    จากผู้ที่มีข้อมูลเทียบได้
+                    ใช้สีสถานะเฉพาะผลลัพธ์สุขภาพจริง
                   </div>
                 </div>
         
-                <span className="rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 text-[10px] font-black text-slate-500">
+                <span className="rounded-full border border-slate-200 bg-white px-2.5 py-1 text-[10px] font-black text-slate-500">
                   {comparable.length} คน
                 </span>
               </div>
         
-              <div className="space-y-1.5">
-                <div className="grid grid-cols-[58px_24px_1fr_34px] items-center gap-2">
+              <div className="space-y-2">
+                <div className="grid grid-cols-[76px_40px_1fr_42px] items-center gap-2">
                   <div className="text-[10px] font-black text-emerald-700">
                     ดีขึ้น
                   </div>
+        
                   <div className="text-right text-[10px] font-black text-slate-700">
                     {improved}
                   </div>
-                  <div className="h-1.5 overflow-hidden rounded-full bg-slate-100">
+        
+                  <div className="h-2 overflow-hidden rounded-full bg-white ring-1 ring-slate-200">
                     <div
                       className="h-full rounded-full bg-gradient-to-r from-emerald-300 to-emerald-500"
                       style={{
@@ -4562,19 +4526,22 @@ function AdminSummary({ records, auditLogs, onFullBackup, onRestoreBackup }) {
                       }}
                     />
                   </div>
+        
                   <div className="text-right text-[10px] font-black text-slate-500">
                     {Math.round((improved / Math.max(1, comparable.length)) * 100)}%
                   </div>
                 </div>
         
-                <div className="grid grid-cols-[58px_24px_1fr_34px] items-center gap-2">
+                <div className="grid grid-cols-[76px_40px_1fr_42px] items-center gap-2">
                   <div className="text-[10px] font-black text-amber-700">
-                    ติดตาม
+                    ต้องติดตาม
                   </div>
+        
                   <div className="text-right text-[10px] font-black text-slate-700">
                     {needFollow}
                   </div>
-                  <div className="h-1.5 overflow-hidden rounded-full bg-slate-100">
+        
+                  <div className="h-2 overflow-hidden rounded-full bg-white ring-1 ring-slate-200">
                     <div
                       className="h-full rounded-full bg-gradient-to-r from-amber-300 to-amber-500"
                       style={{
@@ -4582,19 +4549,22 @@ function AdminSummary({ records, auditLogs, onFullBackup, onRestoreBackup }) {
                       }}
                     />
                   </div>
+        
                   <div className="text-right text-[10px] font-black text-slate-500">
                     {Math.round((needFollow / Math.max(1, comparable.length)) * 100)}%
                   </div>
                 </div>
         
-                <div className="grid grid-cols-[58px_24px_1fr_34px] items-center gap-2">
+                <div className="grid grid-cols-[76px_40px_1fr_42px] items-center gap-2">
                   <div className="text-[10px] font-black text-slate-500">
                     คงเดิม
                   </div>
+        
                   <div className="text-right text-[10px] font-black text-slate-700">
                     {noChange}
                   </div>
-                  <div className="h-1.5 overflow-hidden rounded-full bg-slate-100">
+        
+                  <div className="h-2 overflow-hidden rounded-full bg-white ring-1 ring-slate-200">
                     <div
                       className="h-full rounded-full bg-gradient-to-r from-slate-300 to-slate-500"
                       style={{
@@ -4602,16 +4572,11 @@ function AdminSummary({ records, auditLogs, onFullBackup, onRestoreBackup }) {
                       }}
                     />
                   </div>
+        
                   <div className="text-right text-[10px] font-black text-slate-500">
                     {Math.round((noChange / Math.max(1, comparable.length)) * 100)}%
                   </div>
                 </div>
-              </div>
-        
-              <div className="mt-2 rounded-lg border border-slate-200 bg-slate-50 px-2 py-1 text-[10px] font-semibold text-slate-500">
-                ข้อมูลยังเทียบไม่พอ:{" "}
-                <span className="font-black text-slate-800">{notEnough.length}</span>{" "}
-                คน
               </div>
             </div>
           </div>
