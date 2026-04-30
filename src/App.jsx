@@ -4341,11 +4341,11 @@ function AdminSummary({ records, auditLogs, onFullBackup, onRestoreBackup }) {
   return (
     <main className="mx-auto max-w-7xl space-y-5 px-4 py-6">
       <Card title="สรุปภาพรวมแอดมิน" icon={ClipboardIcon}>
-                <div className="mb-4 flex flex-nowrap items-center gap-2 overflow-x-auto whitespace-nowrap rounded-3xl border border-slate-200 bg-gradient-to-br from-white via-slate-50 to-sky-50/40 p-2 shadow-[0_8px_22px_rgba(15,23,42,0.05)]">
+                <div className="mb-3 flex flex-nowrap items-center gap-1.5 overflow-x-auto whitespace-nowrap rounded-2xl border border-slate-200 bg-gradient-to-br from-white via-slate-50/70 to-sky-50/30 p-1.5 shadow-sm">
                   <select
                     value={yearFilter}
                     onChange={(e) => setYearFilter(e.target.value)}
-                    className="h-10 w-[105px] shrink-0 rounded-xl border border-slate-200 bg-white px-3 text-sm font-bold text-slate-700 outline-none transition focus:border-sky-300 focus:ring-2 focus:ring-sky-100"
+                    className="h-9 w-[105px] shrink-0 rounded-xl border border-slate-200 bg-white px-3 text-sm font-bold text-slate-700 outline-none transition focus:border-sky-300 focus:ring-2 focus:ring-sky-100"
                   >
                     <option value="all">ทุกปี</option>
                     {availableYears.map((year) => (
@@ -4384,34 +4384,34 @@ function AdminSummary({ records, auditLogs, onFullBackup, onRestoreBackup }) {
                     value={adminSearch}
                     onChange={(e) => setAdminSearch(e.target.value)}
                     placeholder="ค้นหา HN / ชื่อ"
-                    className="h-10 w-[180px] shrink-0 rounded-xl border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-sky-300 focus:ring-2 focus:ring-sky-100"
+                    className="h-9 w-[170px] shrink-0 rounded-xl border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-sky-300 focus:ring-2 focus:ring-sky-100"
                   />
         
-                  <div className="flex shrink-0 items-center gap-2 rounded-2xl border border-slate-200 bg-white/80 p-1.5 shadow-sm">
+                  <div className="flex shrink-0 items-center gap-1.5 rounded-xl border border-slate-200 bg-white/80 p-1 shadow-sm">
                     <button
                       onClick={() => exportRecordsCSV(records)}
-                      className="h-9 rounded-xl border border-sky-200 bg-gradient-to-br from-white via-sky-50 to-cyan-50 px-3.5 text-sm font-black text-slate-900 shadow-sm ring-1 ring-sky-100 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_8px_18px_rgba(14,165,233,0.14)]"
+                      className="h-8 rounded-lg border border-sky-200 bg-gradient-to-br from-white via-sky-50 to-cyan-50 px-3 text-xs font-black text-slate-900 shadow-sm ring-1 ring-sky-100 transition-all duration-200 hover:bg-sky-50"
                     >
                       Export Excel/CSV
                     </button>
         
                     <button
                       onClick={onFullBackup}
-                      className="h-9 rounded-xl border border-slate-200 bg-white px-3.5 text-sm font-bold text-slate-600 shadow-sm transition-all duration-200 hover:bg-slate-50 hover:text-slate-900"
+                      className="h-8 rounded-lg border border-slate-200 bg-white px-3 text-xs font-bold text-slate-600 shadow-sm transition-all duration-200 hover:bg-slate-50 hover:text-slate-900"
                     >
                       Backup JSON
                     </button>
         
                     <button
                       onClick={() => restoreInputRef.current?.click()}
-                      className="h-9 rounded-xl border border-indigo-100 bg-white px-3.5 text-sm font-bold text-slate-600 shadow-sm transition-all duration-200 hover:bg-indigo-50 hover:text-indigo-700"
+                      className="h-8 rounded-lg border border-indigo-100 bg-white px-3 text-xs font-bold text-slate-600 shadow-sm transition-all duration-200 hover:bg-indigo-50 hover:text-indigo-700"
                     >
                       Restore JSON
                     </button>
         
                     <button
                       onClick={printPage}
-                      className="h-9 rounded-xl border border-sky-100 bg-white px-3.5 text-sm font-bold text-slate-600 shadow-sm transition-all duration-200 hover:bg-sky-50 hover:text-sky-700"
+                      className="h-8 rounded-lg border border-sky-100 bg-white px-3 text-xs font-bold text-slate-600 shadow-sm transition-all duration-200 hover:bg-sky-50 hover:text-sky-700"
                     >
                       พิมพ์ / PDF
                     </button>
