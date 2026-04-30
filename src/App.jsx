@@ -1705,7 +1705,9 @@ function Summary({ record }) {
                     {item.label}
                   </span>
 
-                  <span className={`mt-0.5 h-2 w-2 shrink-0 rounded-full ${t.dot}`} />
+                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-white bg-white shadow-sm">
+                    <span className={`h-2.5 w-2.5 rounded-full ${t.dot}`} />
+                  </span>
                 </div>
 
                 <div className="mt-2.5 text-[26px] font-black leading-none tracking-tight text-slate-950 sm:mt-3 sm:text-[32px]">
@@ -1713,16 +1715,18 @@ function Summary({ record }) {
                 </div>
               </div>
 
-              <div className="mt-2.5 flex flex-wrap items-end justify-between gap-1.5 sm:mt-3 sm:gap-2">
-                <div className="text-[11px] font-bold leading-tight text-slate-500">
-                  {item.sub}
+              <div className="mt-2.5 rounded-2xl border border-white/70 bg-white/80 px-2.5 py-2 shadow-sm sm:mt-3">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="min-w-0 truncate text-[11px] font-bold leading-tight text-slate-500">
+                    {item.sub}
+                  </div>
+              
+                  <span
+                    className={`shrink-0 rounded-full border px-2 py-0.5 text-[10px] font-black leading-none shadow-sm ${t.status}`}
+                  >
+                    {item.status}
+                  </span>
                 </div>
-
-                <span
-                  className={`shrink-0 rounded-full border px-1.5 py-0.5 text-[9px] font-black leading-none shadow-sm sm:px-2 sm:text-[10px] ${t.status}`}
-                >
-                  {item.status}
-                </span>
               </div>
             </div>
           </div>
