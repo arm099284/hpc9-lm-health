@@ -1739,43 +1739,41 @@ function OhsTable({ record }) {
 
   const problemMarkers = [
     // ===== Front view =====
-    // ไหล่: ย้ายจากแขนมาอยู่หัวไหล่จริง
     { view: "front", label: "ไหล่ซ้าย", status: statusOf(4), top: "33%", left: "40%" },
     { view: "front", label: "ไหล่ขวา", status: statusOf(4), top: "33%", left: "60%" },
-  
-    // ลำตัว: กลางอก/แนวลำตัว
+
     { view: "front", label: "ลำตัว", status: statusOf(0), top: "47%", left: "50%" },
-  
-    // สะโพก: กึ่งกลางเชิงกราน
+
     { view: "front", label: "สะโพก", status: statusOf(2), top: "61%", left: "50%" },
-  
-    // เข่า: ขยับลงและออกข้างให้ตรงข้อเข่า
+
     { view: "front", label: "เข่าซ้าย", status: statusOf(1), top: "72%", left: "37%" },
     { view: "front", label: "เข่าขวา", status: statusOf(1), top: "72%", left: "63%" },
-  
-    // ข้อเท้า: ขยับลงใกล้ข้อเท้า/ส้นเท้า
+
     { view: "front", label: "ข้อเท้าซ้าย", status: statusOf(3), top: "87%", left: "38%" },
     { view: "front", label: "ข้อเท้าขวา", status: statusOf(3), top: "87%", left: "62%" },
-  
-    // สมดุล: กลางลำตัว
+
     { view: "front", label: "สมดุล", status: statusOf(5), top: "54%", left: "50%" },
-  
+
     // ===== Side view =====
-    // ไหล่: ตรงหัวไหล่ด้านข้าง
     { view: "side", label: "ไหล่", status: statusOf(4), top: "34%", left: "52%" },
-  
-    // ลำตัว: กลางลำตัวด้านข้าง
+    
     { view: "side", label: "ลำตัว", status: statusOf(0), top: "47%", left: "53%" },
-  
-    // สะโพก: จุดพับสะโพก/เชิงกราน
+
     { view: "side", label: "สะโพก", status: statusOf(2), top: "61%", left: "49%" },
-  
-    // เข่า: จุดข้อเข่าด้านหน้า
+
     { view: "side", label: "เข่า", status: statusOf(1), top: "72%", left: "58%" },
-  
-    // ข้อเท้า: แถวข้อเท้า/ส้นเท้า
+
     { view: "side", label: "ข้อเท้า", status: statusOf(3), top: "84%", left: "60%" },
   ].filter((marker) => marker.status !== "ปกติ");
+
+  const bodyParts = [
+    { label: "แขน / ไหล่", sub: "Overhead position", status: statusOf(4) },
+    { label: "ลำตัว", sub: "Torso control", status: statusOf(0) },
+    { label: "สะโพก", sub: "Hip depth", status: statusOf(2) },
+    { label: "เข่า", sub: "Knee tracking", status: statusOf(1) },
+    { label: "ส้นเท้า / ข้อเท้า", sub: "Heel & ankle", status: statusOf(3) },
+    { label: "สมดุล", sub: "Balance control", status: statusOf(5) },
+  ];
 
   const problemCount = bodyParts.filter((part) => part.status !== "ปกติ").length;
   const warningCount = bodyParts.filter((part) => part.status === "ต้องระวัง").length;
