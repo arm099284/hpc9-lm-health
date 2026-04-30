@@ -1566,55 +1566,73 @@ function Login({ records, openRecord, openAdminLogin }) {
   return (
     <main className="mx-auto flex min-h-[calc(100vh-120px)] w-full max-w-7xl items-center justify-center px-4 py-10">
       <div className="w-full max-w-xl">
-        <div className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm md:p-10">
-          <div className="mb-6 flex items-center gap-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-slate-200 bg-slate-50 text-slate-500">
-              <SearchIcon />
-            </div>
-            <div>
-              <h2 className="text-3xl font-bold text-slate-900">ดูผลสุขภาพด้วย HN</h2>
-              <p className="mt-1 text-base text-slate-500">ค้นหาผลการประเมินรายบุคคล</p>
-            </div>
-          </div>
+        <div className="relative overflow-hidden rounded-[2rem] border border-slate-200 bg-gradient-to-br from-white via-slate-50/80 to-sky-50/50 p-1 shadow-[0_18px_48px_rgba(15,23,42,0.08)]">
+          <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-sky-200 via-indigo-200 to-cyan-200" />
 
-          <div className="mb-6 border-t border-slate-100" />
+          <div className="rounded-[1.75rem] border border-white/70 bg-white/90 p-6 shadow-sm md:p-8">
+            <div className="mb-6 flex items-start gap-4">
+              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border border-slate-200 bg-gradient-to-br from-white via-sky-50 to-indigo-50/60 shadow-sm">
+                <SearchIcon className="h-7 w-7 text-slate-600" />
+              </div>
 
-          <form onSubmit={submit} className="space-y-5">
-            <div>
-              <label className="mb-2 block text-lg font-semibold text-slate-700">
-                HN
-              </label>
-              <input
-                value={hn}
-                onChange={(e) => {
-                  setHn(e.target.value);
-                  if (error) setError("");
-                }}
-                placeholder="กรอกเลข HN"
-                className="h-16 w-full rounded-2xl border border-slate-300 bg-white px-5 text-2xl font-medium text-slate-900 outline-none transition focus:border-slate-400 focus:ring-4 focus:ring-slate-100"
-              />
-              {error && (
-                <p className="mt-3 text-base font-medium text-rose-600">{error}</p>
-              )}
+              <div className="min-w-0">
+                <div className="inline-flex rounded-full border border-sky-100 bg-sky-50 px-2.5 py-1 text-[11px] font-black text-sky-700">
+                  HN Access
+                </div>
+
+                <h2 className="mt-2 text-2xl font-black tracking-tight text-slate-950 md:text-3xl">
+                  ดูผลสุขภาพด้วย HN
+                </h2>
+
+                <p className="mt-1 text-sm font-semibold leading-6 text-slate-500">
+                  ค้นหาผลการประเมินสุขภาพ สมรรถภาพ และโปรแกรมรายบุคคล
+                </p>
+              </div>
             </div>
 
-            <button
-              type="submit"
-              className="flex h-16 w-full items-center justify-center gap-3 rounded-2xl bg-slate-950 px-6 text-xl font-bold text-white transition hover:bg-slate-800"
-            >
-              <SearchIcon />
-              ดูผลการประเมิน
-            </button>
-          </form>
+            <form onSubmit={submit} className="space-y-4">
+              <div className="rounded-3xl border border-slate-200 bg-gradient-to-br from-white via-slate-50/70 to-white p-3 shadow-sm">
+                <label className="block">
+                  <span className="mb-2 block text-xs font-black tracking-tight text-slate-500">
+                    เลข HN
+                  </span>
 
-          <div className="mt-6 text-center">
-            <button
-              type="button"
-              onClick={openAdminLogin}
-              className="text-base font-medium text-slate-400 transition hover:text-slate-600"
-            >
-              สำหรับผู้ดูแลระบบ
-            </button>
+                  <input
+                    value={hn}
+                    onChange={(e) => {
+                      setHn(e.target.value);
+                      if (error) setError("");
+                    }}
+                    placeholder="กรอกเลข HN"
+                    className="h-14 w-full rounded-2xl border border-slate-200 bg-white px-4 text-xl font-black tracking-wide text-slate-950 shadow-sm outline-none transition-all duration-200 placeholder:text-slate-300 hover:border-slate-300 focus:border-sky-300 focus:ring-4 focus:ring-sky-100"
+                  />
+                </label>
+
+                {error && (
+                  <div className="mt-3 rounded-2xl border border-rose-200 bg-rose-50 px-3 py-2 text-sm font-bold text-rose-700">
+                    {error}
+                  </div>
+                )}
+              </div>
+
+              <button
+                type="submit"
+                className="flex h-13 w-full items-center justify-center gap-2 rounded-2xl border border-sky-200 bg-gradient-to-br from-white via-sky-50 to-cyan-50 px-5 py-3 text-base font-black text-slate-950 shadow-sm ring-1 ring-sky-100 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_10px_24px_rgba(14,165,233,0.16)]"
+              >
+                <SearchIcon className="h-5 w-5 text-slate-700" />
+                ดูผลการประเมิน
+              </button>
+            </form>
+
+            <div className="mt-5 flex items-center justify-center border-t border-slate-100 pt-4">
+              <button
+                type="button"
+                onClick={openAdminLogin}
+                className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-bold text-slate-500 shadow-sm transition-all duration-200 hover:bg-slate-50 hover:text-slate-800"
+              >
+                สำหรับผู้ดูแลระบบ
+              </button>
+            </div>
           </div>
         </div>
       </div>
