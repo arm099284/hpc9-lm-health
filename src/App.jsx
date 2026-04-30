@@ -1722,6 +1722,14 @@ function OhsTable({ record }) {
   };
 
   const markerStyle = (status) => {
+    if (status === "ปกติ") {
+      return {
+        borderColor: "#34d399",
+        backgroundColor: "rgba(52, 211, 153, 0.14)",
+        boxShadow: "0 0 0 4px rgba(52, 211, 153, 0.08)",
+      };
+    }
+  
     if (status === "ต้องระวัง") {
       return {
         borderColor: "#f59e0b",
@@ -1729,7 +1737,7 @@ function OhsTable({ record }) {
         boxShadow: "0 0 0 4px rgba(245, 158, 11, 0.12)",
       };
     }
-
+  
     return {
       borderColor: "#fb7185",
       backgroundColor: "rgba(251, 113, 133, 0.18)",
@@ -1762,7 +1770,7 @@ function OhsTable({ record }) {
     { view: "side", label: "เข่า", status: statusOf(1), top: "65.5%", left: "56.5%" },
 
     { view: "side", label: "ข้อเท้า", status: statusOf(3), top: "83%", left: "44%" },
-  ].filter((marker) => marker.status !== "ปกติ");
+  ];
 
   const bodyParts = [
     { label: "แขน / ไหล่", sub: "Overhead position", status: statusOf(4) },
@@ -1831,7 +1839,11 @@ function OhsTable({ record }) {
                       className="h-2 w-2 rounded-full"
                       style={{
                         backgroundColor:
-                          marker.status === "ต้องระวัง" ? "#f59e0b" : "#fb7185",
+                          marker.status === "ปกติ"
+                            ? "#34d399"
+                            : marker.status === "ต้องระวัง"
+                              ? "#f59e0b"
+                              : "#fb7185",
                       }}
                     />
                   </div>
