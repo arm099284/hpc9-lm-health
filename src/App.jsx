@@ -4452,12 +4452,13 @@ function AdminSummary({ records, auditLogs, onFullBackup, onRestoreBackup }) {
                   </div>
                 
                   <div className="grid gap-4 lg:grid-cols-[0.28fr_0.72fr]">
-                    <div className="rounded-2xl border border-slate-100 bg-gradient-to-br from-white via-slate-50/70 to-sky-50/25 p-3 shadow-sm">
+                    <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-sky-50/80 via-white to-indigo-50/45 p-3 shadow-[inset_0_0_0_1px_rgba(186,230,253,0.45)]">
+                      <div className="pointer-events-none absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-sky-200 via-indigo-100 to-cyan-200" />
                       <div className="mb-2.5 border-b border-slate-100 pb-2">
-                        <div className="text-[10px] font-black uppercase tracking-wide text-sky-700">
+                        <div className="text-[10px] font-black uppercase tracking-[0.16em] text-sky-700">
                           Overview
                         </div>
-                        <div className="text-xs font-black text-slate-900">
+                        <div className="mt-0.5 text-sm font-black tracking-tight text-slate-950">
                           ภาพรวมข้อมูล
                         </div>
                       </div>
@@ -4467,7 +4468,7 @@ function AdminSummary({ records, auditLogs, onFullBackup, onRestoreBackup }) {
                           <div className="text-[11px] font-bold text-slate-500">
                             ทั้งหมด
                           </div>
-                          <div className="mt-0.5 text-3xl font-black leading-none tracking-tight text-slate-950">
+                          <div className="mt-1 text-4xl font-black leading-none tracking-tight text-slate-950">
                             {rows.length}
                             <span className="ml-1 text-xs font-bold text-slate-400">
                               คน
