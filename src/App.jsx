@@ -4446,81 +4446,167 @@ function AdminSummary({ records, auditLogs, onFullBackup, onRestoreBackup }) {
               {periodLabel}
             </span>
           </div>
-        
-                  <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-                    <div className="grid grid-cols-2 divide-y divide-slate-100 md:grid-cols-5 md:divide-x md:divide-y-0">
-                      <div className="px-3 py-2.5">
-                        <div className="text-[10px] font-black uppercase tracking-wide text-sky-600">
-                          ทั้งหมด
-                        </div>
-                        <div className="mt-0.5 flex items-end gap-1">
-                          <span className="text-xl font-black leading-none text-slate-950">
-                            {rows.length}
-                          </span>
-                          <span className="text-[11px] font-bold text-slate-400">
-                            คน
-                          </span>
-                        </div>
-                      </div>
-        
-                      <div className="px-3 py-2.5">
-                        <div className="text-[10px] font-black uppercase tracking-wide text-indigo-600">
-                          เทียบได้
-                        </div>
-                        <div className="mt-0.5 flex items-end gap-1">
-                          <span className="text-xl font-black leading-none text-slate-950">
-                            {comparable.length}
-                          </span>
-                          <span className="text-[11px] font-bold text-slate-400">
-                            ≥2 ครั้ง
-                          </span>
-                        </div>
-                      </div>
-        
-                      <div className="bg-emerald-50/35 px-3 py-2.5">
-                        <div className="text-[10px] font-black uppercase tracking-wide text-emerald-600">
-                          ดีขึ้น
-                        </div>
-                        <div className="mt-0.5 flex items-end gap-1">
-                          <span className="text-xl font-black leading-none text-slate-950">
-                            {improved}
-                          </span>
-                          <span className="text-[11px] font-bold text-slate-400">
-                            คน
-                          </span>
-                        </div>
-                      </div>
-        
-                      <div className="bg-amber-50/35 px-3 py-2.5">
-                        <div className="text-[10px] font-black uppercase tracking-wide text-amber-600">
-                          ต้องติดตาม
-                        </div>
-                        <div className="mt-0.5 flex items-end gap-1">
-                          <span className="text-xl font-black leading-none text-slate-950">
-                            {needFollow}
-                          </span>
-                          <span className="text-[11px] font-bold text-slate-400">
-                            คน
-                          </span>
-                        </div>
-                      </div>
-        
-                      <div className="bg-slate-50/70 px-3 py-2.5">
-                        <div className="text-[10px] font-black uppercase tracking-wide text-slate-500">
-                          คงเดิม
-                        </div>
-                        <div className="mt-0.5 flex items-end gap-1">
-                          <span className="text-xl font-black leading-none text-slate-950">
-                            {noChange}
-                          </span>
-                          <span className="text-[11px] font-bold text-slate-400">
-                            คน
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+        <div className="grid gap-3 xl:grid-cols-[1.05fr_0.95fr]">
+          <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+            <div className="grid grid-cols-2 divide-y divide-slate-100 md:grid-cols-5 md:divide-x md:divide-y-0">
+              <div className="px-3 py-2.5">
+                <div className="text-[10px] font-black uppercase tracking-wide text-sky-600">
+                  ทั้งหมด
                 </div>
+                <div className="mt-0.5 flex items-end gap-1">
+                  <span className="text-xl font-black leading-none text-slate-950">
+                    {rows.length}
+                  </span>
+                  <span className="text-[11px] font-bold text-slate-400">
+                    คน
+                  </span>
+                </div>
+              </div>
+        
+              <div className="px-3 py-2.5">
+                <div className="text-[10px] font-black uppercase tracking-wide text-indigo-600">
+                  เทียบได้
+                </div>
+                <div className="mt-0.5 flex items-end gap-1">
+                  <span className="text-xl font-black leading-none text-slate-950">
+                    {comparable.length}
+                  </span>
+                  <span className="text-[11px] font-bold text-slate-400">
+                    ≥2 ครั้ง
+                  </span>
+                </div>
+              </div>
+        
+              <div className="bg-emerald-50/35 px-3 py-2.5">
+                <div className="text-[10px] font-black uppercase tracking-wide text-emerald-600">
+                  ดีขึ้น
+                </div>
+                <div className="mt-0.5 flex items-end gap-1">
+                  <span className="text-xl font-black leading-none text-slate-950">
+                    {improved}
+                  </span>
+                  <span className="text-[11px] font-bold text-slate-400">
+                    คน
+                  </span>
+                </div>
+              </div>
+        
+              <div className="bg-amber-50/35 px-3 py-2.5">
+                <div className="text-[10px] font-black uppercase tracking-wide text-amber-600">
+                  ต้องติดตาม
+                </div>
+                <div className="mt-0.5 flex items-end gap-1">
+                  <span className="text-xl font-black leading-none text-slate-950">
+                    {needFollow}
+                  </span>
+                  <span className="text-[11px] font-bold text-slate-400">
+                    คน
+                  </span>
+                </div>
+              </div>
+        
+              <div className="bg-slate-50/70 px-3 py-2.5">
+                <div className="text-[10px] font-black uppercase tracking-wide text-slate-500">
+                  คงเดิม
+                </div>
+                <div className="mt-0.5 flex items-end gap-1">
+                  <span className="text-xl font-black leading-none text-slate-950">
+                    {noChange}
+                  </span>
+                  <span className="text-[11px] font-bold text-slate-400">
+                    คน
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        
+          <div className="rounded-2xl border border-slate-200 bg-slate-50/50 px-3 py-2.5 shadow-sm">
+            <div className="mb-2 flex items-center justify-between gap-3">
+              <div>
+                <div className="text-xs font-black text-slate-900">
+                  สัดส่วนผลลัพธ์
+                </div>
+                <div className="mt-0.5 text-[10px] font-semibold text-slate-500">
+                  จากผู้ที่มีข้อมูลเทียบได้
+                </div>
+              </div>
+        
+              <span className="rounded-full border border-slate-200 bg-white px-2.5 py-1 text-[10px] font-black text-slate-500">
+                {comparable.length} คน
+              </span>
+            </div>
+        
+            <div className="space-y-2">
+              <div className="grid grid-cols-[64px_28px_1fr_34px] items-center gap-2">
+                <div className="text-[10px] font-black text-emerald-700">
+                  ดีขึ้น
+                </div>
+                <div className="text-right text-[10px] font-black text-slate-700">
+                  {improved}
+                </div>
+                <div className="h-2 overflow-hidden rounded-full bg-white ring-1 ring-slate-200">
+                  <div
+                    className="h-full rounded-full bg-gradient-to-r from-emerald-300 to-emerald-500"
+                    style={{
+                      width: `${Math.round((improved / Math.max(1, comparable.length)) * 100)}%`,
+                    }}
+                  />
+                </div>
+                <div className="text-right text-[10px] font-black text-slate-500">
+                  {Math.round((improved / Math.max(1, comparable.length)) * 100)}%
+                </div>
+              </div>
+        
+              <div className="grid grid-cols-[64px_28px_1fr_34px] items-center gap-2">
+                <div className="text-[10px] font-black text-amber-700">
+                  ติดตาม
+                </div>
+                <div className="text-right text-[10px] font-black text-slate-700">
+                  {needFollow}
+                </div>
+                <div className="h-2 overflow-hidden rounded-full bg-white ring-1 ring-slate-200">
+                  <div
+                    className="h-full rounded-full bg-gradient-to-r from-amber-300 to-amber-500"
+                    style={{
+                      width: `${Math.round((needFollow / Math.max(1, comparable.length)) * 100)}%`,
+                    }}
+                  />
+                </div>
+                <div className="text-right text-[10px] font-black text-slate-500">
+                  {Math.round((needFollow / Math.max(1, comparable.length)) * 100)}%
+                </div>
+              </div>
+        
+              <div className="grid grid-cols-[64px_28px_1fr_34px] items-center gap-2">
+                <div className="text-[10px] font-black text-slate-500">
+                  คงเดิม
+                </div>
+                <div className="text-right text-[10px] font-black text-slate-700">
+                  {noChange}
+                </div>
+                <div className="h-2 overflow-hidden rounded-full bg-white ring-1 ring-slate-200">
+                  <div
+                    className="h-full rounded-full bg-gradient-to-r from-slate-300 to-slate-500"
+                    style={{
+                      width: `${Math.round((noChange / Math.max(1, comparable.length)) * 100)}%`,
+                    }}
+                  />
+                </div>
+                <div className="text-right text-[10px] font-black text-slate-500">
+                  {Math.round((noChange / Math.max(1, comparable.length)) * 100)}%
+                </div>
+              </div>
+            </div>
+        
+            <div className="mt-2 rounded-xl border border-slate-200 bg-white px-2.5 py-1.5 text-[10px] font-semibold text-slate-500">
+              ข้อมูลยังเทียบไม่พอ:{" "}
+              <span className="font-black text-slate-800">{notEnough.length}</span>{" "}
+              คน
+            </div>
+          </div>
+        </div>
+        </div>
             
         <div className="mt-5 rounded-3xl border border-slate-200 bg-gradient-to-br from-white via-slate-50 to-slate-100 p-4 shadow-[0_12px_35px_rgba(15,23,42,0.08)] ring-1 ring-white/70">
         <div className="mb-3 flex items-center justify-between gap-3 border-b border-slate-200 pb-3">
