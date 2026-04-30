@@ -4077,88 +4077,90 @@ function AdminSummary({ records, auditLogs, onFullBackup, onRestoreBackup }) {
   return (
     <main className="mx-auto max-w-7xl space-y-5 px-4 py-6">
       <Card title="สรุปภาพรวมแอดมิน" icon={ClipboardIcon}>
-        <div className="mb-4 flex flex-nowrap items-center gap-2 overflow-x-auto whitespace-nowrap rounded-2xl border border-slate-200 bg-gradient-to-r from-slate-50 via-white to-slate-50 p-2 shadow-sm">
-          <select
-            value={yearFilter}
-            onChange={(e) => setYearFilter(e.target.value)}
-            className="h-10 w-[105px] shrink-0 rounded-xl border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700 outline-none"
-          >
-            <option value="all">ทุกปี</option>
-            {availableYears.map((year) => (
-              <option key={year} value={year}>
-                พ.ศ. {year}
-              </option>
-            ))}
-          </select>
+                <div className="mb-4 flex flex-nowrap items-center gap-2 overflow-x-auto whitespace-nowrap rounded-3xl border border-slate-200 bg-gradient-to-br from-white via-slate-50 to-sky-50/40 p-2 shadow-[0_8px_22px_rgba(15,23,42,0.05)]">
+                  <select
+                    value={yearFilter}
+                    onChange={(e) => setYearFilter(e.target.value)}
+                    className="h-10 w-[105px] shrink-0 rounded-xl border border-slate-200 bg-white px-3 text-sm font-bold text-slate-700 outline-none transition focus:border-sky-300 focus:ring-2 focus:ring-sky-100"
+                  >
+                    <option value="all">ทุกปี</option>
+                    {availableYears.map((year) => (
+                      <option key={year} value={year}>
+                        พ.ศ. {year}
+                      </option>
+                    ))}
+                  </select>
         
-          <select
-            value={monthFilter}
-            onChange={(e) => setMonthFilter(e.target.value)}
-            className="h-10 w-[120px] shrink-0 rounded-xl border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700 outline-none"
-          >
-            <option value="all">ทุกเดือน</option>
-            {thaiMonths.map((month, index) => (
-              <option key={month} value={index + 1}>
-                {month}
-              </option>
-            ))}
-          </select>
+                  <select
+                    value={monthFilter}
+                    onChange={(e) => setMonthFilter(e.target.value)}
+                    className="h-10 w-[120px] shrink-0 rounded-xl border border-slate-200 bg-white px-3 text-sm font-bold text-slate-700 outline-none transition focus:border-sky-300 focus:ring-2 focus:ring-sky-100"
+                  >
+                    <option value="all">ทุกเดือน</option>
+                    {thaiMonths.map((month, index) => (
+                      <option key={month} value={index + 1}>
+                        {month}
+                      </option>
+                    ))}
+                  </select>
         
-          <select
-            value={ageFilter}
-            onChange={(e) => setAgeFilter(e.target.value)}
-            className="h-10 w-[130px] shrink-0 rounded-xl border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700 outline-none"
-          >
-            {ageOptions.map((opt) => (
-              <option key={opt.value} value={opt.value}>
-                {opt.label}
-              </option>
-            ))}
-          </select>
+                  <select
+                    value={ageFilter}
+                    onChange={(e) => setAgeFilter(e.target.value)}
+                    className="h-10 w-[130px] shrink-0 rounded-xl border border-slate-200 bg-white px-3 text-sm font-bold text-slate-700 outline-none transition focus:border-sky-300 focus:ring-2 focus:ring-sky-100"
+                  >
+                    {ageOptions.map((opt) => (
+                      <option key={opt.value} value={opt.value}>
+                        {opt.label}
+                      </option>
+                    ))}
+                  </select>
         
-          <input
-            value={adminSearch}
-            onChange={(e) => setAdminSearch(e.target.value)}
-            placeholder="ค้นหา HN / ชื่อ"
-            className="h-10 w-[180px] shrink-0 rounded-xl border border-slate-200 bg-white px-3 text-sm outline-none focus:border-slate-700"
-          />
+                  <input
+                    value={adminSearch}
+                    onChange={(e) => setAdminSearch(e.target.value)}
+                    placeholder="ค้นหา HN / ชื่อ"
+                    className="h-10 w-[180px] shrink-0 rounded-xl border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-sky-300 focus:ring-2 focus:ring-sky-100"
+                  />
         
-          <button
-            onClick={() => exportRecordsCSV(records)}
-            className="h-10 shrink-0 rounded-xl border border-slate-200 bg-white px-3 text-sm font-bold text-slate-700 hover:bg-slate-50"
-          >
-            Export Excel/CSV
-          </button>
+                  <div className="flex shrink-0 items-center gap-2 rounded-2xl border border-slate-200 bg-white/80 p-1.5 shadow-sm">
+                    <button
+                      onClick={() => exportRecordsCSV(records)}
+                      className="h-9 rounded-xl border border-sky-200 bg-gradient-to-br from-white via-sky-50 to-cyan-50 px-3.5 text-sm font-black text-slate-900 shadow-sm ring-1 ring-sky-100 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_8px_18px_rgba(14,165,233,0.14)]"
+                    >
+                      Export Excel/CSV
+                    </button>
         
-          <button
-            onClick={onFullBackup}
-            className="h-10 shrink-0 rounded-xl border border-emerald-200 bg-emerald-50 px-3 text-sm font-bold text-emerald-700 hover:bg-emerald-100"
-          >
-            Backup JSON
-          </button>
+                    <button
+                      onClick={onFullBackup}
+                      className="h-9 rounded-xl border border-slate-200 bg-white px-3.5 text-sm font-bold text-slate-600 shadow-sm transition-all duration-200 hover:bg-slate-50 hover:text-slate-900"
+                    >
+                      Backup JSON
+                    </button>
         
-          <button
-            onClick={() => restoreInputRef.current?.click()}
-            className="h-10 shrink-0 rounded-xl border border-amber-200 bg-amber-50 px-3 text-sm font-bold text-amber-700 hover:bg-amber-100"
-          >
-            Restore JSON
-          </button>
+                    <button
+                      onClick={() => restoreInputRef.current?.click()}
+                      className="h-9 rounded-xl border border-indigo-100 bg-white px-3.5 text-sm font-bold text-slate-600 shadow-sm transition-all duration-200 hover:bg-indigo-50 hover:text-indigo-700"
+                    >
+                      Restore JSON
+                    </button>
         
-          <button
-            onClick={printPage}
-            className="h-10 shrink-0 rounded-xl border border-slate-200 bg-white px-3 text-sm font-bold text-slate-700 hover:bg-slate-50"
-          >
-            พิมพ์ / PDF
-          </button>
+                    <button
+                      onClick={printPage}
+                      className="h-9 rounded-xl border border-sky-100 bg-white px-3.5 text-sm font-bold text-slate-600 shadow-sm transition-all duration-200 hover:bg-sky-50 hover:text-sky-700"
+                    >
+                      พิมพ์ / PDF
+                    </button>
+                  </div>
         
-          <input
-            ref={restoreInputRef}
-            type="file"
-            accept="application/json,.json"
-            className="hidden"
-            onChange={handleRestoreFile}
-          />
-        </div>
+                  <input
+                    ref={restoreInputRef}
+                    type="file"
+                    accept="application/json,.json"
+                    className="hidden"
+                    onChange={handleRestoreFile}
+                  />
+                </div>
 
         <div className="mb-4">
           <Pill tone="dark">{periodLabel}</Pill>
