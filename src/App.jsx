@@ -4426,7 +4426,9 @@ function AdminSummary({ records, auditLogs, onFullBackup, onRestoreBackup }) {
                   />
                 </div>
 
-        <div className="rounded-3xl border border-slate-200 bg-white p-3 shadow-[0_10px_28px_rgba(15,23,42,0.045)] ring-1 ring-slate-100">
+        <div className="relative overflow-hidden rounded-3xl border border-slate-200 bg-white p-3 shadow-[0_10px_28px_rgba(15,23,42,0.045)] ring-1 ring-slate-100">
+          <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-sky-200 via-indigo-100 to-cyan-200" />
+        
           <div className="mb-3 flex flex-col gap-2 border-b border-slate-100 pb-2.5 lg:flex-row lg:items-center lg:justify-between">
             <div>
               <div className="text-[10px] font-black uppercase tracking-wide text-sky-600">
@@ -4438,7 +4440,7 @@ function AdminSummary({ records, auditLogs, onFullBackup, onRestoreBackup }) {
               </h3>
         
               <p className="mt-0.5 text-[11px] font-semibold text-slate-500">
-                สรุปจำนวนผู้รับบริการ การเทียบผล และแนวโน้มสุขภาพในช่วงที่เลือก
+                สรุปจำนวนผู้รับบริการ การเทียบผล และผลลัพธ์สุขภาพในช่วงที่เลือก
               </p>
             </div>
         
@@ -4447,145 +4449,87 @@ function AdminSummary({ records, auditLogs, onFullBackup, onRestoreBackup }) {
             </span>
           </div>
         
-          <div className="rounded-2xl border border-slate-200 bg-gradient-to-br from-white via-slate-50/70 to-sky-50/20 p-3 shadow-sm">
-            <div className="rounded-2xl border border-slate-100 bg-white/80 px-3 py-2">
-              <div className="grid grid-cols-2 gap-2 md:grid-cols-5">
-                <div>
-                  <div className="text-[10px] font-black text-sky-600">
-                    ทั้งหมด
-                  </div>
-                  <div className="mt-0.5 text-lg font-black leading-none text-slate-950">
-                    {rows.length}
-                    <span className="ml-1 text-[10px] font-bold text-slate-400">คน</span>
-                  </div>
+          <div className="grid gap-4 lg:grid-cols-2 lg:divide-x lg:divide-slate-100">
+            <div className="space-y-2 lg:pr-4">
+              <div className="text-[11px] font-black text-slate-700">
+                ภาพรวมข้อมูล
+              </div>
+        
+              <div className="grid grid-cols-[1fr_auto] items-center gap-3">
+                <div className="text-xs font-bold text-slate-500">ทั้งหมด</div>
+                <div className="text-right text-2xl font-black leading-none text-slate-950">
+                  {rows.length}
+                  <span className="ml-1 text-[11px] font-bold text-slate-400">คน</span>
                 </div>
-            
-                <div>
-                  <div className="text-[10px] font-black text-indigo-600">
-                    เทียบผลได้
-                  </div>
-                  <div className="mt-0.5 text-lg font-black leading-none text-slate-950">
-                    {comparable.length}
-                    <span className="ml-1 text-[10px] font-bold text-slate-400">คน</span>
-                  </div>
+              </div>
+        
+              <div className="grid grid-cols-[1fr_auto] items-center gap-3 border-t border-slate-100 pt-2">
+                <div className="text-xs font-bold text-slate-500">เทียบผลได้</div>
+                <div className="text-right text-2xl font-black leading-none text-slate-950">
+                  {comparable.length}
+                  <span className="ml-1 text-[11px] font-bold text-slate-400">คน</span>
                 </div>
-            
-                <div>
-                  <div className="text-[10px] font-black text-emerald-600">
-                    ดีขึ้น
-                  </div>
-                  <div className="mt-0.5 text-lg font-black leading-none text-slate-950">
-                    {improved}
-                    <span className="ml-1 text-[10px] font-bold text-slate-400">คน</span>
-                  </div>
-                </div>
-            
-                <div>
-                  <div className="text-[10px] font-black text-amber-600">
-                    ต้องติดตาม
-                  </div>
-                  <div className="mt-0.5 text-lg font-black leading-none text-slate-950">
-                    {needFollow}
-                    <span className="ml-1 text-[10px] font-bold text-slate-400">คน</span>
-                  </div>
-                </div>
-            
-                <div>
-                  <div className="text-[10px] font-black text-slate-500">
-                    ข้อมูลไม่พอ
-                  </div>
-                  <div className="mt-0.5 text-lg font-black leading-none text-slate-950">
-                    {notEnough.length}
-                    <span className="ml-1 text-[10px] font-bold text-slate-400">คน</span>
-                  </div>
+              </div>
+        
+              <div className="grid grid-cols-[1fr_auto] items-center gap-3 border-t border-slate-100 pt-2">
+                <div className="text-xs font-bold text-slate-500">ข้อมูลไม่พอ</div>
+                <div className="text-right text-2xl font-black leading-none text-slate-950">
+                  {notEnough.length}
+                  <span className="ml-1 text-[11px] font-bold text-slate-400">คน</span>
                 </div>
               </div>
             </div>
-                    
-            <div className="mt-3 border-t border-slate-100 pt-3">
-              <div className="mb-2 flex items-center justify-between gap-3">
-                <div>
-                  <div className="text-xs font-black text-slate-900">
-                    ผลลัพธ์จากผู้ที่เทียบผลได้
-                  </div>
-                  <div className="mt-0.5 text-[10px] font-semibold text-slate-500">
-                    ใช้สีสถานะเฉพาะผลลัพธ์สุขภาพจริง
-                  </div>
-                </div>
         
-                <span className="rounded-full border border-slate-200 bg-white px-2.5 py-1 text-[10px] font-black text-slate-500">
-                  {comparable.length} คน
-                </span>
+            <div className="space-y-2 lg:pl-4">
+              <div className="text-[11px] font-black text-slate-700">
+                ผลลัพธ์สุขภาพ
               </div>
         
-              <div className="space-y-2">
-                <div className="grid grid-cols-[76px_40px_1fr_42px] items-center gap-2">
-                  <div className="text-[10px] font-black text-emerald-700">
-                    ดีขึ้น
-                  </div>
-        
-                  <div className="text-right text-[10px] font-black text-slate-700">
-                    {improved}
-                  </div>
-        
-                  <div className="h-2 overflow-hidden rounded-full bg-white ring-1 ring-slate-200">
-                    <div
-                      className="h-full rounded-full bg-gradient-to-r from-emerald-300 to-emerald-500"
-                      style={{
-                        width: `${Math.round((improved / Math.max(1, comparable.length)) * 100)}%`,
-                      }}
-                    />
-                  </div>
-        
-                  <div className="text-right text-[10px] font-black text-slate-500">
-                    {Math.round((improved / Math.max(1, comparable.length)) * 100)}%
-                  </div>
+              <div className="grid grid-cols-[76px_52px_96px_40px] items-center gap-2">
+                <div className="text-xs font-bold text-emerald-700">ดีขึ้น</div>
+                <div className="text-right text-lg font-black text-slate-950">{improved} คน</div>
+                <div className="h-2 overflow-hidden rounded-full bg-slate-100">
+                  <div
+                    className="h-full rounded-full bg-gradient-to-r from-emerald-300 to-emerald-400"
+                    style={{
+                      width: `${Math.round((improved / Math.max(1, comparable.length)) * 100)}%`,
+                    }}
+                  />
                 </div>
-        
-                <div className="grid grid-cols-[76px_40px_1fr_42px] items-center gap-2">
-                  <div className="text-[10px] font-black text-amber-700">
-                    ต้องติดตาม
-                  </div>
-        
-                  <div className="text-right text-[10px] font-black text-slate-700">
-                    {needFollow}
-                  </div>
-        
-                  <div className="h-2 overflow-hidden rounded-full bg-white ring-1 ring-slate-200">
-                    <div
-                      className="h-full rounded-full bg-gradient-to-r from-amber-300 to-amber-500"
-                      style={{
-                        width: `${Math.round((needFollow / Math.max(1, comparable.length)) * 100)}%`,
-                      }}
-                    />
-                  </div>
-        
-                  <div className="text-right text-[10px] font-black text-slate-500">
-                    {Math.round((needFollow / Math.max(1, comparable.length)) * 100)}%
-                  </div>
+                <div className="text-right text-xs font-black text-slate-500">
+                  {Math.round((improved / Math.max(1, comparable.length)) * 100)}%
                 </div>
+              </div>
         
-                <div className="grid grid-cols-[76px_40px_1fr_42px] items-center gap-2">
-                  <div className="text-[10px] font-black text-slate-500">
-                    คงเดิม
-                  </div>
+              <div className="grid grid-cols-[76px_52px_96px_40px] items-center gap-2 border-t border-slate-100 pt-2">
+                <div className="text-xs font-bold text-amber-700">ต้องติดตาม</div>
+                <div className="text-right text-lg font-black text-slate-950">{needFollow} คน</div>
+                <div className="h-2 overflow-hidden rounded-full bg-slate-100">
+                  <div
+                    className="h-full rounded-full bg-gradient-to-r from-amber-300 to-amber-400"
+                    style={{
+                      width: `${Math.round((needFollow / Math.max(1, comparable.length)) * 100)}%`,
+                    }}
+                  />
+                </div>
+                <div className="text-right text-xs font-black text-slate-500">
+                  {Math.round((needFollow / Math.max(1, comparable.length)) * 100)}%
+                </div>
+              </div>
         
-                  <div className="text-right text-[10px] font-black text-slate-700">
-                    {noChange}
-                  </div>
-        
-                  <div className="h-2 overflow-hidden rounded-full bg-white ring-1 ring-slate-200">
-                    <div
-                      className="h-full rounded-full bg-gradient-to-r from-slate-300 to-slate-500"
-                      style={{
-                        width: `${Math.round((noChange / Math.max(1, comparable.length)) * 100)}%`,
-                      }}
-                    />
-                  </div>
-        
-                  <div className="text-right text-[10px] font-black text-slate-500">
-                    {Math.round((noChange / Math.max(1, comparable.length)) * 100)}%
-                  </div>
+              <div className="grid grid-cols-[76px_52px_96px_40px] items-center gap-2 border-t border-slate-100 pt-2">
+                <div className="text-xs font-bold text-slate-500">คงเดิม</div>
+                <div className="text-right text-lg font-black text-slate-950">{noChange} คน</div>
+                <div className="h-2 overflow-hidden rounded-full bg-slate-100">
+                  <div
+                    className="h-full rounded-full bg-gradient-to-r from-slate-300 to-slate-400"
+                    style={{
+                      width: `${Math.round((noChange / Math.max(1, comparable.length)) * 100)}%`,
+                    }}
+                  />
+                </div>
+                <div className="text-right text-xs font-black text-slate-500">
+                  {Math.round((noChange / Math.max(1, comparable.length)) * 100)}%
                 </div>
               </div>
             </div>
