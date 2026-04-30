@@ -2851,8 +2851,8 @@ if (!hasProgramData) {
 
 return (
   <Card title="โปรแกรมที่ได้รับ" icon={ClipboardIcon}>
-    <div className="space-y-5">
-      <div className="rounded-2xl border border-slate-200 bg-gradient-to-br from-slate-50 to-white p-5">
+    <div className="space-y-4 rounded-3xl border border-slate-200 bg-gradient-to-br from-white via-slate-50 to-sky-50/50 p-4 shadow-[0_10px_28px_rgba(15,23,42,0.05)]">
+      <div className="rounded-2xl border border-slate-200 bg-white/90 p-4 shadow-sm">
         <div className="text-sm font-bold text-slate-500">
           โปรแกรมหลัก
         </div>
@@ -2883,7 +2883,7 @@ return (
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
-        <div className="rounded-2xl border border-blue-200 bg-blue-50/70 p-5">
+        <div className="rounded-2xl border border-sky-200 bg-gradient-to-br from-sky-50 via-white to-sky-50/70 p-4 shadow-[0_8px_22px_rgba(14,165,233,0.07)]">
           <div className="flex items-center justify-between gap-3">
             <div>
               <div className="text-sm font-black text-blue-700">
@@ -2898,7 +2898,7 @@ return (
             </div>
           </div>
 
-          <div className="mt-4 rounded-2xl border border-blue-100 bg-white px-4 py-3 text-sm font-bold leading-6 text-slate-800 shadow-sm">
+          <div className="mt-3 rounded-2xl border border-sky-100 bg-white px-4 py-3 text-sm font-bold leading-6 text-slate-800 shadow-sm">
             {setsReps || "-"}
           </div>
 
@@ -2909,7 +2909,7 @@ return (
           </div>
         </div>
 
-        <div className="rounded-2xl border border-emerald-200 bg-emerald-50/70 p-5">
+        <div className="rounded-2xl border border-emerald-200 bg-gradient-to-br from-emerald-50 via-white to-emerald-50/70 p-4 shadow-[0_8px_22px_rgba(16,185,129,0.07)]">
           <div>
             <div className="text-sm font-black text-emerald-700">
               Cardio Plan
@@ -2947,7 +2947,7 @@ return (
         </div>
       </div>
 
-      <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+      <div className="rounded-2xl border border-slate-200 bg-white/90 p-4 shadow-sm">
         <div className="text-sm font-black text-slate-500">
           Focus / จุดเน้น
         </div>
@@ -2973,7 +2973,7 @@ return (
       {(program.precaution || program.followUp) && (
         <div className="grid gap-4 md:grid-cols-2">
           {program.precaution && (
-            <div className="rounded-2xl border border-amber-200 bg-amber-50 p-5">
+            <div className="rounded-2xl border border-amber-200 bg-gradient-to-br from-amber-50 via-white to-amber-50/70 p-4 shadow-[0_8px_22px_rgba(245,158,11,0.07)]">
               <div className="text-sm font-black text-amber-700">
                 ข้อควรระวัง
               </div>
@@ -2985,7 +2985,7 @@ return (
           )}
 
           {program.followUp && (
-            <div className="rounded-2xl border border-sky-200 bg-sky-50 p-5">
+            <div className="rounded-2xl border border-sky-200 bg-gradient-to-br from-sky-50 via-white to-sky-50/70 p-4 shadow-[0_8px_22px_rgba(14,165,233,0.07)]">
               <div className="text-sm font-black text-sky-700">
                 คำแนะนำเพิ่มเติม
               </div>
