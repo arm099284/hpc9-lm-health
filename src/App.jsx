@@ -4589,11 +4589,14 @@ function AdminSummary({ records, auditLogs, onFullBackup, onRestoreBackup }) {
                   }`}
                 >
                   <td className="px-2.5 py-2">
-                    <div className="whitespace-nowrap font-bold text-slate-900">
-                      HN {r.record.hn}
-                    </div>
-                    <div className="whitespace-normal break-words text-[10px] leading-tight text-slate-500">
-                      {r.record.name || "-"}
+                    <div className="min-w-[150px]">
+                      <div className="inline-flex rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 text-[10px] font-black leading-none text-slate-600">
+                        HN {r.record.hn}
+                      </div>
+
+                      <div className="mt-1 max-w-[150px] truncate text-[11px] font-black leading-tight text-slate-900">
+                        {r.record.name || "-"}
+                      </div>
                     </div>
                   </td>
       
@@ -4654,10 +4657,20 @@ function AdminSummary({ records, auditLogs, onFullBackup, onRestoreBackup }) {
                   </td>
       
                   <td className="px-1.5 py-2 text-center">
-                    <div className="flex justify-center">
-                      <span className="inline-flex max-w-full items-center justify-center rounded-full border border-emerald-200 bg-emerald-50 px-1.5 py-0.5 text-[9px] font-bold leading-tight text-emerald-700">
+                    <div className="flex min-w-[92px] items-center justify-center gap-1.5">
+                      <span
+                        className={`h-2 w-2 shrink-0 rounded-full ${
+                          r.badCount > r.goodCount
+                            ? "bg-rose-400"
+                            : r.goodCount > r.badCount
+                              ? "bg-emerald-400"
+                              : "bg-slate-300"
+                        }`}
+                      />
+
+                      <Pill tone={summaryTone(r.goodCount, r.badCount)}>
                         {summaryText(r.goodCount, r.badCount)}
-                      </span>
+                      </Pill>
                     </div>
                   </td>
                 </tr>
