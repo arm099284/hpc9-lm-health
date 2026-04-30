@@ -6219,7 +6219,7 @@ const menuProgress = Math.round((menuDoneCount / allMenuItems.length) * 100);
       </aside>
 
       <section className="space-y-5">
-        <section className="rounded-2xl border border-slate-300 bg-white px-4 py-3 shadow-md">
+        <section className="rounded-3xl border border-slate-200 bg-white px-4 py-3 shadow-[0_10px_28px_rgba(15,23,42,0.055)]">
           <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
@@ -6274,7 +6274,7 @@ const menuProgress = Math.round((menuDoneCount / allMenuItems.length) * 100);
                 <button
                   type="button"
                   onClick={restoreDeletedRecord}
-                  className="rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-sm font-bold text-slate-600 transition-all duration-200 hover:bg-amber-50 hover:text-amber-700 hover:shadow-sm"
+                  className="rounded-xl border border-amber-100 bg-white px-3.5 py-2 text-sm font-bold text-amber-700 transition-all duration-200 hover:bg-amber-50 hover:shadow-sm"
                 >
                   กู้คืน HN ที่ลบล่าสุด
                 </button>
@@ -6291,7 +6291,7 @@ const menuProgress = Math.round((menuDoneCount / allMenuItems.length) * 100);
               <button
                 type="button"
                 onClick={save}
-                className="rounded-xl border border-sky-200 bg-gradient-to-br from-white via-sky-50 to-cyan-50 px-4 py-2 text-sm font-black text-slate-900 shadow-sm ring-1 ring-sky-100 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_8px_18px_rgba(14,165,233,0.14)]"
+                className="rounded-xl border border-sky-200 bg-gradient-to-br from-white via-sky-50 to-cyan-50 px-4 py-2 text-sm font-black text-slate-950 shadow-sm ring-1 ring-sky-100 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_8px_18px_rgba(14,165,233,0.14)]"
               >
                 บันทึกข้อมูล
               </button>
