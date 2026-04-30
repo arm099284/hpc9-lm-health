@@ -1643,6 +1643,7 @@ function AdminLogin({ onSuccess, onCancel }) {
   async function login() {
     setLoading(true);
     setError("");
+
     try {
       const admin = await signInAdminWithSupabase(username.trim(), password);
       onSuccess(admin);
@@ -1654,31 +1655,97 @@ function AdminLogin({ onSuccess, onCancel }) {
     }
   }
 
+  function submit(e) {
+    e.preventDefault();
+    login();
+  }
+
   return (
-    <main className="mx-auto max-w-xl px-4 py-10">
-      <Card title="เข้าสู่ระบบผู้ดูแล" icon={UserIcon} right={<Pill tone="dark">Admin only</Pill>}>
-        <div className="space-y-4">
-          <Field label="Username / Admin ID" value={username} onChange={(v) => { setUsername(v); setError(""); }} />
-          <label className="flex h-full flex-col">
-            <span className="mb-1 flex min-h-[2.6rem] items-end text-sm font-semibold text-slate-500">Password</span>
+    <main className="mx-auto flex min-h-[calc(100vh-120px)] w-full max-w-7xl items-center justify-center px-4 py-10">
+      <section className="relative w-full max-w-xl overflow-hidden rounded-3xl border border-slate-200 bg-white p-6 shadow-[0_16px_42px_rgba(15,23,42,0.07)] md:p-8">
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-sky-200 via-indigo-100 to-cyan-200" />
+
+        <div className="mb-6 flex items-start gap-4">
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-slate-200 bg-slate-50 shadow-sm">
+            <UserIcon className="h-6 w-6 text-slate-600" />
+          </div>
+
+          <div className="min-w-0">
+            <div className="text-xs font-black uppercase tracking-wide text-sky-600">
+              Admin Access
+            </div>
+
+            <h2 className="mt-1 text-2xl font-black tracking-tight text-slate-950 md:text-3xl">
+              เข้าสู่ระบบผู้ดูแล
+            </h2>
+
+            <p className="mt-1 text-sm font-semibold leading-6 text-slate-500">
+              สำหรับบันทึกข้อมูล ตรวจสอบผล และจัดการระบบประเมินสุขภาพ
+            </p>
+          </div>
+        </div>
+
+        <form onSubmit={submit} className="space-y-3">
+          <label className="block">
+            <span className="mb-1.5 block text-xs font-black text-slate-500">
+              Username / Admin ID
+            </span>
+
+            <input
+              value={username}
+              onChange={(e) => {
+                setUsername(e.target.value);
+                if (error) setError("");
+              }}
+              className="h-12 w-full rounded-2xl border border-slate-200 bg-slate-50/70 px-4 text-sm font-bold text-slate-900 shadow-sm outline-none transition-all duration-200 hover:border-slate-300 hover:bg-white focus:border-sky-300 focus:bg-white focus:ring-4 focus:ring-sky-100"
+            />
+          </label>
+
+          <label className="block">
+            <span className="mb-1.5 block text-xs font-black text-slate-500">
+              Password
+            </span>
+
             <input
               value={password}
               type="password"
-              onChange={(e) => { setPassword(e.target.value); setError(""); }}
-              onKeyDown={(e) => { if (e.key === "Enter") login(); }}
-              className="h-12 w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-base outline-none focus:border-slate-700"
+              onChange={(e) => {
+                setPassword(e.target.value);
+                if (error) setError("");
+              }}
+              className="h-12 w-full rounded-2xl border border-slate-200 bg-slate-50/70 px-4 text-sm font-bold text-slate-900 shadow-sm outline-none transition-all duration-200 hover:border-slate-300 hover:bg-white focus:border-sky-300 focus:bg-white focus:ring-4 focus:ring-sky-100"
             />
           </label>
-          {error && <div className="rounded-xl border border-rose-200 bg-rose-50 p-3 text-base font-semibold text-rose-700">{error}</div>}
-          <button onClick={login} disabled={loading} className="w-full rounded-xl bg-slate-900 px-4 py-3 text-lg font-bold text-white hover:bg-slate-800 disabled:opacity-50">{loading ? "กำลังเข้าสู่ระบบ..." : "เข้าสู่ระบบ"}</button>
-          <button onClick={onCancel} className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-base font-semibold text-slate-600 hover:bg-slate-50">กลับหน้ากรอก HN</button>
-          <div className="rounded-xl border border-slate-200 bg-slate-50 p-3 text-sm text-slate-600">
-            <div className="font-semibold text-slate-800">ผู้ดูแลระบบ</div>
-            <div>admin1 — ชัยวัฒน์</div>
-            <div>admin2 — ธนาวุฒิ</div>
-          </div>
+
+          {error && (
+            <div className="rounded-2xl border border-rose-200 bg-rose-50 px-3 py-2 text-sm font-bold text-rose-700">
+              {error}
+            </div>
+          )}
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="flex h-12 w-full items-center justify-center rounded-2xl border border-sky-200 bg-gradient-to-br from-white via-sky-50 to-cyan-50 px-5 text-base font-black text-slate-950 shadow-sm ring-1 ring-sky-100 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_10px_24px_rgba(14,165,233,0.14)] disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {loading ? "กำลังเข้าสู่ระบบ..." : "เข้าสู่ระบบ"}
+          </button>
+        </form>
+
+        <div className="mt-5 flex items-center justify-center border-t border-slate-100 pt-4">
+          <button
+            type="button"
+            onClick={onCancel}
+            className="rounded-full px-4 py-2 text-sm font-bold text-slate-400 transition-all duration-200 hover:bg-slate-50 hover:text-slate-700"
+          >
+            กลับหน้ากรอก HN
+          </button>
         </div>
-      </Card>
+
+        <div className="mt-3 text-center text-xs font-semibold leading-5 text-slate-400">
+          ผู้ดูแลระบบ: admin1 — ชัยวัฒน์ / admin2 — ธนาวุฒิ
+        </div>
+      </section>
     </main>
   );
 }
