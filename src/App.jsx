@@ -1422,13 +1422,16 @@ function Card({ title, icon: Icon, right, children }) {
 
 function Field({ label, value, onChange, type = "text", tone = "default" }) {
   return (
-    <label className="flex h-full flex-col">
-      <span className="mb-1 flex min-h-[2.6rem] items-end text-sm font-semibold text-slate-500">{label}</span>
+    <label className="group flex h-full flex-col">
+      <span className="mb-1 flex min-h-[2.15rem] items-end text-xs font-black tracking-tight text-slate-500 transition-colors group-focus-within:text-sky-600">
+        {label}
+      </span>
+
       <input
         value={value || ""}
         type={type}
         onChange={(e) => onChange(e.target.value)}
-        className={`h-12 w-full rounded-xl border px-3 py-3 text-base outline-none ${fieldToneClass(tone)}`}
+        className={`h-11 w-full rounded-2xl border px-3.5 py-2.5 text-sm font-semibold text-slate-800 shadow-sm outline-none transition-all duration-200 placeholder:text-slate-300 hover:border-slate-300 hover:bg-white focus:border-sky-300 focus:bg-white focus:ring-4 focus:ring-sky-100 ${fieldToneClass(tone)}`}
       />
     </label>
   );
@@ -1436,14 +1439,31 @@ function Field({ label, value, onChange, type = "text", tone = "default" }) {
 
 function Select({ label, value, onChange, options }) {
   return (
-    <label className="flex h-full flex-col">
-      <span className="mb-1 flex min-h-[2.6rem] items-end text-sm font-semibold text-slate-500">{label}</span>
-      <select value={value || ""} onChange={(e) => onChange(e.target.value)} className="h-12 w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-base outline-none focus:border-slate-700">
-        {options.map((opt) => {
-          const item = typeof opt === "string" ? { value: opt, label: opt } : opt;
-          return <option key={item.value} value={item.value}>{item.label}</option>;
-        })}
-      </select>
+    <label className="group flex h-full flex-col">
+      <span className="mb-1 flex min-h-[2.15rem] items-end text-xs font-black tracking-tight text-slate-500 transition-colors group-focus-within:text-sky-600">
+        {label}
+      </span>
+
+      <div className="relative">
+        <select
+          value={value || ""}
+          onChange={(e) => onChange(e.target.value)}
+          className="h-11 w-full appearance-none rounded-2xl border border-slate-200 bg-gradient-to-br from-white via-slate-50/60 to-white px-3.5 py-2.5 pr-9 text-sm font-semibold text-slate-800 shadow-sm outline-none transition-all duration-200 hover:border-slate-300 focus:border-sky-300 focus:bg-white focus:ring-4 focus:ring-sky-100"
+        >
+          {options.map((opt) => {
+            const item = typeof opt === "string" ? { value: opt, label: opt } : opt;
+            return (
+              <option key={item.value} value={item.value}>
+                {item.label}
+              </option>
+            );
+          })}
+        </select>
+
+        <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-black text-slate-400">
+          ▼
+        </span>
+      </div>
     </label>
   );
 }
