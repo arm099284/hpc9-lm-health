@@ -1767,9 +1767,9 @@ function OhsTable({ record }) {
 
     { view: "side", label: "สะโพก", status: statusOf(2), top: "59%", left: "37%" },
 
-    { view: "side", label: "เข่า", status: statusOf(1), top: "66%", left: "58%" },
+    { view: "side", label: "เข่า", status: statusOf(1), top: "68%", left: "58%" },
 
-    { view: "side", label: "ข้อเท้า", status: statusOf(3), top: "82%", left: "45%" },
+    { view: "side", label: "ข้อเท้า", status: statusOf(3), top: "82%", left: "47%" },
   ];
 
   const bodyParts = [
