@@ -1739,8 +1739,8 @@ function OhsTable({ record }) {
 
   const problemMarkers = [
     // ===== Front view =====
-    { view: "front", label: "ไหล่ซ้าย", status: statusOf(4), top: "29%", left: "36%" },
-    { view: "front", label: "ไหล่ขวา", status: statusOf(4), top: "29%", left: "64%" },
+    { view: "front", label: "ไหล่ซ้าย", status: statusOf(4), top: "31%", left: "40%" },
+    { view: "front", label: "ไหล่ขวา", status: statusOf(4), top: "31%", left: "60%" },
 
     { view: "front", label: "ลำตัว", status: statusOf(0), top: "45%", left: "50%" },
 
@@ -1755,7 +1755,7 @@ function OhsTable({ record }) {
     { view: "front", label: "สมดุล", status: statusOf(5), top: "53%", left: "50%" },
 
     // ===== Side view =====
-    { view: "side", label: "ไหล่", status: statusOf(4), top: "28%", left: "56%" },
+    { view: "side", label: "ไหล่", status: statusOf(4), top: "31%", left: "50%" },
 
     { view: "side", label: "ลำตัว", status: statusOf(0), top: "43%", left: "53%" },
 
