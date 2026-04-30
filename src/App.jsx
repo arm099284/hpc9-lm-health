@@ -1778,11 +1778,11 @@ function OhsTable({ record }) {
         </span>
       </div>
 
-      <div className="relative aspect-square overflow-hidden rounded-xl bg-white ring-1 ring-slate-100">
+      <div className="relative aspect-square overflow-hidden rounded-xl bg-white ring-1 ring-slate-200 shadow-inner">
         <img
           src={src}
           alt={title}
-          className="h-full w-full object-contain p-1.5"
+          className="h-full w-full object-contain p-0"
           draggable={false}
         />
 
