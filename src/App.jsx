@@ -4448,9 +4448,9 @@ function AdminSummary({ records, auditLogs, onFullBackup, onRestoreBackup }) {
           </div>
         
           <div className="grid items-start gap-3 lg:grid-cols-[1fr_0.92fr]">
-            <div className="rounded-2xl border border-slate-200 bg-gradient-to-br from-white via-slate-50/70 to-sky-50/20 px-3 py-2.5 shadow-sm">
-              <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
-                <div className="min-w-[72px]">
+            <div className="flex h-full items-center rounded-2xl border border-slate-200 bg-gradient-to-br from-white via-slate-50/70 to-sky-50/20 px-3 py-2.5 shadow-sm">
+              <div className="grid w-full grid-cols-5 items-center divide-x divide-slate-200">
+                <div className="px-3">
                   <div className="text-[10px] font-black text-sky-600">
                     ทั้งหมด
                   </div>
@@ -4464,9 +4464,9 @@ function AdminSummary({ records, auditLogs, onFullBackup, onRestoreBackup }) {
                   </div>
                 </div>
         
-                <div className="h-8 w-px bg-slate-200" />
+         
         
-                <div className="min-w-[72px]">
+                <div className="px-3">
                   <div className="text-[10px] font-black text-indigo-600">
                     เทียบได้
                   </div>
@@ -4480,9 +4480,9 @@ function AdminSummary({ records, auditLogs, onFullBackup, onRestoreBackup }) {
                   </div>
                 </div>
         
-                <div className="h-8 w-px bg-slate-200" />
+      
         
-                <div className="min-w-[64px]">
+                <div className="px-3">
                   <div className="text-[10px] font-black text-emerald-600">
                     ดีขึ้น
                   </div>
@@ -4496,9 +4496,9 @@ function AdminSummary({ records, auditLogs, onFullBackup, onRestoreBackup }) {
                   </div>
                 </div>
         
-                <div className="h-8 w-px bg-slate-200" />
+
         
-                <div className="min-w-[76px]">
+                <div className="px-3">
                   <div className="text-[10px] font-black text-amber-600">
                     ต้องติดตาม
                   </div>
@@ -4512,9 +4512,9 @@ function AdminSummary({ records, auditLogs, onFullBackup, onRestoreBackup }) {
                   </div>
                 </div>
         
-                <div className="h-8 w-px bg-slate-200" />
+ 
         
-                <div className="min-w-[64px]">
+                <div className="px-3">
                   <div className="text-[10px] font-black text-slate-500">
                     คงเดิม
                   </div>
