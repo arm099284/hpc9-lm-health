@@ -1725,58 +1725,58 @@ function OhsTable({ record }) {
     if (status === "ต้องระวัง") {
       return {
         borderColor: "#f59e0b",
-        backgroundColor: "rgba(245, 158, 11, 0.16)",
-        boxShadow: "0 0 0 4px rgba(245, 158, 11, 0.10)",
+        backgroundColor: "rgba(245, 158, 11, 0.22)",
+        boxShadow: "0 0 0 5px rgba(245, 158, 11, 0.16)",
       };
     }
-
+  
     return {
-      borderColor: "#f43f5e",
-      backgroundColor: "rgba(244, 63, 94, 0.16)",
-      boxShadow: "0 0 0 4px rgba(244, 63, 94, 0.10)",
+      borderColor: "#fb7185",
+      backgroundColor: "rgba(251, 113, 133, 0.22)",
+      boxShadow: "0 0 0 5px rgba(251, 113, 133, 0.16)",
     };
   };
 
   const problemMarkers = [
     // ===== Front view =====
-    { view: "front", label: "ไหล่ซ้าย", status: statusOf(4), top: "27%", left: "34%" },
-    { view: "front", label: "ไหล่ขวา", status: statusOf(4), top: "27%", left: "66%" },
+    { view: "front", label: "ไหล่ซ้าย", status: statusOf(4), top: "30%", left: "35%" },
+    { view: "front", label: "ไหล่ขวา", status: statusOf(4), top: "30%", left: "65%" },
   
-    { view: "front", label: "ลำตัว", status: statusOf(0), top: "45%", left: "50%" },
+    { view: "front", label: "ลำตัว", status: statusOf(0), top: "44%", left: "50%" },
   
     { view: "front", label: "สะโพก", status: statusOf(2), top: "59%", left: "50%" },
   
-    { view: "front", label: "เข่าซ้าย", status: statusOf(1), top: "71%", left: "36%" },
-    { view: "front", label: "เข่าขวา", status: statusOf(1), top: "71%", left: "64%" },
+    { view: "front", label: "เข่าซ้าย", status: statusOf(1), top: "72%", left: "37%" },
+    { view: "front", label: "เข่าขวา", status: statusOf(1), top: "72%", left: "63%" },
   
-    { view: "front", label: "ข้อเท้าซ้าย", status: statusOf(3), top: "84%", left: "34%" },
-    { view: "front", label: "ข้อเท้าขวา", status: statusOf(3), top: "84%", left: "66%" },
+    { view: "front", label: "ข้อเท้าซ้าย", status: statusOf(3), top: "84%", left: "33%" },
+    { view: "front", label: "ข้อเท้าขวา", status: statusOf(3), top: "84%", left: "67%" },
   
     { view: "front", label: "สมดุล", status: statusOf(5), top: "53%", left: "50%" },
   
     // ===== Side view =====
-    { view: "side", label: "ไหล่", status: statusOf(4), top: "26%", left: "57%" },
+    { view: "side", label: "ไหล่", status: statusOf(4), top: "29%", left: "56%" },
   
-    { view: "side", label: "ลำตัว", status: statusOf(0), top: "42%", left: "52%" },
+    { view: "side", label: "ลำตัว", status: statusOf(0), top: "43%", left: "52%" },
   
-    { view: "side", label: "สะโพก", status: statusOf(2), top: "60%", left: "47%" },
+    { view: "side", label: "สะโพก", status: statusOf(2), top: "60%", left: "49%" },
   
-    { view: "side", label: "เข่า", status: statusOf(1), top: "73%", left: "60%" },
+    { view: "side", label: "เข่า", status: statusOf(1), top: "73%", left: "59%" },
   
-    { view: "side", label: "ข้อเท้า", status: statusOf(3), top: "86%", left: "63%" },
+    { view: "side", label: "ข้อเท้า", status: statusOf(3), top: "85%", left: "61%" },
   ].filter((marker) => marker.status !== "ปกติ");
 
   const ImageWithMarkers = ({ type, src, title }) => (
-    <div className="rounded-2xl border border-slate-300 bg-gradient-to-b from-white via-slate-50 to-slate-100 p-2.5 shadow-[0_8px_18px_rgba(15,23,42,0.06)]">
+    <div className="rounded-2xl border border-slate-200 bg-gradient-to-br from-white via-sky-50/40 to-slate-100 p-3 shadow-[0_12px_24px_rgba(15,23,42,0.08)]">
       <div className="mb-2 flex items-center justify-between">
         <div className="text-[11px] font-black text-slate-700">{title}</div>
 
-        <span className="rounded-full bg-slate-50 px-2 py-0.5 text-[9px] font-bold text-slate-500 ring-1 ring-slate-200">
+        <span className="rounded-full bg-white px-2.5 py-0.5 text-[9px] font-bold text-slate-600 ring-1 ring-slate-200 shadow-sm">
           OHS
         </span>
       </div>
 
-      <div className="relative aspect-square overflow-hidden rounded-xl bg-slate-50 ring-1 ring-slate-200">
+      <div className="relative aspect-square overflow-hidden rounded-xl bg-white ring-1 ring-slate-200 shadow-inner">
         <img
           src={src}
           alt={title}
@@ -1790,7 +1790,7 @@ function OhsTable({ record }) {
             <div
               key={`${type}-${marker.label}-${index}`}
               title={`${marker.label}: ${marker.status}`}
-              className="absolute flex h-6 w-6 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border-2"
+              className="absolute flex h-7 w-7 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border-[2.5px]"
               style={{
                 top: marker.top,
                 left: marker.left,
@@ -1798,7 +1798,7 @@ function OhsTable({ record }) {
               }}
             >
               <span
-                className="h-2 w-2 rounded-full"
+                className="h-2.5 w-2.5 rounded-full"
                 style={{
                   backgroundColor:
                     marker.status === "ต้องระวัง" ? "#f59e0b" : "#f43f5e",
@@ -1821,7 +1821,7 @@ function OhsTable({ record }) {
       }
     >
       <div className="space-y-3">
-        <div className="rounded-3xl border border-slate-300 bg-gradient-to-br from-white via-slate-50 to-sky-50 p-4 shadow-[0_12px_30px_rgba(15,23,42,0.08)]">
+        <div className="rounded-3xl border border-slate-200 bg-gradient-to-br from-white via-slate-50 to-sky-100/60 p-4 shadow-[0_14px_32px_rgba(15,23,42,0.08)]">
           <div className="mb-3 flex items-start justify-between gap-3">
             <div>
               <div className="text-sm font-black text-slate-900">
@@ -1889,7 +1889,7 @@ function OhsTable({ record }) {
             ))}
           </div>
 
-          <div className="mt-3 flex flex-wrap gap-2 border-t border-slate-100 pt-3 text-[10px] font-bold text-slate-500">
+          <div className="mt-3 flex flex-wrap gap-2 border-t border-slate-200 pt-3 text-[10px] font-bold text-slate-600">
             <span className="inline-flex items-center gap-1 rounded-full bg-slate-50 px-2 py-1 ring-1 ring-slate-200">
               <span className="h-2 w-2 rounded-full bg-slate-400" />
               ปกติ
