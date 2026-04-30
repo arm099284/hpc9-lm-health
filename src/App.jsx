@@ -4543,26 +4543,26 @@ function AdminSummary({ records, auditLogs, onFullBackup, onRestoreBackup }) {
             </div>
           </div>
         </div>
-        <div className="mt-5 rounded-3xl border border-slate-200 bg-white p-4 shadow-[0_10px_28px_rgba(15,23,42,0.055)]">
-          <div className="mb-3 flex items-center justify-between gap-3 border-b border-slate-100 pb-3">
-            <div>
-              <h3 className="text-base font-black text-slate-950">
-                ตารางสรุปทุกคน สำหรับแอดมิน
-              </h3>
-              <p className="mt-0.5 text-xs font-semibold text-slate-500">
-                ภาพรวมรายบุคคลตามตัวกรองที่เลือก
-              </p>
-            </div>
-
-            <span className="rounded-full border border-sky-100 bg-sky-50 px-3 py-1 text-xs font-black text-sky-700 shadow-sm">
-              Admin table
-            </span>
+        <div className="mt-5 rounded-3xl border border-slate-200 bg-gradient-to-br from-white via-slate-50 to-slate-100 p-4 shadow-[0_12px_35px_rgba(15,23,42,0.08)] ring-1 ring-white/70">
+        <div className="mb-3 flex items-center justify-between gap-3 border-b border-slate-200 pb-3">
+          <div>
+            <h3 className="text-base font-black text-slate-900">
+              ตารางสรุปทุกคน สำหรับแอดมิน
+            </h3>
+            <p className="mt-0.5 text-xs font-medium text-slate-500">
+              ภาพรวมรายบุคคลตามตัวกรองที่เลือก
+            </p>
           </div>
       
-              <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-[0_8px_22px_rgba(15,23,42,0.04)]">
-                <table className="w-full min-w-[1460px] border-separate border-spacing-0 text-left text-xs">
-                  <thead className="bg-gradient-to-r from-slate-50 via-sky-50/60 to-slate-50 text-[10px] font-black uppercase tracking-wide text-slate-500">
-                <tr>
+          <span className="rounded-full border border-slate-200 bg-slate-900 px-3 py-1 text-xs font-bold text-white shadow-sm">
+            Admin table
+          </span>
+        </div>
+      
+        <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-inner">
+          <table className="w-full text-left text-[10px]">
+            <thead className="bg-slate-900 text-[10px] font-black uppercase tracking-wide text-white">
+              <tr>
                 <th className="px-2 py-2 text-center whitespace-nowrap">HN / ชื่อ</th>
                 <th className="px-2 py-2 text-center whitespace-nowrap">ครั้ง</th>
                 <th className="px-2 py-2 text-center whitespace-nowrap">เทียบ</th>
@@ -4589,14 +4589,11 @@ function AdminSummary({ records, auditLogs, onFullBackup, onRestoreBackup }) {
                   }`}
                 >
                   <td className="px-2.5 py-2">
-                    <div className="min-w-[150px]">
-                      <div className="inline-flex rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 text-[10px] font-black leading-none text-slate-600">
-                        HN {r.record.hn}
-                      </div>
-
-                      <div className="mt-1 max-w-[150px] truncate text-[11px] font-black leading-tight text-slate-900">
-                        {r.record.name || "-"}
-                      </div>
+                    <div className="whitespace-nowrap font-bold text-slate-900">
+                      HN {r.record.hn}
+                    </div>
+                    <div className="whitespace-normal break-words text-[10px] leading-tight text-slate-500">
+                      {r.record.name || "-"}
                     </div>
                   </td>
       
@@ -4657,20 +4654,10 @@ function AdminSummary({ records, auditLogs, onFullBackup, onRestoreBackup }) {
                   </td>
       
                   <td className="px-1.5 py-2 text-center">
-                    <div className="flex min-w-[92px] items-center justify-center gap-1.5">
-                      <span
-                        className={`h-2 w-2 shrink-0 rounded-full ${
-                          r.badCount > r.goodCount
-                            ? "bg-rose-400"
-                            : r.goodCount > r.badCount
-                              ? "bg-emerald-400"
-                              : "bg-slate-300"
-                        }`}
-                      />
-
-                      <Pill tone={summaryTone(r.goodCount, r.badCount)}>
+                    <div className="flex justify-center">
+                      <span className="inline-flex max-w-full items-center justify-center rounded-full border border-emerald-200 bg-emerald-50 px-1.5 py-0.5 text-[9px] font-bold leading-tight text-emerald-700">
                         {summaryText(r.goodCount, r.badCount)}
-                      </Pill>
+                      </span>
                     </div>
                   </td>
                 </tr>
@@ -5666,36 +5653,26 @@ function lmAdminRow(record) {
               </table>
             </div>
 
-            <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white px-3 py-2.5 text-xs shadow-sm">
-              <div className="font-semibold text-slate-500">
-                แสดง{" "}
-                <span className="font-black text-slate-800">
-                  {pagedComparable.length}
-                </span>{" "}
-                รายการ จากทั้งหมด{" "}
-                <span className="font-black text-slate-800">
-                  {filteredComparable.length}
-                </span>{" "}
-                รายการ
+            <div className="mt-4 flex flex-wrap items-center justify-between gap-3 text-sm text-slate-500">
+              <div>
+                แสดง {pagedRows.length} รายการ จากทั้งหมด {filteredRows.length} รายการ • หน้า {safePage}/{pageCount}
               </div>
-    
-              <div className="flex items-center gap-1.5">
+
+              <div className="flex gap-2">
                 <button
+                  type="button"
                   disabled={safePage <= 1}
-                  onClick={() => setPage((p) => Math.max(1, p - 1))}
-                  className="rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-black text-slate-600 shadow-sm transition-all duration-200 hover:bg-slate-50 hover:text-slate-900 disabled:cursor-not-allowed disabled:opacity-40"
+                  onClick={() => setLmPage((p) => Math.max(1, p - 1))}
+                  className="rounded-xl border border-slate-200 bg-white px-4 py-2 font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-40"
                 >
                   ก่อนหน้า
                 </button>
-    
-                <span className="rounded-xl border border-sky-100 bg-sky-50 px-3 py-1.5 text-xs font-black text-sky-700">
-                  หน้า {safePage}/{pageCount}
-                </span>
-    
+
                 <button
+                  type="button"
                   disabled={safePage >= pageCount}
-                  onClick={() => setPage((p) => Math.min(pageCount, p + 1))}
-                  className="rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-black text-slate-600 shadow-sm transition-all duration-200 hover:bg-slate-50 hover:text-slate-900 disabled:cursor-not-allowed disabled:opacity-40"
+                  onClick={() => setLmPage((p) => Math.min(pageCount, p + 1))}
+                  className="rounded-xl border border-slate-200 bg-white px-4 py-2 font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-40"
                 >
                   ถัดไป
                 </button>
